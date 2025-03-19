@@ -2,9 +2,10 @@ import { ChatMessage as ChatMessageType } from '../types';
 
 interface ChatMessageProps {
   message: ChatMessageType;
+  isTyping?: boolean;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+export default function ChatMessage({ message, isTyping = false }: ChatMessageProps) {
   const isSystem = message.sender === 'system';
   
   return (
@@ -18,18 +19,15 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           }
         `}
       >
-        {/* 말풍선 꼬리 부분 */}
-        <div 
-          className={`
-            absolute bottom-0 w-3 h-3 
-            ${isSystem 
-              ? 'left-0 -translate-x-1/2 translate-y-1/3 bg-purple-100 clip-triangle-left' 
-              : 'right-0 translate-x-1/2 translate-y-1/3 bg-blue-100 clip-triangle-right'
-            }
-          `}
-        />
-        
-        <p className="relative z-10 text-sm md:text-base">{message.text}</p>
+        {isTyping ? (
+          <div className="flex items-center justify-center space-x-1 py-2 min-h-[28px]">
+            <span className="typing-dot w-2 h-2 bg-purple-500"></span>
+            <span className="typing-dot w-2 h-2 bg-purple-500"></span>
+            <span className="typing-dot w-2 h-2 bg-purple-500"></span>
+          </div>
+        ) : (
+          <p className="relative z-10 text-sm md:text-base">{message.text}</p>
+        )}
       </div>
     </div>
   );

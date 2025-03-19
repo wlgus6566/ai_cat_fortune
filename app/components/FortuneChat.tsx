@@ -1,8 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ChatMessage from './ChatMessage';
-import { ChatMessage as ChatMessageType, ChatStep, ConcernType } from '../types';
-import { CONCERN_TYPES, SUB_CONCERNS } from '../data';
+import { ChatMessage as ChatMessageType, ChatStep, ConcernType, InputMode } from '../types';
+import { CONCERN_TYPES, DETAILED_CONCERNS } from '../data';
+
+// 직접 입력창 컴포넌트
+const ChatInput = ({ onSend, disabled }: { onSend: (text: string) => void; disabled: boolean }) => {
+  const [input, setInput] = useState('');
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() && !disabled) {
+      onSend(input.trim());
+      setInput('');
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="고민을 직접 입력해보세요..."
+        className="flex-1 px-4 py-2 rounded-full border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        disabled={disabled}
+      />
+      <button
+        type="submit"
+        disabled={!input.trim() || disabled}
+        className={`px-4 py-2 rounded-full ${
+          !input.trim() || disabled ? 'bg-gray-300' : 'bg-purple-600 text-white'
+        }`}
+      >
+        전송
+      </button>
+    </form>
+  );
+};
 
 export default function FortuneChat() {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
@@ -11,22 +46,187 @@ export default function FortuneChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentOptions, setCurrentOptions] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const [initialMessagesComplete, setInitialMessagesComplete] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
+  
+  // 4단계 세부 고민 선택을 위한 상태
+  const [inputMode, setInputMode] = useState<InputMode>('SELECTION');
+  const [detailLevel1, setDetailLevel1] = useState<string | null>(null);
+  const [detailLevel2, setDetailLevel2] = useState<string | null>(null);
+  const [detailLevel3, setDetailLevel3] = useState<string | null>(null);
+  
+  // 채팅창 자동 스크롤
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  
+  // 환영 메시지 배열
+  const welcomeMessages = [
+    '안냥! 난 고민을 들어주는 고민마스터 \'묘묘\' 다냥! 😺',
+    '너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!',
+    '내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖',
+    '어떤 고민이 있나냥! 선택하거나 직접 말해봐라냥! 😽'
+  ];
+  
+  // 타이핑 효과를 위한 함수
+  const addMessageWithTypingEffect = useCallback((text: string, delay: number = 1000, typingDelay: number = 1200) => {
+    return new Promise<void>((resolve) => {
+      // 먼저 타이핑 중인 메시지 추가
+      const typingId = uuidv4();
+      const typingMessage: ChatMessageType = {
+        id: typingId,
+        sender: 'system',
+        text: '...'
+      };
+      
+      setTypingMessageId(typingId);
+      setMessages(prev => [...prev, typingMessage]);
+      scrollToBottom();
+      
+      // 적절한 타이핑 시간 계산 (텍스트 길이에 비례)
+      const calculatedTypingDelay = Math.max(1000, Math.min(typingDelay, text.length * 40));
+      
+      // 타이핑 효과를 표시하는 시간
+      setTimeout(() => {
+        // 일정 시간 후 실제 메시지로 교체
+        setTypingMessageId(null);
+        setMessages(prev => prev.map(msg => 
+          msg.id === typingId 
+            ? { ...msg, text }
+            : msg
+        ));
+        scrollToBottom();
+        
+        // 메시지 표시 후 다음 작업을 위한 딜레이
+        setTimeout(() => {
+          resolve();
+        }, delay);
+      }, calculatedTypingDelay);
+    });
+  }, []);
   
   // 초기 메시지 설정
   useEffect(() => {
-    setMessages([
-      {
+    // Strict Mode로 인한 이중 실행 방지
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    
+    const showWelcomeMessages = async () => {
+      // 초기화
+      setMessages([]);
+      setCurrentOptions([]);
+      
+      // 약간의 딜레이 후 시작
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // 환영 메시지를 순차적으로 표시
+      for (let i = 0; i < welcomeMessages.length; i++) {
+        // 메시지 길이에 따라 타이핑 시간과 표시 시간 조정
+        const typingDelay = 300; // 타이핑 시간
+        const readDelay = 300; // 읽는 시간
+        
+        await addMessageWithTypingEffect(welcomeMessages[i], readDelay, typingDelay);
+      }
+      
+      // 선택 옵션과 직접 입력 옵션 제공
+      setCurrentOptions([...CONCERN_TYPES, '직접 입력하기']);
+      setCurrentStep('CONCERN_SELECT');
+      setInitialMessagesComplete(true);
+    };
+    
+    showWelcomeMessages();
+    
+    // 컴포넌트 언마운트 시 타이머 클리어
+    return () => {
+      setTypingMessageId(null);
+    };
+  }, [addMessageWithTypingEffect]);
+  
+  // 직접 입력 처리 함수
+  const handleDirectInput = async (text: string) => {
+    if (typingMessageId) return; // 타이핑 중이면 무시
+    
+    // 사용자 메시지 추가
+    const userMessage: ChatMessageType = {
+      id: uuidv4(),
+      sender: 'user',
+      text: text,
+    };
+    setMessages(prev => [...prev, userMessage]);
+    scrollToBottom();
+    
+    // 로딩 시작
+    setIsLoading(true);
+    setCurrentOptions([]);
+    
+    // 잠시 딜레이 후 응답
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 로딩 메시지 추가 (타이핑 효과 적용)
+    await addMessageWithTypingEffect('고민을 살펴보고 있어요...', 500, 1000);
+    
+    try {
+      // OpenAI API 호출 - 직접 입력 모드
+      const response = await fetch('/api/fortune/direct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          userQuery: text 
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('API 요청 실패');
+      }
+      
+      const data = await response.json();
+      
+      // 마지막 메시지를 실제 응답으로 교체
+      setMessages(prev => [...prev.slice(0, -1), {
         id: uuidv4(),
         sender: 'system',
-        text: '안녕! 무슨 고민이 있냥?',
-      },
-    ]);
-    setCurrentOptions(CONCERN_TYPES);
-    setCurrentStep('CONCERN_SELECT');
-  }, []);
+        text: data.fortune,
+      }]);
+      scrollToBottom();
+      
+      // 결과 화면에서 '다시 상담하기' 옵션 추가
+      setTimeout(() => {
+        setCurrentOptions(['다시 상담하기']);
+        setCurrentStep('FORTUNE_RESULT');
+      }, 1000);
+    } catch (error: unknown) {
+      console.error('오류 발생:', error instanceof Error ? error.message : '알 수 없는 오류');
+      
+      // 마지막 메시지를 에러 메시지로 교체
+      setMessages(prev => [...prev.slice(0, -1), {
+        id: uuidv4(),
+        sender: 'system',
+        text: '죄송합니다, 질문을 처리하는 중 오류가 발생했습니다. 다시 시도해주세요.',
+      }]);
+      scrollToBottom();
+      
+      // 다시 상담하기 옵션 추가
+      setTimeout(() => {
+        setCurrentOptions(['다시 상담하기']);
+        setCurrentStep('FORTUNE_RESULT');
+      }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // 사용자가 옵션을 선택했을 때의 핸들러
   const handleOptionSelect = async (option: string) => {
+    if (typingMessageId || !initialMessagesComplete) return; // 타이핑 중이거나 초기 메시지가 완료되지 않았으면 무시
+    
     setSelectedOption(option);
     
     // 잠시 강조 효과를 보여준 후 다음 단계로 진행
@@ -38,50 +238,108 @@ export default function FortuneChat() {
         text: option,
       };
       setMessages(prev => [...prev, userMessage]);
+      scrollToBottom();
       
-      switch (currentStep) {
-        case 'CONCERN_SELECT':
-          handleConcernSelect(option as ConcernType);
-          break;
-        case 'SUB_CONCERN_SELECT':
-          handleSubConcernSelect(option);
-          break;
-        default:
-          break;
+      if (option === '직접 입력할게!') {
+        // 직접 입력 모드로 전환
+        setInputMode('DIRECT_INPUT');
+        setCurrentStep('DIRECT_INPUT');
+        setCurrentOptions([]);
+        addMessageWithTypingEffect('자유롭게 이야기해주라냥!', 0, 1000);
+      } else if (option === '다시 상담하기') {
+        resetChat();
+      } else {
+        switch (currentStep) {
+          case 'CONCERN_SELECT':
+            handleConcernSelect(option as ConcernType);
+            break;
+          case 'DETAIL_LEVEL_1_SELECT':
+            handleDetailLevel1Select(option);
+            break;
+          case 'DETAIL_LEVEL_2_SELECT':
+            handleDetailLevel2Select(option);
+            break;
+          case 'DETAIL_LEVEL_3_SELECT':
+            handleDetailLevel3Select(option);
+            break;
+          default:
+            break;
+        }
       }
       
       setSelectedOption(null);
     }, 300);
   };
   
-  // 고민 유형 선택 처리
-  const handleConcernSelect = (concern: ConcernType) => {
+  // 고민 유형 선택 처리 (1단계)
+  const handleConcernSelect = async (concern: ConcernType) => {
     setSelectedConcern(concern);
+    setCurrentOptions([]);
     
-    // 세부 고민 메시지 추가
-    const subConcernMessage: ChatMessageType = {
-      id: uuidv4(),
-      sender: 'system',
-      text: `${concern}에 관한 고민이구냥. 어떤 게 고민되느냥!`,
-    };
+    // 잠시 딜레이 후 응답
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    setMessages(prev => [...prev, subConcernMessage]);
-    setCurrentOptions(SUB_CONCERNS[concern]);
-    setCurrentStep('SUB_CONCERN_SELECT');
+    // 세부 고민 메시지 추가 (타이핑 효과 적용)
+    const responseText = `${concern}에 관한 고민이구냥. 좀 더 구체적으로 알려달라냥!`;
+    await addMessageWithTypingEffect(responseText, 800, 1500);
+    
+    // 1단계 세부 고민 옵션 제공
+    const level1Options = Object.keys(DETAILED_CONCERNS[concern].level1);
+    setCurrentOptions(level1Options);
+    setCurrentStep('DETAIL_LEVEL_1_SELECT');
   };
   
-  // 세부 고민 선택 처리
-  const handleSubConcernSelect = async (subConcern: string) => {
+  // 1단계 세부 고민 선택 처리
+  const handleDetailLevel1Select = async (option: string) => {
+    setDetailLevel1(option);
+    setCurrentOptions([]);
+    
+    // 잠시 딜레이 후 응답
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 2단계 세부 고민 메시지 추가
+    const responseText = `${option}에 대해 더 구체적인 상황을 알려달라냥!`;
+    await addMessageWithTypingEffect(responseText, 800, 1200);
+    
+    // 2단계 세부 고민 옵션 제공
+    if (selectedConcern) {
+      const level2Options = Object.keys(DETAILED_CONCERNS[selectedConcern].level1[option].level2);
+      setCurrentOptions(level2Options);
+      setCurrentStep('DETAIL_LEVEL_2_SELECT');
+    }
+  };
+  
+  // 2단계 세부 고민 선택 처리
+  const handleDetailLevel2Select = async (option: string) => {
+    setDetailLevel2(option);
+    setCurrentOptions([]);
+    
+    // 잠시 딜레이 후 응답
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 3단계 세부 고민 메시지 추가
+    const responseText = `${option}에 대해 마지막으로 좀 더 자세히 알려달라냥!`;
+    await addMessageWithTypingEffect(responseText, 800, 1200);
+    
+    // 3단계 세부 고민 옵션 제공
+    if (selectedConcern && detailLevel1) {
+      const level3Options = DETAILED_CONCERNS[selectedConcern].level1[detailLevel1].level2[option];
+      setCurrentOptions(level3Options);
+      setCurrentStep('DETAIL_LEVEL_3_SELECT');
+    }
+  };
+  
+  // 3단계 세부 고민 선택 처리
+  const handleDetailLevel3Select = async (option: string) => {
+    setDetailLevel3(option);
     setIsLoading(true);
     setCurrentOptions([]);
     
+    // 잠시 딜레이 후 응답
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     // 로딩 메시지 추가
-    const loadingMessage: ChatMessageType = {
-      id: uuidv4(),
-      sender: 'system',
-      text: '운세를 살펴보고 있어요...',
-    };
-    setMessages(prev => [...prev, loadingMessage]);
+    await addMessageWithTypingEffect('운세를 살펴보고 있어요...', 1000, 1200);
     
     try {
       // OpenAI API 호출
@@ -92,7 +350,9 @@ export default function FortuneChat() {
         },
         body: JSON.stringify({ 
           concern: selectedConcern,
-          subConcern: subConcern 
+          detailLevel1,
+          detailLevel2,
+          detailLevel3: option
         }),
       });
       
@@ -102,30 +362,34 @@ export default function FortuneChat() {
       
       const data = await response.json();
       
-      // 로딩 메시지 제거하고 결과 메시지 추가
-      setMessages(prev => 
-        prev.filter(msg => msg.id !== loadingMessage.id).concat({
-          id: uuidv4(),
-          sender: 'system',
-          text: data.fortune,
-        })
-      );
+      // 마지막 메시지를 실제 응답으로 교체
+      const fortuneId = uuidv4();
+      setMessages(prev => [...prev.slice(0, -1), {
+        id: fortuneId,
+        sender: 'system',
+        text: data.fortune,
+      }]);
+      scrollToBottom();
       
       // 결과 화면에서 '다시 상담하기' 옵션 추가
-      setCurrentOptions(['다시 상담하기']);
+      setTimeout(() => {
+        setCurrentOptions(['다시 상담하기']);
+      }, 1000);
     } catch (error: unknown) {
       console.error('운세 생성 오류:', error instanceof Error ? error.message : '알 수 없는 오류');
-      // 에러 메시지 추가
-      setMessages(prev => 
-        prev.filter(msg => msg.id !== loadingMessage.id).concat({
-          id: uuidv4(),
-          sender: 'system',
-          text: '죄송합니다, 운세를 볼 수 없습니다. 다시 시도해주세요.',
-        })
-      );
+      
+      // 마지막 메시지를 에러 메시지로 교체
+      setMessages(prev => [...prev.slice(0, -1), {
+        id: uuidv4(),
+        sender: 'system',
+        text: '죄송합니다, 운세를 볼 수 없습니다. 다시 시도해주세요.',
+      }]);
+      scrollToBottom();
       
       // 오류 발생 시에도 '다시 상담하기' 옵션 추가
-      setCurrentOptions(['다시 상담하기']);
+      setTimeout(() => {
+        setCurrentOptions(['다시 상담하기']);
+      }, 1000);
     } finally {
       setIsLoading(false);
       setCurrentStep('FORTUNE_RESULT');
@@ -133,17 +397,38 @@ export default function FortuneChat() {
   };
 
   // 다시 상담하기 처리
-  const resetChat = () => {
+  const resetChat = async () => {
+    // 초기화 플래그 리셋
+    initializedRef.current = false;
+    
     setCurrentStep('INITIAL');
     setSelectedConcern(null);
-    setMessages([
-      {
-        id: uuidv4(),
-        sender: 'system',
-        text: '안녕! 무슨 고민이 있냥?',
-      },
-    ]);
-    setCurrentOptions(CONCERN_TYPES);
+    setCurrentOptions([]);
+    setInitialMessagesComplete(false);
+    setMessages([]);
+    setInputMode('SELECTION');
+    setDetailLevel1(null);
+    setDetailLevel2(null);
+    setDetailLevel3(null);
+    
+    // 다시 초기화 플래그 설정 (이중 실행 방지)
+    initializedRef.current = true;
+    
+    // 약간의 딜레이 후 시작
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 환영 메시지를 다시 표시
+    for (let i = 0; i < welcomeMessages.length; i++) {
+      // 메시지 길이에 따라 타이핑 시간과 표시 시간 조정
+      const typingDelay = 200; // 타이핑 시간
+      const readDelay = 200; // 읽는 시간
+      
+      await addMessageWithTypingEffect(welcomeMessages[i], readDelay, typingDelay);
+    }
+    
+    setCurrentOptions([...CONCERN_TYPES, '직접 입력하기']);
+    setCurrentStep('CONCERN_SELECT');
+    setInitialMessagesComplete(true);
   };
 
   return (
@@ -154,10 +439,12 @@ export default function FortuneChat() {
           <ChatMessage 
             key={message.id} 
             message={message}
+            isTyping={message.id === typingMessageId}
           />
         ))}
+        <div ref={messagesEndRef} />
         
-        {isLoading && (
+        {isLoading && !typingMessageId && (
           <div className="flex justify-center py-2">
             <div className="animate-bounce mx-1 h-2 w-2 rounded-full bg-purple-600"></div>
             <div className="animate-bounce mx-1 h-2 w-2 rounded-full bg-purple-600" style={{ animationDelay: '0.2s' }}></div>
@@ -166,38 +453,38 @@ export default function FortuneChat() {
         )}
       </div>
       
-      {/* 선택지 영역 - 항상 하단에 고정 */}
-      {currentOptions.length > 0 && (
+      {/* 입력 영역 - 직접 입력 모드일 때만 표시 */}
+      {currentStep === 'DIRECT_INPUT' && !typingMessageId && (
+        <div className="p-3 border-t border-gray-200 bg-gray-50">
+          <ChatInput 
+            onSend={handleDirectInput} 
+            disabled={!!typingMessageId || isLoading}
+          />
+        </div>
+      )}
+      
+      {/* 선택지 영역 - 선택 모드이고 선택지가 있을 때만 표시 */}
+      {currentOptions.length > 0 && initialMessagesComplete && !typingMessageId && currentStep !== 'DIRECT_INPUT' && (
         <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
           <div className="flex flex-wrap gap-2 justify-center">
             {currentOptions.map((option) => (
               <button
                 key={option}
                 onClick={() => handleOptionSelect(option)}
+                disabled={!!typingMessageId}
                 className={`
                   px-4 py-2 rounded-full border transition-all duration-300
                   ${selectedOption === option
                     ? 'keyword-selected border-purple-500 shadow-md'
                     : 'bg-white border-purple-300 hover:bg-purple-50'
                   }
+                  ${typingMessageId ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
                 {option}
               </button>
             ))}
           </div>
-        </div>
-      )}
-      
-      {/* 결과 화면에서 '다시 상담하기' 버튼은 큰 버튼으로 표시 */}
-      {currentStep === 'FORTUNE_RESULT' && currentOptions.length === 0 && (
-        <div className="mt-4 text-center p-3 border-t border-gray-200">
-          <button
-            onClick={resetChat}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg shadow-md hover:bg-purple-700 transition-colors"
-          >
-            다시 상담하기
-          </button>
         </div>
       )}
     </div>

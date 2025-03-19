@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFortuneResponse } from '@/app/lib/openai';
+import { getDirectFortuneResponse } from '@/app/lib/openai';
 
 export async function POST(req: NextRequest) {
   try {
-    const { concern, detailLevel1, detailLevel2, detailLevel3 } = await req.json();
+    const { userQuery } = await req.json();
     
-    if (!concern || !detailLevel1 || !detailLevel2 || !detailLevel3) {
+    if (!userQuery) {
       return NextResponse.json(
-        { error: '고민 유형과 세부 정보가 모두 필요합니다.' },
+        { error: '질문 내용이 필요합니다.' },
         { status: 400 }
       );
     }
     
-    const fortune = await getFortuneResponse(concern, detailLevel1, detailLevel2, detailLevel3);
+    const fortune = await getDirectFortuneResponse(userQuery);
     
     return NextResponse.json({ fortune });
   } catch (error) {
