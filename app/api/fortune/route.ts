@@ -1,24 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFortuneResponse } from '@/app/lib/openai';
+import { ConcernType } from '@/app/types';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { concern, detailLevel1, detailLevel2, detailLevel3 } = await req.json();
+    const { concern, detailLevel1, detailLevel2, detailLevel3, userName } = await request.json();
     
     if (!concern || !detailLevel1 || !detailLevel2 || !detailLevel3) {
       return NextResponse.json(
-        { error: '고민 유형과 세부 정보가 모두 필요합니다.' },
+        { error: '모든 상세 정보가 필요합니다.' },
         { status: 400 }
       );
     }
     
-    const fortune = await getFortuneResponse(concern, detailLevel1, detailLevel2, detailLevel3);
+    const fortune = await getFortuneResponse(
+      concern as ConcernType,
+      detailLevel1,
+      detailLevel2,
+      detailLevel3,
+      userName
+    );
     
     return NextResponse.json({ fortune });
   } catch (error) {
-    console.error('운세 생성 중 오류 발생:', error);
+    console.error('운세 생성 오류:', error);
     return NextResponse.json(
-      { error: '운세를 생성하는 중 오류가 발생했습니다.' },
+      { error: '운세를 생성하는 데 실패했습니다.' },
       { status: 500 }
     );
   }

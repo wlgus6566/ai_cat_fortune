@@ -1,24 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDirectFortuneResponse } from '@/app/lib/openai';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { userQuery } = await req.json();
+    const { userQuery, userName } = await request.json();
     
     if (!userQuery) {
       return NextResponse.json(
-        { error: '질문 내용이 필요합니다.' },
+        { error: '질문이 필요합니다.' },
         { status: 400 }
       );
     }
     
-    const fortune = await getDirectFortuneResponse(userQuery);
+    const fortune = await getDirectFortuneResponse(
+      userQuery,
+      userName
+    );
     
     return NextResponse.json({ fortune });
   } catch (error) {
-    console.error('운세 생성 중 오류 발생:', error);
+    console.error('운세 생성 오류:', error);
     return NextResponse.json(
-      { error: '운세를 생성하는 중 오류가 발생했습니다.' },
+      { error: '운세를 생성하는 데 실패했습니다.' },
       { status: 500 }
     );
   }

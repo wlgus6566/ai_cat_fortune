@@ -1,25 +1,28 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-const FortuneChat = dynamic(() => import('@/app/components/FortuneChat'), {
-  ssr: false,
-  loading: () => <p className="text-center p-4">로딩 중...</p>
-});
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/app/contexts/UserContext';
 
 export default function Home() {
+  const { isProfileComplete } = useUser();
+  const router = useRouter();
+
+  // 프로필 완성 여부에 따라 적절한 페이지로 리디렉션
+  useEffect(() => {
+    if (isProfileComplete) {
+      router.push('/chat');
+    } else {
+      router.push('/setup');
+    }
+  }, [isProfileComplete, router]);
+
+  // 리디렉션 중 로딩 표시
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-24 bg-gradient-to-b from-purple-50 to-white">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden border border-purple-100">
-        <header className="bg-gradient-to-r from-purple-600 to-purple-500 text-white p-4 text-center">
-          <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
-            <span className="text-3xl">🔮</span> AI 사주 상담냥이
-          </h1>
-          <p className="text-sm opacity-80 mt-1">고민을 말해달라냥😺</p>
-        </header>
-        <div className="p-4">
-          <FortuneChat />
-        </div>
+      <div className="flex flex-col items-center justify-center">
+        <div className="animate-spin h-12 w-12 border-4 border-purple-500 rounded-full border-t-transparent"></div>
+        <p className="mt-4 text-purple-600">페이지 이동 중...</p>
       </div>
     </main>
   );

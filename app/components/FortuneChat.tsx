@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ChatMessage from './ChatMessage';
-import { ChatMessage as ChatMessageType, ChatStep, ConcernType, InputMode } from '../types';
+import { ChatMessage as ChatMessageType, ChatStep, ConcernType, InputMode, UserProfile } from '../types';
 import { CONCERN_TYPES, DETAILED_CONCERNS } from '../data';
 
 // 직접 입력창 컴포넌트
@@ -39,7 +39,12 @@ const ChatInput = ({ onSend, disabled }: { onSend: (text: string) => void; disab
   );
 };
 
-export default function FortuneChat() {
+interface FortuneChatProps {
+  userName: string;
+  userProfile: UserProfile | null;
+}
+
+export default function FortuneChat({ userName, userProfile }: FortuneChatProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [currentStep, setCurrentStep] = useState<ChatStep>('INITIAL');
   const [selectedConcern, setSelectedConcern] = useState<ConcernType | null>(null);
@@ -78,7 +83,7 @@ export default function FortuneChat() {
   
   // 환영 메시지 배열
   const welcomeMessages = [
-    '안냥! 난 고민을 들어주는 고민마스터 \'묘묘\' 다냥! 😺',
+    `안냥! ${userName}님, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
     '너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!',
     '내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖',
     '어떤 고민이 있나냥! 선택하거나 직접 말해봐라냥! 😽'
@@ -156,7 +161,7 @@ export default function FortuneChat() {
     return () => {
       setTypingMessageId(null);
     };
-  }, [addMessageWithTypingEffect]);
+  }, [addMessageWithTypingEffect, welcomeMessages]);
   
   // 부적 이미지 생성 함수
   const handleGenerateTalisman = async () => {
@@ -166,13 +171,16 @@ export default function FortuneChat() {
     setTalismanError(null);
     
     try {
-      // 부적 이미지 생성 API 호출
+      // 부적 이미지 생성 API 호출 (사용자 정보 포함)
       const talismanResponse = await fetch('/api/replicate/talisman', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ concern: currentConcernText }),
+        body: JSON.stringify({ 
+          concern: currentConcernText,
+          userName: userName
+        }),
       });
       
       console.log('부적 API 응답 상태:', talismanResponse.status);
@@ -199,8 +207,7 @@ export default function FortuneChat() {
         await addMessageWithTypingEffect(errorMsg, 500, 1000);
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : '알 수 없는 오류';
-      console.error('부적 이미지 생성 오류:', errorMsg);
+      console.error('부적 이미지 생성 오류:', error);
       setTalismanError('부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.');
       await addMessageWithTypingEffect('부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.', 500, 1000);
     } finally {
@@ -240,14 +247,15 @@ export default function FortuneChat() {
     await addMessageWithTypingEffect('고민을 살펴보고 있어요...', 500, 1000);
     
     try {
-      // OpenAI API 호출 - 직접 입력 모드
+      // OpenAI API 호출 - 직접 입력 모드 (사용자 정보 포함)
       const response = await fetch('/api/fortune/direct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          userQuery: text 
+          userQuery: text,
+          userName: userName
         }),
       });
       
@@ -421,7 +429,7 @@ export default function FortuneChat() {
     await addMessageWithTypingEffect('운세를 살펴보고 있어요...', 1000, 1200);
     
     try {
-      // OpenAI API 호출
+      // OpenAI API 호출 (사용자 정보 포함)
       const response = await fetch('/api/fortune', {
         method: 'POST',
         headers: {
@@ -431,7 +439,8 @@ export default function FortuneChat() {
           concern: selectedConcern,
           detailLevel1,
           detailLevel2,
-          detailLevel3: option
+          detailLevel3: option,
+          userName: userName
         }),
       });
       
