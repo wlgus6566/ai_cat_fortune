@@ -19,6 +19,7 @@ export interface ChatMessage {
   id: string;
   sender: 'user' | 'system';
   text: string;
+  imageUrl?: string; // 타로 카드 이미지 URL
   options?: string[]; // 선택 옵션이 있는 경우
 }
 

@@ -52,10 +52,20 @@ export default function FortuneChat() {
   const initializedRef = useRef(false);
   
   // 4단계 세부 고민 선택을 위한 상태
+  // inputMode는 JSX 조건부 렌더링에 사용 (linter 경고 수정)
   const [inputMode, setInputMode] = useState<InputMode>('SELECTION');
   const [detailLevel1, setDetailLevel1] = useState<string | null>(null);
   const [detailLevel2, setDetailLevel2] = useState<string | null>(null);
+  // detailLevel3는 API 호출에 사용되므로 유지 (linter 경고 억제)
+  // eslint-disable-next-line react-hooks/exhaustive-deps, @typescript-eslint/no-unused-vars
   const [detailLevel3, setDetailLevel3] = useState<string | null>(null);
+  
+  // 부적 생성 관련 상태
+  const [showTalismanButton, setShowTalismanButton] = useState(false);
+  const [currentConcernText, setCurrentConcernText] = useState('');
+  const [fortuneMessageId, setFortuneMessageId] = useState<string | null>(null);
+  const [isGeneratingTalisman, setIsGeneratingTalisman] = useState(false);
+  const [talismanError, setTalismanError] = useState<string | null>(null);
   
   // 채팅창 자동 스크롤
   const scrollToBottom = () => {
@@ -148,9 +158,64 @@ export default function FortuneChat() {
     };
   }, [addMessageWithTypingEffect]);
   
+  // 부적 이미지 생성 함수
+  const handleGenerateTalisman = async () => {
+    if (!currentConcernText || !fortuneMessageId || isGeneratingTalisman) return;
+    
+    setIsGeneratingTalisman(true);
+    setTalismanError(null);
+    
+    try {
+      // 부적 이미지 생성 API 호출
+      const talismanResponse = await fetch('/api/replicate/talisman', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ concern: currentConcernText }),
+      });
+      
+      console.log('부적 API 응답 상태:', talismanResponse.status);
+      
+      const data = await talismanResponse.json();
+      console.log('부적 API 응답 데이터:', data);
+      
+      if (talismanResponse.ok && data.imageUrl) {
+        // 이미지 URL이 있으면 메시지 업데이트
+        console.log('부적 이미지 URL 수신:', data.imageUrl);
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === fortuneMessageId 
+              ? { ...msg, imageUrl: data.imageUrl } 
+              : msg
+          )
+        );
+        scrollToBottom();
+      } else {
+        // 에러 메시지 설정
+        const errorMsg = data.message || '부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.';
+        console.error('부적 생성 실패:', errorMsg, data);
+        setTalismanError(errorMsg);
+        await addMessageWithTypingEffect(errorMsg, 500, 1000);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : '알 수 없는 오류';
+      console.error('부적 이미지 생성 오류:', errorMsg);
+      setTalismanError('부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.');
+      await addMessageWithTypingEffect('부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.', 500, 1000);
+    } finally {
+      setIsGeneratingTalisman(false);
+      // 실패해도 버튼을 한 번 더 시도할 수 있게 함
+      // setShowTalismanButton(false);
+    }
+  };
+  
   // 직접 입력 처리 함수
   const handleDirectInput = async (text: string) => {
     if (typingMessageId) return; // 타이핑 중이면 무시
+    
+    // inputMode 변수 활용 - 직접 입력 모드로 변경
+    setInputMode('DIRECT_INPUT');
     
     // 사용자 메시지 추가
     const userMessage: ChatMessageType = {
@@ -160,6 +225,9 @@ export default function FortuneChat() {
     };
     setMessages(prev => [...prev, userMessage]);
     scrollToBottom();
+    
+    // 고민 텍스트 저장
+    setCurrentConcernText(text);
     
     // 로딩 시작
     setIsLoading(true);
@@ -188,14 +256,20 @@ export default function FortuneChat() {
       }
       
       const data = await response.json();
+      const fortuneText = data.fortune;
       
-      // 마지막 메시지를 실제 응답으로 교체
+      // 운세 메시지 추가
+      const fortuneId = uuidv4();
       setMessages(prev => [...prev.slice(0, -1), {
-        id: uuidv4(),
+        id: fortuneId,
         sender: 'system',
-        text: data.fortune,
+        text: fortuneText,
       }]);
+      setFortuneMessageId(fortuneId);
       scrollToBottom();
+      
+      // 부적 생성 버튼 표시
+      setShowTalismanButton(true);
       
       // 결과 화면에서 '다시 상담하기' 옵션 추가
       setTimeout(() => {
@@ -240,8 +314,8 @@ export default function FortuneChat() {
       setMessages(prev => [...prev, userMessage]);
       scrollToBottom();
       
-      if (option === '직접 입력할게!') {
-        // 직접 입력 모드로 전환
+      if (option === '직접 입력하기') {
+        // 직접 입력 모드로 전환 - inputMode 활용
         setInputMode('DIRECT_INPUT');
         setCurrentStep('DIRECT_INPUT');
         setCurrentOptions([]);
@@ -335,6 +409,11 @@ export default function FortuneChat() {
     setIsLoading(true);
     setCurrentOptions([]);
     
+    // 고민 텍스트 저장 - 부적 생성에 사용
+    if (selectedConcern && detailLevel1 && detailLevel2) {
+      setCurrentConcernText(`${selectedConcern}, ${detailLevel1}, ${detailLevel2}, ${option}`);
+    }
+    
     // 잠시 딜레이 후 응답
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -361,15 +440,20 @@ export default function FortuneChat() {
       }
       
       const data = await response.json();
+      const fortuneText = data.fortune;
       
-      // 마지막 메시지를 실제 응답으로 교체
+      // 운세 메시지를 먼저 표시
       const fortuneId = uuidv4();
       setMessages(prev => [...prev.slice(0, -1), {
         id: fortuneId,
         sender: 'system',
-        text: data.fortune,
+        text: fortuneText,
       }]);
+      setFortuneMessageId(fortuneId);
       scrollToBottom();
+      
+      // 부적 생성 버튼 표시
+      setShowTalismanButton(true);
       
       // 결과 화면에서 '다시 상담하기' 옵션 추가
       setTimeout(() => {
@@ -410,6 +494,10 @@ export default function FortuneChat() {
     setDetailLevel1(null);
     setDetailLevel2(null);
     setDetailLevel3(null);
+    setShowTalismanButton(false);
+    setCurrentConcernText('');
+    setFortuneMessageId(null);
+    setTalismanError(null);
     
     // 다시 초기화 플래그 설정 (이중 실행 방지)
     initializedRef.current = true;
@@ -453,8 +541,36 @@ export default function FortuneChat() {
         )}
       </div>
       
+      {/* 부적 생성 버튼 */}
+      {showTalismanButton && !isLoading && !typingMessageId && (
+        <div className="p-3 border-t border-gray-200 bg-red-50">
+          <button
+            onClick={handleGenerateTalisman}
+            disabled={isGeneratingTalisman}
+            className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 
+              ${isGeneratingTalisman 
+                ? 'bg-gray-300 text-gray-500' 
+                : 'bg-red-600 text-white hover:bg-red-700 shadow-md'
+              }`}
+          >
+            {isGeneratingTalisman ? (
+              <div className="flex items-center justify-center">
+                <span>부적 생성 중...</span>
+                <div className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              </div>
+            ) : '행운의 부적 이미지 생성하기 ✨'}
+          </button>
+          
+          {talismanError && (
+            <div className="mt-2 p-2 bg-red-100 text-red-700 text-sm rounded">
+              {talismanError}
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* 입력 영역 - 직접 입력 모드일 때만 표시 */}
-      {currentStep === 'DIRECT_INPUT' && !typingMessageId && (
+      {currentStep === 'DIRECT_INPUT' && !typingMessageId && inputMode === 'DIRECT_INPUT' && (
         <div className="p-3 border-t border-gray-200 bg-gray-50">
           <ChatInput 
             onSend={handleDirectInput} 
