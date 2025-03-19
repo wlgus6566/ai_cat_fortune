@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFortuneResponse } from '@/app/lib/openai';
-import { ConcernType } from '@/app/types';
+import { ConcernType, UserProfile } from '@/app/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { concern, detailLevel1, detailLevel2, detailLevel3, userName } = await request.json();
+    const { concern, detailLevel1, detailLevel2, detailLevel3, userName, userProfile } = await request.json();
     
     if (!concern || !detailLevel1 || !detailLevel2 || !detailLevel3) {
       return NextResponse.json(
@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
       detailLevel1,
       detailLevel2,
       detailLevel3,
-      userName
+      userName,
+      userProfile as UserProfile | null
     );
     
     return NextResponse.json({ fortune });

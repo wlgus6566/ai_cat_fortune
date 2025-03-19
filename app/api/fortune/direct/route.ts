@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDirectFortuneResponse } from '@/app/lib/openai';
+import { UserProfile } from '@/app/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userQuery, userName } = await request.json();
+    const { userQuery, userName, userProfile } = await request.json();
     
     if (!userQuery) {
       return NextResponse.json(
@@ -14,7 +15,8 @@ export async function POST(request: NextRequest) {
     
     const fortune = await getDirectFortuneResponse(
       userQuery,
-      userName
+      userName,
+      userProfile as UserProfile | null
     );
     
     return NextResponse.json({ fortune });

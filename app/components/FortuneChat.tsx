@@ -41,7 +41,7 @@ const ChatInput = ({ onSend, disabled }: { onSend: (text: string) => void; disab
 
 interface FortuneChatProps {
   userName: string;
-  userProfile: UserProfile | null;
+  userProfile: UserProfile;
 }
 
 export default function FortuneChat({ userName, userProfile }: FortuneChatProps) {
@@ -86,7 +86,7 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
     `안냥! ${userName}님, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
     '너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!',
     '내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖',
-    '어떤 고민이 있나냥! 선택하거나 직접 말해봐라냥! 😽'
+    '어떤 고민이 있나냥! 말해봐라냥! 😽'
   ];
   
   // 타이핑 효과를 위한 함수
@@ -255,7 +255,8 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
         },
         body: JSON.stringify({ 
           userQuery: text,
-          userName: userName
+          userName: userName,
+          userProfile: userProfile
         }),
       });
       
@@ -440,7 +441,8 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
           detailLevel1,
           detailLevel2,
           detailLevel3: option,
-          userName: userName
+          userName: userName,
+          userProfile: userProfile
         }),
       });
       

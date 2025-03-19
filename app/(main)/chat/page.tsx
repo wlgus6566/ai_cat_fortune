@@ -32,7 +32,7 @@ export default function ChatPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <header className="bg-white border-b border-gray-200 py-4 px-4 text-center shadow-sm">
         <h1 className="text-xl font-semibold text-gray-800">
           AI 운세 상담
