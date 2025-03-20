@@ -72,3 +72,23 @@ export interface UserProfile {
 
 // 앱 네비게이션 타입
 export type AppTab = 'home' | 'chat' | 'profile'; 
+export interface IErrorResponse {
+  success: false
+  error: {
+      code: string
+      message: string
+  }
+}
+
+export interface IGenerateRequest {
+    prompt: string
+    styleOptions: {
+        artStyle: string
+        colorTone: string
+    }
+}
+
+export interface IGenerateResponse {
+    success: true
+    imageUrl: string
+}

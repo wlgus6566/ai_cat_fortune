@@ -35,10 +35,10 @@ export default function ChatPage() {
     <div className="bg-gray-50">
       <header className="bg-white border-b border-gray-200 py-4 px-4 text-center shadow-sm">
         <h1 className="text-xl font-semibold text-gray-800">
-          AI 운세 상담
+          포춘냥이
         </h1>
         <p className="text-sm text-gray-600">
-          궁금한 내용을 편하게 물어보세요
+          고민을 편하게 말해보라냥😸
         </p>
       </header>
       

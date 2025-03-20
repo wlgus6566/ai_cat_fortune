@@ -83,7 +83,7 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
   
   // 환영 메시지 배열
   const welcomeMessages = [
-    `안냥! ${userName}님, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
+    `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
     '너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!',
     '내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖',
     '어떤 고민이 있나냥! 말해봐라냥! 😽'
