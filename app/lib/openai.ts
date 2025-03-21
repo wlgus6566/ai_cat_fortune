@@ -31,6 +31,22 @@ function formatUserProfile(userProfile?: UserProfile | null): string {
  */
 export interface DailyFortune {
   date: string; // 날짜
+  saju: {
+    cheongan: {
+      year: string; // 연주(년柱) 천간
+      month: string; // 월주(월柱) 천간
+      day: string; // 일주(일柱) 천간
+      time: string; // 시주(시柱) 천간
+    };
+    jiji: {
+      year: string; // 연주(년柱) 지지
+      month: string; // 월주(월柱) 지지
+      day: string; // 일주(일柱) 지지
+      time: string; // 시주(시柱) 지지
+    };
+    ilju: string; // 일주 정보
+    iljuHanja: string; // 일주 한자 표기
+  };
   overall: {
     score: number; // 1-5 사이의 점수
     description: string; // 전체 운세 설명
@@ -88,6 +104,22 @@ export async function getDailyFortune(
           
           {
             "date": "YYYY-MM-DD", // 오늘 날짜
+            "saju": {
+              "cheongan": {
+                "year": "갑/을/병/정/무/기/경/신/임/계 중 하나", // 연주(년柱) 천간
+                "month": "갑/을/병/정/무/기/경/신/임/계 중 하나", // 월주(월柱) 천간
+                "day": "갑/을/병/정/무/기/경/신/임/계 중 하나", // 일주(일柱) 천간
+                "time": "갑/을/병/정/무/기/경/신/임/계 중 하나" // 시주(시柱) 천간
+              },
+              "jiji": {
+                "year": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나", // 연주(년柱) 지지
+                "month": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나", // 월주(월柱) 지지
+                "day": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나", // 일주(일柱) 지지
+                "time": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나" // 시주(시柱) 지지
+              },
+              "ilju": "사용자의 일주 (예: '임술일주')", // 일주 정보
+              "iljuHanja": "사용자의 일주 한자 표기 (예: '壬戌日柱')" // 일주 한자 표기
+            },
             "overall": {
               "score": 숫자(1-5), // 전체 운세 점수
               "description": "오늘의 전반적인 운세 설명"
@@ -118,7 +150,8 @@ export async function getDailyFortune(
           각 카테고리 설명은 50자 내외로 간결하게 작성하세요.
           점수는 1(매우 나쁨)부터 5(매우 좋음)까지의 정수로 표현하세요.
           오늘의 조언은 귀여운 고양이처럼 "~냥", "~다냥"으로 끝나는 문장으로 작성하세요.
-          생년월일과 사주 정보를 바탕으로 분석하되, 실제 사주 분석 방법론을 적용하세요.`
+          생년월일과 사주 정보를 바탕으로 분석하되, 실제 사주 분석 방법론을 적용하세요.
+          사주팔자 정보는 사용자의 생년월일과 태어난 시간을 바탕으로 실제 사주학 원리에 따라 정확하게 계산하여 제공하세요.`
         },
         {
           role: "user",
@@ -137,7 +170,23 @@ export async function getDailyFortune(
       const fortuneData = JSON.parse(content) as DailyFortune;
       return {
         ...fortuneData,
-        date: formattedDate // 날짜는 항상 오늘 날짜로 설정
+        date: formattedDate,
+        saju: {
+          cheongan: {
+            year: fortuneData.saju.cheongan.year,
+            month: fortuneData.saju.cheongan.month,
+            day: fortuneData.saju.cheongan.day,
+            time: fortuneData.saju.cheongan.time
+          },
+          jiji: {
+            year: fortuneData.saju.jiji.year,
+            month: fortuneData.saju.jiji.month,
+            day: fortuneData.saju.jiji.day,
+            time: fortuneData.saju.jiji.time
+          },
+          ilju: fortuneData.saju.ilju,
+          iljuHanja: fortuneData.saju.iljuHanja
+        }
       };
     } catch (parseError) {
       console.error('JSON 파싱 오류:', parseError);
@@ -152,6 +201,22 @@ export async function getDailyFortune(
     
     return {
       date: formattedDate,
+      saju: {
+        cheongan: {
+          year: "갑",
+          month: "무",
+          day: "임",
+          time: "을"
+        },
+        jiji: {
+          year: "진",
+          month: "술",
+          day: "묘",
+          time: "해"
+        },
+        ilju: "임묘일주",
+        iljuHanja: "壬卯日柱"
+      },
       overall: {
         score: 3,
         description: "오늘은 평범한 하루가 될 것 같습니다."

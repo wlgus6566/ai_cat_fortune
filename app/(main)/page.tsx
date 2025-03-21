@@ -5,6 +5,7 @@ import { useUser } from '@/app/contexts/UserContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import { DailyFortune } from '@/app/lib/openai';
+import SajuInfo from '@/app/components/SajuInfo';
 
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
@@ -282,6 +283,16 @@ export default function HomePage() {
           )}
         </div>
       </header>
+      
+      {/* 사주팔자 정보 섹션 */}
+      {!loading && fortune && fortune.saju && (
+        <section className="mb-6">
+          <SajuInfo 
+            birthInfo={userProfile ? `${userProfile.birthDate ? new Date(userProfile.birthDate).getFullYear() : ''}년 ${userProfile.birthDate ? new Date(userProfile.birthDate).getMonth() + 1 : ''}월 ${userProfile.birthDate ? new Date(userProfile.birthDate).getDate() : ''}일 ${userProfile.birthTime !== '모름' ? userProfile.birthTime : ''}생` : ''}
+            saju={fortune.saju} 
+          />
+        </section>
+      )}
       
       {/* 오늘의 운세 섹션 */}
       <section className="mb-8">
