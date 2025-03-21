@@ -6,8 +6,35 @@ import Image from 'next/image';
 import { useUser } from '@/app/contexts/UserContext';
 import { Gender, CalendarType, BirthTime } from '@/app/types';
 
+// 이름 유효성 검사 함수
+const validateName = (name: string): { isValid: boolean; errorMessage: string } => {
+  // 빈 값 체크
+  if (!name.trim()) {
+    return { isValid: false, errorMessage: '이름을 입력해주세요.' };
+  }
+  
+  // 길이 체크 (2글자 이상)
+  if (name.trim().length < 2) {
+    return { isValid: false, errorMessage: '이름은 2글자 이상이어야 합니다.' };
+  }
+  
+  // 한글/영문만 허용 (자음, 모음 단독 사용 불가)
+  const koreanRegex = /^[가-힣a-zA-Z\s]+$/;
+  if (!koreanRegex.test(name)) {
+    return { isValid: false, errorMessage: '이름은 한글 또는 영문만 입력 가능합니다. (자음, 모음 단독 사용 불가)' };
+  }
+  
+  // 한글 자음/모음만 있는지 체크
+  const koreanSingleCharRegex = /[ㄱ-ㅎㅏ-ㅣ]/;
+  if (koreanSingleCharRegex.test(name)) {
+    return { isValid: false, errorMessage: '완성된 한글만 입력 가능합니다. (자음, 모음 단독 사용 불가)' };
+  }
+  
+  return { isValid: true, errorMessage: '' };
+};
+
 export default function SetupPage() {
-  const { userProfile, isProfileComplete, createUserProfile } = useUser();
+  const { isProfileComplete, createUserProfile } = useUser();
   const router = useRouter();
   
   const [name, setName] = useState('');
@@ -69,12 +96,18 @@ export default function SetupPage() {
   const handleNext = () => {
     setError('');
     
-    if (step === 0 && !name.trim()) {
-      setError('이름을 입력해주세요.');
-      return;
+    // 단계별 유효성 검사
+    if (step === 0) {
+      // 이름 유효성 검사
+      const nameValidation = validateName(name);
+      if (!nameValidation.isValid) {
+        setError(nameValidation.errorMessage);
+        return;
+      }
     }
     
     if (step === 1) {
+      // 생년월일 필수값 및 유효성 검사
       if (!birthYear || !birthMonth || !birthDay) {
         setError('생년월일을 모두 선택해주세요.');
         return;
@@ -93,6 +126,14 @@ export default function SetupPage() {
         selectedDate.getDate() !== parseInt(birthDay)
       ) {
         setError('유효하지 않은 날짜입니다.');
+        return;
+      }
+    }
+    
+    if (step === 2) {
+      // 태어난 시간 필수값 검사
+      if (!birthTime) {
+        setError('태어난 시간을 선택해주세요.');
         return;
       }
     }
@@ -120,9 +161,10 @@ export default function SetupPage() {
   
   // 프로필 저장
   const handleSubmit = () => {
-    // 유효성 검사
-    if (!name.trim()) {
-      setError('이름을 입력해주세요.');
+    // 전체 유효성 검사
+    const nameValidation = validateName(name);
+    if (!nameValidation.isValid) {
+      setError(nameValidation.errorMessage);
       setStep(0);
       return;
     }
@@ -133,8 +175,14 @@ export default function SetupPage() {
       return;
     }
     
+    if (!birthTime) {
+      setError('태어난 시간을 선택해주세요.');
+      setStep(2);
+      return;
+    }
+    
     // 생년월일 포맷팅 (YYYY-MM-DD)
-    const formattedBirthDate = `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`;
+    const formattedBirthDate = `${birthYear}-${String(parseInt(birthMonth)).padStart(2, '0')}-${String(parseInt(birthDay)).padStart(2, '0')}`;
     
     // 프로필 생성
     createUserProfile({
@@ -163,7 +211,7 @@ export default function SetupPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="이름"
+              placeholder="이름 (2글자 이상, 한글/영문만)"
               className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <div className="space-y-2">
@@ -196,13 +244,14 @@ export default function SetupPage() {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              생년월일을 알려주세요
+              생년월일을 알려주세요 <span className="text-red-500">*</span>
             </h2>
             <div className="flex space-x-2">
               <select
                 value={birthYear}
                 onChange={(e) => setBirthYear(e.target.value)}
                 className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                required
               >
                 <option value="">연도</option>
                 {yearOptions.map(year => (
@@ -215,6 +264,7 @@ export default function SetupPage() {
                 value={birthMonth}
                 onChange={(e) => setBirthMonth(e.target.value)}
                 className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                required
               >
                 <option value="">월</option>
                 {monthOptions.map(month => (
@@ -227,6 +277,7 @@ export default function SetupPage() {
                 value={birthDay}
                 onChange={(e) => setBirthDay(e.target.value)}
                 className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                required
               >
                 <option value="">일</option>
                 {dayOptions.map(day => (
@@ -266,10 +317,10 @@ export default function SetupPage() {
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              태어난 시간을 알려주세요
+              태어난 시간을 알려주세요 <span className="text-red-500">*</span>
             </h2>
             <p className="text-sm text-gray-600">
-              정확한 시간을 모르시면 '모름'을 선택해주세요.
+              정확한 시간을 모르시면 &apos;모름&apos;을 선택해주세요.
             </p>
             <div className="grid grid-cols-2 gap-2">
               {timeOptions.map(time => (
