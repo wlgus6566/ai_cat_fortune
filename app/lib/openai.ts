@@ -27,6 +27,161 @@ function formatUserProfile(userProfile?: UserProfile | null): string {
 }
 
 /**
+ * 오늘의 운세 타입 정의
+ */
+export interface DailyFortune {
+  date: string; // 날짜
+  overall: {
+    score: number; // 1-5 사이의 점수
+    description: string; // 전체 운세 설명
+  };
+  categories: {
+    love: {
+      score: number; // 1-5 사이의 점수
+      description: string; // 연애운 설명
+    };
+    money: {
+      score: number; // 1-5 사이의 점수
+      description: string; // 금전운 설명
+    };
+    health: {
+      score: number; // 1-5 사이의 점수
+      description: string; // 건강운 설명
+    };
+    social: {
+      score: number; // 1-5 사이의 점수
+      description: string; // 인간관계운 설명
+    };
+  };
+  luckyColor: string; // 행운의 색
+  luckyNumber: number; // 행운의 숫자
+  advice: string; // 오늘의 조언
+}
+
+/**
+ * 오늘의 운세를 가져오는 함수
+ */
+export async function getDailyFortune(
+  userName?: string,
+  userProfile?: UserProfile | null
+): Promise<DailyFortune> {
+  try {
+    // 사용자 프로필 정보 포맷팅
+    const namePrefix = userName ? `${userName}님` : '사용자';
+    const profileInfo = formatUserProfile(userProfile);
+    const userInfo = profileInfo ? `${namePrefix}(${profileInfo})` : namePrefix;
+    
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      temperature: 0.7,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `당신은 사주와 운세에 특화된 AI 운세 상담사입니다. 
+          사용자의 사주 정보를 바탕으로 오늘의 운세를 분석하여 제공해야 합니다.
+          
+          응답은 반드시 다음 JSON 형식으로 제공해야 합니다:
+          
+          {
+            "date": "YYYY-MM-DD", // 오늘 날짜
+            "overall": {
+              "score": 숫자(1-5), // 전체 운세 점수
+              "description": "오늘의 전반적인 운세 설명"
+            },
+            "categories": {
+              "love": {
+                "score": 숫자(1-5), // 연애운 점수
+                "description": "연애운 설명"
+              },
+              "money": {
+                "score": 숫자(1-5), // 금전운 점수
+                "description": "금전운 설명"
+              },
+              "health": {
+                "score": 숫자(1-5), // 건강운 점수
+                "description": "건강운 설명"
+              },
+              "social": {
+                "score": 숫자(1-5), // 인간관계운 점수
+                "description": "인간관계운 설명"
+              }
+            },
+            "luckyColor": "행운의 색", // 오늘의 행운의 색
+            "luckyNumber": 숫자, // 오늘의 행운의 숫자
+            "advice": "오늘의 조언" // 전반적인 조언
+          }
+          
+          각 카테고리 설명은 50자 내외로 간결하게 작성하세요.
+          점수는 1(매우 나쁨)부터 5(매우 좋음)까지의 정수로 표현하세요.
+          오늘의 조언은 귀여운 고양이처럼 "~냥", "~다냥"으로 끝나는 문장으로 작성하세요.
+          생년월일과 사주 정보를 바탕으로 분석하되, 실제 사주 분석 방법론을 적용하세요.`
+        },
+        {
+          role: "user",
+          content: `${userInfo}의 오늘(${formattedDate}) 운세를 알려주세요. JSON 형식으로 응답해주세요.`
+        }
+      ]
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('운세 데이터를 받지 못했습니다.');
+    }
+    
+    try {
+      // JSON 파싱 시도
+      const fortuneData = JSON.parse(content) as DailyFortune;
+      return {
+        ...fortuneData,
+        date: formattedDate // 날짜는 항상 오늘 날짜로 설정
+      };
+    } catch (parseError) {
+      console.error('JSON 파싱 오류:', parseError);
+      throw new Error('운세 데이터 형식이 올바르지 않습니다.');
+    }
+  } catch (error) {
+    console.error('OpenAI API 호출 중 오류 발생:', error);
+    
+    // 오류 발생 시 기본 응답 반환
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    return {
+      date: formattedDate,
+      overall: {
+        score: 3,
+        description: "오늘은 평범한 하루가 될 것 같습니다."
+      },
+      categories: {
+        love: {
+          score: 3,
+          description: "특별한 변화는 없지만 안정적인 하루가 될 것입니다."
+        },
+        money: {
+          score: 3,
+          description: "재정적으로 무리하지 않는 것이 좋습니다."
+        },
+        health: {
+          score: 3,
+          description: "적절한 휴식을 취하는 것이 좋습니다."
+        },
+        social: {
+          score: 3,
+          description: "차분하게 대화하면 인간관계가 개선됩니다."
+        }
+      },
+      luckyColor: "파란색",
+      luckyNumber: 7,
+      advice: "오늘은 무리하지 말고 차분하게 지내는 것이 좋을 것 같다냥!"
+    };
+  }
+}
+
+/**
  * 선택형 고민 상담 응답 함수 (4단계 세부 고민)
  */
 export async function getFortuneResponse(

@@ -11,7 +11,7 @@ export default function Home() {
   // 프로필 완성 여부에 따라 적절한 페이지로 리디렉션
   useEffect(() => {
     if (isProfileComplete) {
-      router.push('/chat');
+      router.push('/fortune');
     } else {
       router.push('/setup');
     }
