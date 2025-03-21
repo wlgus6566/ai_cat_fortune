@@ -182,34 +182,25 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
           userName: userName
         }),
       });
-      
-      console.log('부적 API 응답 상태:', talismanResponse.status);
-      
       const data = await talismanResponse.json();
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === fortuneMessageId 
+            ? { ...msg, imageUrl: data.imageUrl } 
+            : msg
+        )
+      );
+      scrollToBottom();
       console.log('부적 API 응답 데이터:', data);
       
-      if (talismanResponse.ok && data.imageUrl) {
-        // 이미지 URL이 있으면 메시지 업데이트
-        console.log('부적 이미지 URL 수신:', data.imageUrl);
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === fortuneMessageId 
-              ? { ...msg, imageUrl: data.imageUrl } 
-              : msg
-          )
-        );
-        scrollToBottom();
-      } else {
-        // 에러 메시지 설정
-        const errorMsg = data.message || '부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.';
-        console.error('부적 생성 실패:', errorMsg, data);
-        setTalismanError(errorMsg);
-        await addMessageWithTypingEffect(errorMsg, 500, 1000);
-      }
-    } catch (error) {
-      console.error('부적 이미지 생성 오류:', error);
-      setTalismanError('부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.');
-      await addMessageWithTypingEffect('부적 이미지를 생성하지 못했어요. Replicate API 결제 정보가 필요합니다.', 500, 1000);
+      if (!data.success) {
+        throw new Error(
+            data.error?.message || '이미지 생성에 실패했습니다'
+        )
+    }
+    } catch (err) {
+      console.error('부적 이미지 생성 오류:', err);
+     
     } finally {
       setIsGeneratingTalisman(false);
       // 실패해도 버튼을 한 번 더 시도할 수 있게 함

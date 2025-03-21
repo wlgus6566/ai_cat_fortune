@@ -1,72 +1,95 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { generateTalismanImage } from '@/app/lib/replicate';
+import { NextResponse } from 'next/server'
+import Replicate from 'replicate'
+import {  IGenerateResponse, IErrorResponse } from '@/app/types'
 
-// API 응답 타입 정의
-interface ApiResponse {
-  error?: boolean;
-  message?: string;
-  imageUrl?: string;
+// Replicate 클라이언트 초기화
+const replicate = new Replicate({
+    auth: process.env.REPLICATE_API_TOKEN
+})
+
+export async function POST(request: Request) {
+    try {
+        // 요청 데이터 파싱
+        const { concern, userName } = await request.json()
+
+        // 입력값 검증
+        if (!concern || !userName) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: {
+                        code: 'INVALID_PROMPT',
+                        message:
+                            '프롬프트가 누락되었거나 길이가 초과되었습니다.'
+                    }
+                } as IErrorResponse,
+                { status: 400 }
+            )
+        }
+
+        // Replicate API 호출 시 추가 매개변수 설정
+        const prediction = await replicate.predictions.create({
+            model: 'black-forest-labs/flux-schnell',
+            input: {
+                prompt: concern,
+                aspect_ratio: '1:1',
+                num_outputs: 1,
+                go_fast: true,
+                megapixels: '1',
+                output_format: 'webp',
+                output_quality: 90,
+                negative_prompt: 'blurry, low quality, distorted, deformed' // 품질 향상을 위한 네거티브 프롬프트 추가
+            }
+        })
+
+        // 이미지 생성 상태 확인을 위한 폴링
+        let finalPrediction = prediction
+        let retryCount = 0
+        const maxRetries = 30 // 최대 30초 대기
+
+        while (
+            finalPrediction.status !== 'succeeded' &&
+            finalPrediction.status !== 'failed' &&
+            retryCount < maxRetries
+        ) {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            finalPrediction = await replicate.predictions.get(prediction.id)
+            retryCount++
+        }
+
+        // 타임아웃 또는 생성 실패 시
+        if (retryCount >= maxRetries || finalPrediction.status === 'failed') {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: {
+                        code: 'GENERATION_FAILED',
+                        message:
+                            retryCount >= maxRetries
+                                ? '이미지 생성 시간이 초과되었습니다.'
+                                : '이미지 생성에 실패했습니다.'
+                    }
+                } as IErrorResponse,
+                { status: 500 }
+            )
+        }
+
+        // 성공 응답
+        return NextResponse.json({
+            success: true,
+            imageUrl: finalPrediction.output[0]
+        } as IGenerateResponse)
+    } catch (error) {
+        console.error('Image generation error:', error)
+        return NextResponse.json(
+            {
+                success: false,
+                error: {
+                    code: 'GENERATION_FAILED',
+                    message: '서버 오류가 발생했습니다.'
+                }
+            } as IErrorResponse,
+            { status: 500 }
+        )
+    }
 }
-
-interface RequestBody {
-  concern: string;
-  userName?: string;
-}
-
-/**
- * 부적 이미지 생성 API 핸들러
- */
-export async function POST(request: NextRequest) {
-  try {
-    // 요청 데이터 검증
-    const body = await request.json();
-    const { concern, userName } = validateRequestBody(body);
-    
-    // 부적 이미지 생성
-    const imageUrl = await generateTalismanImage(concern, userName);
-    
-    return NextResponse.json({ imageUrl });
-    
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
-
-/**
- * 요청 데이터 검증
- */
-function validateRequestBody(body: RequestBody): { concern: string; userName?: string } {
-  const { concern, userName } = body;
-  
-  if (!concern || typeof concern !== 'string') {
-    throw new Error('고민 내용이 필요합니다.');
-  }
-  
-  if (userName && typeof userName !== 'string') {
-    throw new Error('사용자 이름이 올바르지 않습니다.');
-  }
-  
-  return { concern, userName };
-}
-
-/**
- * API 에러 처리
- */
-function handleApiError(error: unknown): NextResponse<ApiResponse> {
-  console.error('부적 이미지 생성 API 오류:', error);
-  
-  const message = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
-  
-  // HTTP 상태 코드 결정
-  let status = 500;
-  if (message.includes('결제 정보')) {
-    status = 402;
-  } else if (message.includes('고민 내용') || message.includes('사용자 이름')) {
-    status = 400;
-  }
-  
-  return NextResponse.json(
-    { error: true, message },
-    { status }
-  );
-} 

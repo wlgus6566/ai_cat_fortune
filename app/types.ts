@@ -126,3 +126,27 @@ export interface DailyFortune {
   };
   // ... 기존 속성들
 }
+export interface IGenerateRequest {
+    prompt: string
+    styleOptions: {
+        artStyle: string
+        colorTone: string
+    }
+}
+
+export interface IGenerateResponse {
+    success: true
+    imageUrl: string
+    error?: {
+        code: string
+        message: string
+    }
+}
+
+export interface IErrorResponse {
+    success: false
+    error: {
+        code: string
+        message: string
+    }
+}
