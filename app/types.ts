@@ -60,6 +60,7 @@ export type BirthTime =
 
 export interface UserProfile {
   id: string;
+  userId?: string; // Supabase Storage 저장용 사용자 ID
   name: string;
   gender: Gender;
   birthDate: string; // YYYY-MM-DD 형식

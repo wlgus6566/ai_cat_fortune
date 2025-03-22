@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ChatMessage from './ChatMessage';
+import TalismanPopup from './TalismanPopup';
 import { ChatMessage as ChatMessageType, ChatStep, ConcernType, InputMode, UserProfile } from '../types';
 import { CONCERN_TYPES, DETAILED_CONCERNS } from '../data';
-
+import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from '../data.en'; // ✅ 영어 데이터 불러오기
 // 직접 입력창 컴포넌트
 const ChatInput = ({ onSend, disabled }: { onSend: (text: string) => void; disabled: boolean }) => {
   const [input, setInput] = useState('');
@@ -68,15 +69,17 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
   // 부적 생성 관련 상태
   const [showTalismanButton, setShowTalismanButton] = useState(false);
   const [currentConcernText, setCurrentConcernText] = useState('');
-  const [fortuneMessageId, setFortuneMessageId] = useState<string | null>(null);
   const [isGeneratingTalisman, setIsGeneratingTalisman] = useState(false);
   const [talismanError, setTalismanError] = useState<string | null>(null);
+  
+  // 부적 팝업 관련 상태
+  const [showTalismanPopup, setShowTalismanPopup] = useState(false);
+  const [talismanImageUrl, setTalismanImageUrl] = useState<string | null>(null);
   
   // 채팅창 자동 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -165,12 +168,16 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
   
   // 부적 이미지 생성 함수
   const handleGenerateTalisman = async () => {
-    if (!currentConcernText || !fortuneMessageId || isGeneratingTalisman) return;
+    if (!currentConcernText || isGeneratingTalisman) return;
     
     setIsGeneratingTalisman(true);
     setTalismanError(null);
     
     try {
+      // 부적 생성 진행 중 메시지 추가
+      const processingMessage = '행운의 부적을 만들고 있어요...';
+      await addMessageWithTypingEffect(processingMessage, 500, 800);
+      
       // 부적 이미지 생성 API 호출 (사용자 정보 포함)
       const talismanResponse = await fetch('/api/replicate/talisman', {
         method: 'POST',
@@ -179,32 +186,39 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
         },
         body: JSON.stringify({ 
           concern: currentConcernText,
-          userName: userName
+          userName: userName,
+          userId: userProfile.id // 유저 ID 전달 (Supabase Storage 저장용)
         }),
       });
-      const data = await talismanResponse.json();
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === fortuneMessageId 
-            ? { ...msg, imageUrl: data.imageUrl } 
-            : msg
-        )
-      );
-      scrollToBottom();
-      console.log('부적 API 응답 데이터:', data);
       
-      if (!data.success) {
-        throw new Error(
-            data.error?.message || '이미지 생성에 실패했습니다'
-        )
-    }
+      const data = await talismanResponse.json();
+      
+      if (!data.success && !data.imageUrl) {
+        throw new Error(data.error?.message || '이미지 생성에 실패했습니다');
+      }
+      
+      // 이미지 URL 저장 (팝업용)
+      setTalismanImageUrl(data.imageUrl || data.storedImageUrl);
+      
+      // 부적 생성 완료 메시지
+      const successMessage = '행운의 부적이 만들어졌어요! 지금 확인해보세요 ✨';
+      await addMessageWithTypingEffect(successMessage, 500, 800);
+      
+      // 팝업 표시
+      setShowTalismanPopup(true);
+      
+      // 부적 생성 버튼 숨기기 (한 번만 생성 가능하도록)
+      setShowTalismanButton(false);
+      
     } catch (err) {
       console.error('부적 이미지 생성 오류:', err);
-     
+      setTalismanError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다');
+      
+      // 오류 메시지 표시
+      const errorMessage = '부적 생성에 실패했어요. 잠시 후 다시 시도해주세요. 😿';
+      await addMessageWithTypingEffect(errorMessage, 500, 800);
     } finally {
       setIsGeneratingTalisman(false);
-      // 실패해도 버튼을 한 번 더 시도할 수 있게 함
-      // setShowTalismanButton(false);
     }
   };
   
@@ -259,13 +273,11 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
       const fortuneText = data.fortune;
       
       // 운세 메시지 추가
-      const fortuneId = uuidv4();
       setMessages(prev => [...prev.slice(0, -1), {
-        id: fortuneId,
+        id: uuidv4(),
         sender: 'system',
         text: fortuneText,
       }]);
-      setFortuneMessageId(fortuneId);
       scrollToBottom();
       
       // 부적 생성 버튼 표시
@@ -302,7 +314,7 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
     if (typingMessageId || !initialMessagesComplete) return; // 타이핑 중이거나 초기 메시지가 완료되지 않았으면 무시
     
     setSelectedOption(option);
-    
+     // 🚀 한글 → 영어 변환
     // 잠시 강조 효과를 보여준 후 다음 단계로 진행
     setTimeout(() => {
       // 사용자 선택 메시지 추가
@@ -445,13 +457,11 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
       const fortuneText = data.fortune;
       
       // 운세 메시지를 먼저 표시
-      const fortuneId = uuidv4();
       setMessages(prev => [...prev.slice(0, -1), {
-        id: fortuneId,
+        id: uuidv4(),
         sender: 'system',
         text: fortuneText,
       }]);
-      setFortuneMessageId(fortuneId);
       scrollToBottom();
       
       // 부적 생성 버튼 표시
@@ -498,8 +508,8 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
     setDetailLevel3(null);
     setShowTalismanButton(false);
     setCurrentConcernText('');
-    setFortuneMessageId(null);
     setTalismanError(null);
+    setTalismanImageUrl(null);
     
     // 다시 초기화 플래그 설정 (이중 실행 방지)
     initializedRef.current = true;
@@ -604,6 +614,15 @@ export default function FortuneChat({ userName, userProfile }: FortuneChatProps)
             ))}
           </div>
         </div>
+      )}
+      
+      {/* 부적 이미지 팝업 */}
+      {showTalismanPopup && talismanImageUrl && (
+        <TalismanPopup 
+          imageUrl={talismanImageUrl} 
+          userName={userName}
+          onClose={() => setShowTalismanPopup(false)} 
+        />
       )}
     </div>
   );

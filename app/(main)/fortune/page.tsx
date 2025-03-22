@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/app/contexts/UserContext';
-import Image from 'next/image';
 import Link from 'next/link';
 import { DailyFortune } from '@/app/lib/openai';
-import SajuInfo from '@/app/components/SajuInfo';
 
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
@@ -65,7 +63,41 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, score, description, 
 };
 
 // 로컬 스토리지 관련 함수들
-const getStorageKey = (userId: string) => `fortune_${userId}_${new Date().toISOString().split('T')[0]}`;
+const getStorageKey = (userId: string, day?: string) => {
+  const today = day || new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+  return `fortune_${userId}_${today}`;
+};
+
+// 모든 이전 운세 데이터 삭제
+const clearAllPreviousFortuneData = (userId: string) => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // localStorage의 모든 키를 확인
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      
+      // fortune_ 으로 시작하는 키만 처리
+      if (key && key.startsWith(`fortune_${userId}`)) {
+        // 날짜 부분 추출
+        const keyParts = key.split('_');
+        if (keyParts.length >= 3) {
+          const keyDate = keyParts[2];
+          
+          // 오늘 날짜가 아닌 경우 삭제
+          if (keyDate !== today) {
+            localStorage.removeItem(key);
+            console.log(`이전 운세 데이터 삭제: ${key}`);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('이전 운세 데이터 삭제 오류:', error);
+  }
+};
 
 const getStoredFortune = (userId: string): DailyFortune | null => {
   if (typeof window === 'undefined') return null;
@@ -82,9 +114,13 @@ const getStoredFortune = (userId: string): DailyFortune | null => {
     
     // 저장된 데이터가 오늘 날짜인 경우에만 사용
     if (storedDate === todayDate) {
+      console.log('로컬 스토리지에 오늘자 운세 데이터가 있습니다.');
       return fortune;
     }
     
+    // 날짜가 다르면 저장된 데이터 삭제
+    console.log('저장된 운세 데이터가 오늘 날짜가 아닙니다. 삭제합니다.');
+    localStorage.removeItem(key);
     return null;
   } catch (error) {
     console.error('저장된 운세 데이터 불러오기 오류:', error);
@@ -101,10 +137,8 @@ const storeFortune = (userId: string, fortune: DailyFortune) => {
       timestamp: new Date().toISOString(),
       fortune: fortune
     };
-    console.log(55555);
     
     localStorage.setItem(key, JSON.stringify(dataToStore));
-    console.log(566666);
   } catch (error) {
     console.error('운세 데이터 저장 오류:', error);
   }
@@ -112,56 +146,46 @@ const storeFortune = (userId: string, fortune: DailyFortune) => {
 
 export default function HomePage() {
   const { userProfile, isProfileComplete } = useUser();
-  const [greeting, setGreeting] = useState('');
-  const [date, setDate] = useState('');
-  const [loading, setLoading] = useState(true);
   const [fortune, setFortune] = useState<DailyFortune | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchAttempted, setFetchAttempted] = useState(false);
-  
-  // 시간에 따른 인사말 및 날짜 설정
-  useEffect(() => {
-    // 시간에 따른 인사말 설정
-    const hours = new Date().getHours();
-    let newGreeting;
-    
-    if (hours >= 5 && hours < 12) {
-      newGreeting = '좋은 아침이다냥! ';
-    } else if (hours >= 12 && hours < 18) {
-      newGreeting = '좋은 오후다냥! ';
-    } else {
-      newGreeting = '좋은 밤이다냥! ';
-    }
-    
-    setGreeting(newGreeting);
-    
-    // 현재 날짜 표시
-    const today = new Date();
-    const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-    setDate(formattedDate);
-  }, []);
+  const [isApiCallInProgress, setIsApiCallInProgress] = useState(false);
   
   // 오늘의 운세 데이터 가져오기
   const fetchDailyFortune = useCallback(async (forceRefresh = false) => {
+    // 이미 API 호출이 진행 중이면 리턴
+    if (isApiCallInProgress) {
+      console.log('이미 API 호출이 진행 중입니다.');
+      return;
+    }
+    
     if (!isProfileComplete || !userProfile || (fetchAttempted && !forceRefresh)) {
       return;
     }
     
-    // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
-    if (!forceRefresh) {
-      const storedFortune = getStoredFortune(userProfile.id);
-      if (storedFortune) {
-        setFortune(storedFortune);
-        setLoading(false);
-        setFetchAttempted(true);
-        return;
-      }
+    // 이전 날짜의 운세 데이터 모두 삭제
+    if (userProfile) {
+      clearAllPreviousFortuneData(userProfile.id);
     }
     
+    // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
+    const storedFortune = getStoredFortune(userProfile.id);
+    if (storedFortune) {
+      console.log('로컬 스토리지에서 오늘의 운세 데이터를 불러왔습니다.');
+      setFortune(storedFortune);
+      setLoading(false);
+      setFetchAttempted(true);
+      return;
+    }
+    
+    // 오늘 날짜의 데이터가 없는 경우에만 API 호출
     try {
       setLoading(true);
       setFetchAttempted(true);
-      console.log(4444)
+      setIsApiCallInProgress(true); // API 호출 시작
+      console.log('API 호출 시작: /api/fortune/daily');
+      
       const response = await fetch('/api/fortune/daily', {
         method: 'POST',
         headers: {
@@ -180,6 +204,7 @@ export default function HomePage() {
       }
       
       const dailyFortune = responseData.data;
+      console.log('API 응답 성공: 운세 데이터를 받았습니다.');
       
       // 로컬 스토리지에 운세 데이터 저장
       storeFortune(userProfile.id, dailyFortune);
@@ -191,21 +216,68 @@ export default function HomePage() {
       setError(error instanceof Error ? error.message : '오늘의 운세를 불러오는 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
+      setIsApiCallInProgress(false); // API 호출 종료
+      console.log('API 호출 종료');
     }
-  }, [isProfileComplete, userProfile, fetchAttempted]);
+  }, [isProfileComplete, userProfile, fetchAttempted, isApiCallInProgress]);
   
-  // userProfile이 로드된 후 한 번만 실행
+  // 초기 데이터 로딩 로직
   useEffect(() => {
-    if (isProfileComplete && userProfile && !fetchAttempted) {
+    if (isProfileComplete && userProfile && !isApiCallInProgress) {
+      // 이미 fortune 데이터가 있으면 API 호출하지 않음
+      if (fortune) {
+        return;
+      }
+      
+      // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
+      const storedFortune = getStoredFortune(userProfile.id);
+      if (storedFortune) {
+        console.log('useEffect: 로컬 스토리지에서 오늘의 운세 데이터를 불러왔습니다.');
+        setFortune(storedFortune);
+        setLoading(false);
+        setFetchAttempted(true);
+        return;
+      }
+      
+      // 저장된 데이터가 없는 경우에만 API 호출
+      console.log('useEffect: 로컬 스토리지에 오늘의 운세 데이터가 없습니다. API를 호출합니다.');
       fetchDailyFortune(false);
     }
-  }, [isProfileComplete, userProfile, fetchAttempted, fetchDailyFortune]);
+  }, [isProfileComplete, userProfile, fortune, isApiCallInProgress, fetchDailyFortune]);
+  
+  // 이전 날짜 데이터 정리
+  useEffect(() => {
+    if (userProfile) {
+      clearAllPreviousFortuneData(userProfile.id);
+    }
+  }, [userProfile]);
   
   // 새로고침 핸들러
   const handleRefresh = () => {
-    setFetchAttempted(false);
-    setLoading(true);
-    fetchDailyFortune(true); // 강제 새로고침
+    // 이미 API 호출이 진행 중이면 리턴
+    if (isApiCallInProgress) {
+      return;
+    }
+    
+    // 오늘 날짜의 데이터가 있는지 확인
+    if (userProfile) {
+      const storedFortune = getStoredFortune(userProfile.id);
+      
+      // 오늘 날짜의 데이터가 있으면 그 데이터를 사용
+      if (storedFortune) {
+        console.log('로컬 스토리지에 오늘 날짜의 운세 데이터가 있습니다. API 호출을 건너뜁니다.');
+        setFortune(storedFortune);
+        setLoading(false);
+        setFetchAttempted(true);
+        return;
+      }
+      
+      // 오늘 날짜의 데이터가 없는 경우에만 API 호출
+      console.log('로컬 스토리지에 오늘 날짜의 운세 데이터가 없습니다. API를 호출합니다.');
+      setFetchAttempted(false);
+      setLoading(true);
+      fetchDailyFortune(true); // 강제 새로고침
+    }
   };
   
   if (!isProfileComplete) {
@@ -242,56 +314,21 @@ export default function HomePage() {
   ];
   
   return (
-    <div className="container mx-auto px-4 py-6 max-w-md">
-      {/* 헤더 섹션 */}
-      <header className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            {greeting},
-          </h1>
-          <h2 className="text-xl font-medium text-purple-700">
-            {userProfile?.name}님
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">{date}</p>
-        </div>
-        
-        <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-purple-200">
-          {userProfile?.profileImageUrl ? (
-            <Image 
-              src={userProfile.profileImageUrl} 
-              alt="프로필 이미지" 
-              fill 
-              className="object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-purple-100 flex items-center justify-center">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-8 w-8 text-purple-500" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
-                />
-              </svg>
-            </div>
-          )}
-        </div>
+    <div className="container max-w-screen-md mx-auto px-4 py-6">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">오늘의 운세</h1>
+        <p className="text-gray-600">
+          {userProfile?.name}님을 위한 {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} 운세입니다.
+        </p>
       </header>
       
-      {/* 사주팔자 정보 섹션 */}
-      {!loading && fortune && fortune.saju && (
-        <section className="mb-6">
-          <SajuInfo 
-            birthInfo={userProfile ? `${userProfile.birthDate ? new Date(userProfile.birthDate).getFullYear() : ''}년 ${userProfile.birthDate ? new Date(userProfile.birthDate).getMonth() + 1 : ''}월 ${userProfile.birthDate ? new Date(userProfile.birthDate).getDate() : ''}일 ${userProfile.birthTime !== '모름' ? userProfile.birthTime : ''}생` : ''}
-            saju={fortune.saju} 
-          />
-        </section>
+      {/* 에러 표시 */}
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">
+          <p className="flex items-center">
+            <span className="mr-2">⚠️</span> {error}
+          </p>
+        </div>
       )}
       
       {/* 오늘의 운세 섹션 */}
@@ -421,7 +458,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h4 className="font-medium text-gray-800">운세 상담</h4>
-              <p className="text-sm text-gray-600">AI와 1:1 운세 상담하기</p>
+              <p className="text-sm text-gray-600">포춘냥이와 고민상담하기</p>
             </div>
           </Link>
           
@@ -444,7 +481,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h4 className="font-medium text-gray-800">내 프로필</h4>
-              <p className="text-sm text-gray-600">프로필 정보 변경하기</p>
+              <p className="text-sm text-gray-600">프로필 정보 / 부적 관리</p>
             </div>
           </Link>
         </div>

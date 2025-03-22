@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import TalismanPopup from './TalismanPopup';
 
 interface UserTalismansProps {
   userId: string;
@@ -11,6 +12,8 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
   const [talismans, setTalismans] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -40,6 +43,11 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
     fetchTalismans();
   }, [userId]);
 
+  const handleTalismanClick = (imageUrl: string) => {
+    setSelectedTalisman(imageUrl);
+    setShowPopup(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -67,13 +75,14 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
   return (
     <div className="my-6">
       <h2 className="text-xl font-bold mb-4">나의 부적 이미지</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {talismans.map((talismanUrl, index) => (
           <div 
             key={index} 
-            className="border border-gray-200 rounded-md p-2 bg-white shadow-sm hover:shadow-md transition-shadow"
+            className="border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => handleTalismanClick(talismanUrl)}
           >
-            <div className="relative aspect-square w-full overflow-hidden rounded-md">
+            <div className="relative w-full overflow-hidden rounded-md" style={{ aspectRatio: '9/16' }}>
               <Image
                 src={talismanUrl}
                 alt={`부적 이미지 ${index + 1}`}
@@ -82,20 +91,17 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
                 className="object-cover"
               />
             </div>
-            <div className="mt-2 flex justify-between items-center">
-              <span className="text-sm text-gray-500">부적 {index + 1}</span>
-              <a 
-                href={talismanUrl} 
-                download={`talisman-${index + 1}.jpg`}
-                target="_blank"
-                className="text-sm text-blue-500 hover:text-blue-700"
-              >
-                다운로드
-              </a>
-            </div>
           </div>
         ))}
       </div>
+
+      {/* 부적 팝업 */}
+      {showPopup && selectedTalisman && (
+        <TalismanPopup 
+          imageUrl={selectedTalisman} 
+          onClose={() => setShowPopup(false)}
+        />
+      )}
     </div>
   );
 } 

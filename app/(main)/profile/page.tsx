@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/app/contexts/UserContext';
 import Image from 'next/image';
 import { Gender, CalendarType, BirthTime } from '@/app/types';
+import UserTalismans from '@/app/components/UserTalismans';
+//import SajuInfo from '@/app/components/SajuInfo';
 
 // 이름 유효성 검사 함수
 const validateName = (name: string): { isValid: boolean; errorMessage: string } => {
@@ -117,8 +119,40 @@ export default function ProfilePage() {
   ];
   
   // 프로필 ID로 저장된 운세 데이터의 로컬 스토리지 키 생성
-  const getFortuneStorageKey = (userId: string) => {
-    return `fortune_${userId}_${new Date().toISOString().split('T')[0]}`;
+  const getFortuneStorageKey = (userId: string, day?: string) => {
+    const today = day || new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+    return `fortune_${userId}_${today}`;
+  };
+  
+  // 모든 이전 운세 데이터 삭제
+  const clearAllPreviousFortuneData = (userId: string) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // localStorage의 모든 키를 확인
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        
+        // fortune_ 으로 시작하는 키만 처리
+        if (key && key.startsWith(`fortune_${userId}`)) {
+          // 날짜 부분 추출
+          const keyParts = key.split('_');
+          if (keyParts.length >= 3) {
+            const keyDate = keyParts[2];
+            
+            // 오늘 날짜가 아닌 경우 삭제
+            if (keyDate !== today) {
+              localStorage.removeItem(key);
+              console.log(`이전 운세 데이터 삭제: ${key}`);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('이전 운세 데이터 삭제 오류:', error);
+    }
   };
   
   // 저장된 운세 데이터 삭제 (프로필 업데이트시 호출)
@@ -126,11 +160,42 @@ export default function ProfilePage() {
     if (!userProfile || typeof window === 'undefined') return;
     
     try {
+      // 모든 날짜의 운세 데이터 삭제
+      clearAllPreviousFortuneData(userProfile.id);
+      
+      // 오늘 데이터도 삭제
       const key = getFortuneStorageKey(userProfile.id);
       localStorage.removeItem(key);
+      
       console.log('프로필 업데이트에 따라 저장된 운세 데이터를 삭제했습니다.');
     } catch (error) {
       console.error('저장된 운세 데이터 삭제 오류:', error);
+    }
+  }, [userProfile]);
+  
+  // 로컬 스토리지에서 오늘의 운세 데이터 가져오기
+  useEffect(() => {
+    if (!userProfile) return;
+    
+    try {
+      // 이전 날짜의 운세 데이터 모두 삭제
+      clearAllPreviousFortuneData(userProfile.id);
+      
+      const key = getFortuneStorageKey(userProfile.id);
+      const storedData = localStorage.getItem(key);
+      
+      if (storedData) {
+        const { timestamp } = JSON.parse(storedData);
+        const storedDate = new Date(timestamp).toISOString().split('T')[0];
+        const todayDate = new Date().toISOString().split('T')[0];
+        
+        // 저장된 데이터가 오늘 날짜가 아닌 경우 삭제
+        if (storedDate !== todayDate) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (error) {
+      console.error('저장된 운세 데이터 불러오기 오류:', error);
     }
   }, [userProfile]);
   
@@ -164,13 +229,6 @@ export default function ProfilePage() {
     setError('');
     setMessage('');
     setShowDatePicker(false);
-  };
-  
-  // 프로필 이미지 선택 (데모용으로 기본 이미지 사용)
-  const handleImageSelection = () => {
-    // 실제 구현에서는 파일 업로드 로직이 필요하지만, 
-    // 이 예제에서는 간단히 기본 이미지 URL을 사용합니다.
-    setProfileImage('/profile_placeholder.png');
   };
   
   // 생년월일 업데이트
@@ -262,29 +320,25 @@ export default function ProfilePage() {
   }
   
   return (
-    <div className="container mx-auto px-4 py-6 max-w-md">
-      <header className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">내 프로필</h1>
-        <p className="text-sm text-gray-600">프로필 정보를 관리합니다</p>
-      </header>
-      
-      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-purple-100 mb-6">
-        <div className="p-6 space-y-6">
-          {/* 프로필 이미지 */}
-          <div className="flex flex-col items-center">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-purple-200 mb-4">
+    <div className="container max-w-2xl mx-auto px-4 py-8">      
+      {/* 프로필 카드 */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 mb-6">
+        {/* 프로필 상단 - 이미지와 이름 */}
+        <div className="bg-purple-500 p-6 text-white relative">
+          <div className="flex items-center">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-md mr-4">
               {profileImage ? (
                 <Image 
                   src={profileImage} 
-                  alt="프로필 이미지" 
-                  fill 
+                  alt="프로필 이미지"
+                  fill
                   className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className="h-12 w-12 text-gray-400" 
+                    className="h-10 w-10 text-gray-400" 
                     fill="none" 
                     viewBox="0 0 24 24" 
                     stroke="currentColor"
@@ -299,260 +353,286 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-            {isEditing && (
-              <button
-                type="button"
-                onClick={handleImageSelection}
-                className="py-1 px-3 rounded-lg bg-purple-100 text-purple-700 text-sm border border-purple-300"
-              >
-                이미지 변경
-              </button>
-            )}
-          </div>
-          
-          {/* 오류 메시지 */}
-          {error && (
-            <div className="p-2 rounded-lg text-center bg-red-100 text-red-700">
-              {error}
-            </div>
-          )}
-          
-          {/* 프로필 정보 */}
-          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="이름 (2글자 이상, 한글/영문만)"
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              ) : (
-                <p className="p-2 bg-gray-50 rounded-lg text-gray-800">{name}</p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">성별</label>
-              {isEditing ? (
-                <div className="flex space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setGender('남성')}
-                    className={`flex-1 py-2 px-4 rounded-lg border ${
-                      gender === '남성' ? 'bg-purple-100 border-purple-500' : 'border-gray-300'
-                    }`}
-                  >
-                    남성
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGender('여성')}
-                    className={`flex-1 py-2 px-4 rounded-lg border ${
-                      gender === '여성' ? 'bg-purple-100 border-purple-500' : 'border-gray-300'
-                    }`}
-                  >
-                    여성
-                  </button>
-                </div>
-              ) : (
-                <p className="p-2 bg-gray-50 rounded-lg text-gray-800">{gender}</p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
-              {isEditing ? (
-                showDatePicker ? (
-                  <div className="space-y-3">
-                    <div className="flex space-x-2">
-                      <select
-                        value={birthYear}
-                        onChange={(e) => setBirthYear(e.target.value)}
-                        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        required
-                      >
-                        <option value="">연도</option>
-                        {yearOptions.map(year => (
-                          <option key={year} value={year.toString()}>
-                            {year}년
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={birthMonth}
-                        onChange={(e) => setBirthMonth(e.target.value)}
-                        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        required
-                      >
-                        <option value="">월</option>
-                        {monthOptions.map(month => (
-                          <option key={month} value={month.toString()}>
-                            {month}월
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={birthDay}
-                        onChange={(e) => setBirthDay(e.target.value)}
-                        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        required
-                      >
-                        <option value="">일</option>
-                        {dayOptions.map(day => (
-                          <option key={day} value={day.toString()}>
-                            {day}일
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => setShowDatePicker(false)}
-                        className="py-1 px-3 rounded-lg bg-gray-100 text-gray-700 text-sm border border-gray-300"
-                      >
-                        취소
-                      </button>
-                      <button
-                        type="button"
-                        onClick={updateBirthDate}
-                        className="py-1 px-3 rounded-lg bg-purple-100 text-purple-700 text-sm border border-purple-300"
-                      >
-                        저장
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center">
-                    <p className="p-2 bg-gray-50 rounded-lg text-gray-800 flex-grow">
-                      {parsedBirthDate ? 
-                        `${parsedBirthDate.year}년 ${parsedBirthDate.month}월 ${parsedBirthDate.day}일` : 
-                        '날짜 정보 없음'
-                      }
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowDatePicker(true)}
-                      className="ml-2 py-1 px-3 rounded-lg bg-purple-100 text-purple-700 text-sm border border-purple-300"
-                    >
-                      변경
-                    </button>
-                  </div>
-                )
-              ) : (
-                <p className="p-2 bg-gray-50 rounded-lg text-gray-800">
-                  {parsedBirthDate ? 
-                    `${parsedBirthDate.year}년 ${parsedBirthDate.month}월 ${parsedBirthDate.day}일 (${calendarType})` : 
-                    '날짜 정보 없음'
-                  }
-                </p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">양력/음력</label>
-              {isEditing ? (
-                <div className="flex space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setCalendarType('양력')}
-                    className={`flex-1 py-2 px-4 rounded-lg border ${
-                      calendarType === '양력' ? 'bg-purple-100 border-purple-500' : 'border-gray-300'
-                    }`}
-                  >
-                    양력
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCalendarType('음력')}
-                    className={`flex-1 py-2 px-4 rounded-lg border ${
-                      calendarType === '음력' ? 'bg-purple-100 border-purple-500' : 'border-gray-300'
-                    }`}
-                  >
-                    음력
-                  </button>
-                </div>
-              ) : (
-                <p className="p-2 bg-gray-50 rounded-lg text-gray-800">{calendarType}</p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">태어난 시간</label>
-              {isEditing ? (
-                <select
-                  value={birthTime}
-                  onChange={(e) => setBirthTime(e.target.value as BirthTime)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {timeOptions.map(time => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <p className="p-2 bg-gray-50 rounded-lg text-gray-800">{birthTime}</p>
-              )}
+              <h2 className="text-xl font-bold">{isEditing ? '프로필 수정' : userProfile?.name}</h2>
+              <p className="text-purple-100">{parsedBirthDate ? `${parsedBirthDate.year}년 ${parsedBirthDate.month}월 ${parsedBirthDate.day}일생` : ''}</p>
             </div>
           </div>
-          
-          {/* 상태 메시지 */}
+        </div>
+        
+        {/* 프로필 정보 및 편집 폼 */}
+        <div className="p-6">
           {message && (
-            <div className={`p-2 rounded-lg text-center ${
-              message.includes('오류') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-            }`}>
+            <div className="mb-4 p-3 bg-green-50 text-green-800 rounded-md">
               {message}
             </div>
           )}
           
-          {/* 버튼 */}
-          <div className="flex justify-center space-x-3">
-            {isEditing ? (
-              <>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-800 rounded-md">
+              {error}
+            </div>
+          )}
+          
+          {!isEditing ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="border-b pb-2">
+                  <p className="text-sm text-gray-500">이름</p>
+                  <p className="font-medium">{userProfile?.name}</p>
+                </div>
+                
+                <div className="border-b pb-2">
+                  <p className="text-sm text-gray-500">성별</p>
+                  <p className="font-medium">{userProfile?.gender}</p>
+                </div>
+                
+                <div className="border-b pb-2">
+                  <p className="text-sm text-gray-500">생년월일</p>
+                  <p className="font-medium">
+                    {parsedBirthDate ? 
+                      `${parsedBirthDate.year}년 ${parsedBirthDate.month}월 ${parsedBirthDate.day}일 (${userProfile?.calendarType})` : 
+                      '-'}
+                  </p>
+                </div>
+                
+                <div className="border-b pb-2">
+                  <p className="text-sm text-gray-500">태어난 시간</p>
+                  <p className="font-medium">{userProfile?.birthTime}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleEdit}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition shadow-sm"
+                >
+                  내 정보 수정하기
+                </button>
+              </div>
+            </div>
+          ) : (
+            // 편집 모드 폼
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                {/* 이름 입력 */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+                
+                {/* 성별 선택 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    성별
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        checked={gender === '남성'}
+                        onChange={() => setGender('남성')}
+                        className="form-radio h-4 w-4 text-purple-600 transition duration-150 ease-in-out"
+                      />
+                      <span className="ml-2">남성</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        checked={gender === '여성'}
+                        onChange={() => setGender('여성')}
+                        className="form-radio h-4 w-4 text-purple-600 transition duration-150 ease-in-out"
+                      />
+                      <span className="ml-2">여성</span>
+                    </label>
+                  </div>
+                </div>
+                
+                {/* 음력/양력 선택 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    양력/음력
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        checked={calendarType === '양력'}
+                        onChange={() => setCalendarType('양력')}
+                        className="form-radio h-4 w-4 text-purple-600 transition duration-150 ease-in-out"
+                      />
+                      <span className="ml-2">양력</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        checked={calendarType === '음력'}
+                        onChange={() => setCalendarType('음력')}
+                        className="form-radio h-4 w-4 text-purple-600 transition duration-150 ease-in-out"
+                      />
+                      <span className="ml-2">음력</span>
+                    </label>
+                  </div>
+                </div>
+                
+                {/* 생년월일 선택 */}
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    생년월일
+                  </label>
+                  {!showDatePicker ? (
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        value={birthDate ? new Date(birthDate).toLocaleDateString('ko-KR') : ''}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 cursor-pointer"
+                        readOnly
+                        onClick={() => setShowDatePicker(true)}
+                      />
+                      <button
+                        type="button"
+                        className="ml-2 p-2 text-purple-600 hover:text-purple-800"
+                        onClick={() => setShowDatePicker(true)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 p-3 border border-gray-200 rounded-md">
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">년</label>
+                          <select
+                            value={birthYear}
+                            onChange={(e) => setBirthYear(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">선택</option>
+                            {yearOptions.map((year) => (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">월</label>
+                          <select
+                            value={birthMonth}
+                            onChange={(e) => setBirthMonth(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">선택</option>
+                            {monthOptions.map((month) => (
+                              <option key={month} value={month}>
+                                {month}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">일</label>
+                          <select
+                            value={birthDay}
+                            onChange={(e) => setBirthDay(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">선택</option>
+                            {dayOptions.map((day) => (
+                              <option key={day} value={day}>
+                                {day}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          type="button"
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100"
+                          onClick={() => setShowDatePicker(false)}
+                        >
+                          취소
+                        </button>
+                        <button
+                          type="button"
+                          className="px-3 py-1 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                          onClick={updateBirthDate}
+                        >
+                          확인
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* 태어난 시간 선택 */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="birthTime" className="block text-sm font-medium text-gray-700 mb-1">
+                    태어난 시간
+                  </label>
+                  <select
+                    id="birthTime"
+                    value={birthTime}
+                    onChange={(e) => setBirthTime(e.target.value as BirthTime)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    {timeOptions.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex justify-center space-x-4 mt-6">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="py-2 px-6 rounded-lg border border-gray-300 text-gray-700"
-                  disabled={isSaving}
+                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
                 >
                   취소
                 </button>
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="py-2 px-6 rounded-lg bg-purple-600 text-white flex items-center"
                   disabled={isSaving}
+                  className={`px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition ${
+                    isSaving ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
                 >
-                  {isSaving ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                      저장 중...
-                    </>
-                  ) : '저장'}
+                  {isSaving ? '저장 중...' : '저장하기'}
                 </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={handleEdit}
-                className="py-2 px-6 rounded-lg bg-purple-600 text-white"
-              >
-                편집
-              </button>
-            )}
-          </div>
+              </div>
+            </form>
+          )}
         </div>
       </div>
-      
-      {/* 개발자 정보 */}
-      <div className="text-center text-gray-500 text-sm mt-8">
-        <p>AI 사주 상담냥이 v1.0</p>
-        <p className="mt-1">© 2023 AI Fortune Teller</p>
-      </div>
+      {/* 사주 정보 섹션 */}
+      {/* {userProfile && fortune && fortune.saju && (
+        <div className="mb-6">
+          <div className="bg-white rounded-lg shadow-md p-4 border border-purple-100 mb-4">
+            <h2 className="text-lg font-semibold mb-4 text-purple-800">나의 사주 정보</h2>
+            <SajuInfo 
+              birthInfo={userProfile ? `${userProfile.birthDate ? new Date(userProfile.birthDate).getFullYear() : ''}년 ${userProfile.birthDate ? new Date(userProfile.birthDate).getMonth() + 1 : ''}월 ${userProfile.birthDate ? new Date(userProfile.birthDate).getDate() : ''}일 ${userProfile.birthTime !== '모름' ? userProfile.birthTime : ''}생` : ''}
+              saju={fortune.saju} 
+            />
+          </div>
+        </div>
+      )} */}
+      {/* 부적 이미지 모음 */}
+      {userProfile && <UserTalismans userId={userProfile.id} />}
     </div>
   );
 } 
