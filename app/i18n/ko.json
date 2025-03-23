@@ -118,19 +118,17 @@
     "profile": "프로필"
   },
   "talisman": {
-    "pageTitle": "부적 갤러리",
     "headerTitle": "나의 부적 갤러리",
-    "description": "상담 후 생성된 행운의 부적 모음",
-    "loading": "부적을 불러오는 중...",
-    "empty": "아직 생성된 부적이 없습니다.",
-    "error": "부적을 불러오지 못했습니다.",
-    "yourName": "행운의 부적",
-    "lucky": "행운의 부적",
+    "description": "행운을 담은 부적 모음",
+    "collectionTitle": "나의 행운 부적 컬렉션",
+    "collectionDescription": "AI 운세 상담을 통해 생성된 행운의 부적들을 모아볼 수 있습니다. 부적을 클릭하면 확대하여 볼 수 있어요.",
+    "emptyState": "아직 생성된 부적 이미지가 없습니다.",
+    "emptyStateDescription": "채팅 상담을 통해 행운의 부적을 생성해보세요!",
+    "talismanNumber": "행운의 부적 #{number}",
     "saveButton": "저장하기",
-    "saving": "이미지 저장 중...",
-    "saved": "이미지가 저장되었습니다.",
-    "saveFailed": "이미지 저장에 실패했습니다.",
-    "saveNewTab": "새 탭에서 이미지를 열었습니다. 길게 눌러 저장해주세요.",
-    "bringLuck": "이 부적을 소지하면 행운이 찾아옵니다."
+    "popup": {
+      "title": "행운의 부적",
+      "close": "닫기"
+    }
   }
 } 

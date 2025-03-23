@@ -121,17 +121,26 @@
   "talisman": {
     "pageTitle": "Talisman Gallery",
     "headerTitle": "My Talisman Gallery",
-    "description": "Collection of lucky talismans created after consultation",
+    "description": "Collection of lucky talismans",
     "loading": "Loading talismans...",
     "empty": "No talismans have been created yet.",
     "error": "Failed to load talismans.",
     "yourName": "Lucky Talisman",
     "lucky": "Lucky Talisman",
-    "saveButton": "Save",
+    "saveButton": "Save Image",
     "saving": "Saving image...",
     "saved": "Image has been saved.",
     "saveFailed": "Failed to save image.",
     "saveNewTab": "Image opened in new tab. Long press to save.",
-    "bringLuck": "Carrying this talisman will bring you luck."
+    "bringLuck": "Carrying this talisman will bring you luck.",
+    "collectionTitle": "My Lucky Talisman Collection",
+    "collectionDescription": "View all your lucky talismans created through AI fortune consultations. Click on a talisman to see it enlarged.",
+    "emptyState": "No talisman images have been created yet.",
+    "emptyStateDescription": "Create lucky talismans through chat consultations!",
+    "talismanNumber": "Lucky Talisman #{number}",
+    "popup": {
+      "title": "Lucky Talisman",
+      "close": "Close"
+    }
   }
 } 

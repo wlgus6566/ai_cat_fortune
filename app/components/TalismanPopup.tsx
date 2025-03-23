@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 interface TalismanPopupProps {
   imageUrl: string;
   onClose: () => void;
-  userName?: string;
   title?: string;
   darkMode?: boolean;
+  userName?: string;
 }
 
 export default function TalismanPopup({ imageUrl, onClose, userName, title, darkMode = false }: TalismanPopupProps) {
@@ -27,10 +27,14 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
     }, 100);
 
     const timer2 = setTimeout(() => {
-      setIsUnrolling(true);  // Start unrolling the scroll
-      // Add a slight shaking effect
+      // 전체 팝업에 흔들림 효과 먼저 적용
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 600);
+      
+      // 그 후 두루마기 펼치기 애니메이션
+      setTimeout(() => {
+        setIsUnrolling(true);  // Start unrolling the scroll
+      }, 200);
     }, 500);
 
     const timer3 = setTimeout(() => {
@@ -60,11 +64,11 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
   // 이미지 저장 함수
   const handleSaveImage = async () => {
     try {
-      setSaveMessage(t('saving'));
+      setSaveMessage(t('saving', { defaultValue: '이미지 저장 중...' }));
       
       // Fetch the image as a blob
       const response = await fetch(imageUrl);
-      if (!response.ok) throw new Error(t('saveFailed'));
+      if (!response.ok) throw new Error(t('saveFailed', { defaultValue: '이미지 저장에 실패했습니다.' }));
       
       const blob = await response.blob();
       
@@ -78,17 +82,17 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
         link.click();
         document.body.removeChild(link);
         
-        setSaveMessage(t('saved'));
+        setSaveMessage(t('saved', { defaultValue: '이미지가 저장되었습니다.' }));
         setTimeout(() => setSaveMessage(null), 3000);
       } else {
         // Fallback for browsers that don't support the download attribute
         window.open(imageUrl, '_blank');
-        setSaveMessage(t('saveNewTab'));
+        setSaveMessage(t('saveNewTab', { defaultValue: '새 탭에서 이미지를 열었습니다. 길게 눌러 저장해주세요.' }));
         setTimeout(() => setSaveMessage(null), 3000);
       }
     } catch (error) {
       console.error("이미지 저장 실패:", error);
-      setSaveMessage(t('saveFailed'));
+      setSaveMessage(t('saveFailed', { defaultValue: '이미지 저장에 실패했습니다.' }));
       setTimeout(() => setSaveMessage(null), 3000);
     }
   };
@@ -96,9 +100,9 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
   // 부적 제목 생성
   const getTalismanTitle = () => {
     if (title) return title;
-    if (userName) return `{t('yourName')}`;
-    return t('lucky');
-  };
+    if (userName) return `${userName}${t('yourName', { defaultValue: '의 행운 부적' })}`;
+    return t('lucky', { defaultValue: '행운의 부적' });
+   };
 
   return (
     <div 
@@ -111,9 +115,10 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
           ${isOpen ? 'scale-100' : 'scale-95'}
           ${isShaking ? 'animate-shake' : ''}`}
         style={{
-          maxWidth: '95vw',
-          maxHeight: '95vh',
+          maxWidth: '90vw',
+          maxHeight: '90vh',
           perspective: '1000px',
+          width: '90%',
         }}
       >
         {/* 닫기 버튼 */}
@@ -128,7 +133,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
             xmlns="http://www.w3.org/2000/svg" 
             fill="none" 
             viewBox="0 0 24 24" 
-            stroke="currentColor" 
+            stroke="currentColor"
             className="w-6 h-6"
           >
             <path 
@@ -161,7 +166,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
             minHeight: isUnrolling ? '50vh' : '0', 
             maxHeight: '90vh',
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '300px',
             boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.25)`,
             transform: `rotateX(${isUnrolling ? '0' : '60deg'})`,
             transformOrigin: 'top',
@@ -173,7 +178,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
               {getTalismanTitle()}
             </h2>
           </div>
-
+          
           {/* 스크롤 내용 */}
           <div className="flex-1 overflow-auto w-full p-4">
             <div className="flex justify-center">
@@ -211,7 +216,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
                 
                 <Image
                   src={imageUrl}
-                  alt={t('lucky')}
+                  alt={t('lucky', { defaultValue: '행운의 부적' })}
                   fill
                   quality={90}
                   className={`object-contain rounded-lg transition-all duration-1000 ${
@@ -224,10 +229,10 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
                 />
               </div>
             </div>
-
+          
             {/* 부적 설명 */}
             <div className={`mt-4 text-center ${darkMode ? 'text-gray-300' : 'text-amber-800'}`}>
-              <p className="text-sm">{t('bringLuck')}</p>
+              <p className="text-sm">{t('bringLuck', { defaultValue: '이 부적을 소지하면 행운이 찾아옵니다.' })}</p>
               
               {/* 저장 버튼 */}
               <button
@@ -241,7 +246,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-                {t('saveButton')}
+                {t('saveButton', { defaultValue: '저장하기' })}
               </button>
               
               {/* 저장 메시지 */}
