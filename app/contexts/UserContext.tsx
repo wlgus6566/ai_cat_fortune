@@ -7,6 +7,7 @@ import { UserProfile } from '../types';
 interface UserContextType {
   userProfile: UserProfile | null;
   isProfileComplete: boolean;
+  isLoaded: boolean;
   updateUserProfile: (data: Partial<UserProfile>) => void;
   createUserProfile: (data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>) => void;
   clearUserProfile: () => void;
@@ -22,18 +23,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // 로컬 스토리지에서 사용자 프로필 로드
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedProfile = localStorage.getItem(USER_PROFILE_KEY);
-        if (savedProfile) {
-          setUserProfile(JSON.parse(savedProfile));
+    const loadUserProfile = async () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const savedProfile = localStorage.getItem(USER_PROFILE_KEY);
+          if (savedProfile) {
+            const parsed = JSON.parse(savedProfile);
+            setUserProfile(parsed);
+          }
+        } catch (error) {
+          console.error('사용자 프로필을 로드하는 중 오류가 발생했습니다:', error);
+        } finally {
+          setIsLoaded(true);
         }
-      } catch (error) {
-        console.error('사용자 프로필을 로드하는 중 오류가 발생했습니다:', error);
-      } finally {
-        setIsLoaded(true);
       }
-    }
+    };
+
+    loadUserProfile();
   }, []);
 
   // 사용자 프로필 저장
@@ -83,6 +89,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const value = {
     userProfile,
     isProfileComplete,
+    isLoaded,
     updateUserProfile,
     createUserProfile,
     clearUserProfile,

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/app/contexts/UserContext';
 import Link from 'next/link';
 import { DailyFortune } from '@/app/lib/openai';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
@@ -55,7 +57,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, score, description, 
         <h4 className="font-medium text-gray-800">{title}</h4>
       </div>
       <div className="mb-2">
-        <FortuneScore score={score} label={`${title} 점수`} color={color} />
+        <FortuneScore score={score} label={`${title} Score`} color={color} />
       </div>
       <p className="text-sm text-gray-600">{description}</p>
     </div>
@@ -89,13 +91,13 @@ const clearAllPreviousFortuneData = (userId: string) => {
           // 오늘 날짜가 아닌 경우 삭제
           if (keyDate !== today) {
             localStorage.removeItem(key);
-            console.log(`이전 운세 데이터 삭제: ${key}`);
+            console.log(`Deleted previous fortune data: ${key}`);
           }
         }
       }
     }
   } catch (error) {
-    console.error('이전 운세 데이터 삭제 오류:', error);
+    console.error('Error deleting previous fortune data:', error);
   }
 };
 
@@ -114,16 +116,16 @@ const getStoredFortune = (userId: string): DailyFortune | null => {
     
     // 저장된 데이터가 오늘 날짜인 경우에만 사용
     if (storedDate === todayDate) {
-      console.log('로컬 스토리지에 오늘자 운세 데이터가 있습니다.');
+      console.log('Today\'s fortune data exists in local storage.');
       return fortune;
     }
     
     // 날짜가 다르면 저장된 데이터 삭제
-    console.log('저장된 운세 데이터가 오늘 날짜가 아닙니다. 삭제합니다.');
+    console.log('Stored fortune data is not from today. Deleting it.');
     localStorage.removeItem(key);
     return null;
   } catch (error) {
-    console.error('저장된 운세 데이터 불러오기 오류:', error);
+    console.error('Error loading stored fortune data:', error);
     return null;
   }
 };
@@ -140,7 +142,7 @@ const storeFortune = (userId: string, fortune: DailyFortune) => {
     
     localStorage.setItem(key, JSON.stringify(dataToStore));
   } catch (error) {
-    console.error('운세 데이터 저장 오류:', error);
+    console.error('Error storing fortune data:', error);
   }
 };
 
@@ -151,12 +153,13 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [fetchAttempted, setFetchAttempted] = useState(false);
   const [isApiCallInProgress, setIsApiCallInProgress] = useState(false);
+  const t = useTranslations('fortune');
   
   // 오늘의 운세 데이터 가져오기
   const fetchDailyFortune = useCallback(async (forceRefresh = false) => {
     // 이미 API 호출이 진행 중이면 리턴
     if (isApiCallInProgress) {
-      console.log('이미 API 호출이 진행 중입니다.');
+      console.log('API call is already in progress.');
       return;
     }
     
@@ -172,7 +175,7 @@ export default function HomePage() {
     // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
     const storedFortune = getStoredFortune(userProfile.id);
     if (storedFortune) {
-      console.log('로컬 스토리지에서 오늘의 운세 데이터를 불러왔습니다.');
+      console.log('Loaded today\'s fortune data from local storage.');
       setFortune(storedFortune);
       setLoading(false);
       setFetchAttempted(true);
@@ -184,7 +187,7 @@ export default function HomePage() {
       setLoading(true);
       setFetchAttempted(true);
       setIsApiCallInProgress(true); // API 호출 시작
-      console.log('API 호출 시작: /api/fortune/daily');
+      console.log('API call started: /api/fortune/daily');
       
       const response = await fetch('/api/fortune/daily', {
         method: 'POST',
@@ -200,11 +203,11 @@ export default function HomePage() {
       const responseData = await response.json();
       
       if (!response.ok || responseData.error) {
-        throw new Error(responseData.message || '운세 데이터를 가져오는데 실패했습니다.');
+        throw new Error(responseData.message || 'Failed to get fortune data.');
       }
       
       const dailyFortune = responseData.data;
-      console.log('API 응답 성공: 운세 데이터를 받았습니다.');
+      console.log('API response success: Received fortune data.');
       
       // 로컬 스토리지에 운세 데이터 저장
       storeFortune(userProfile.id, dailyFortune);
@@ -212,12 +215,12 @@ export default function HomePage() {
       setFortune(dailyFortune);
       setError(null);
     } catch (error) {
-      console.error('오늘의 운세 가져오기 오류:', error);
-      setError(error instanceof Error ? error.message : '오늘의 운세를 불러오는 중 오류가 발생했습니다.');
+      console.error('Error fetching today\'s fortune:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred while loading today\'s fortune.');
     } finally {
       setLoading(false);
       setIsApiCallInProgress(false); // API 호출 종료
-      console.log('API 호출 종료');
+      console.log('API call ended');
     }
   }, [isProfileComplete, userProfile, fetchAttempted, isApiCallInProgress]);
   
@@ -232,7 +235,7 @@ export default function HomePage() {
       // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
       const storedFortune = getStoredFortune(userProfile.id);
       if (storedFortune) {
-        console.log('useEffect: 로컬 스토리지에서 오늘의 운세 데이터를 불러왔습니다.');
+        console.log('useEffect: Loaded today\'s fortune data from local storage.');
         setFortune(storedFortune);
         setLoading(false);
         setFetchAttempted(true);
@@ -240,7 +243,7 @@ export default function HomePage() {
       }
       
       // 저장된 데이터가 없는 경우에만 API 호출
-      console.log('useEffect: 로컬 스토리지에 오늘의 운세 데이터가 없습니다. API를 호출합니다.');
+      console.log('useEffect: No fortune data for today in local storage. Calling API.');
       fetchDailyFortune(false);
     }
   }, [isProfileComplete, userProfile, fortune, isApiCallInProgress, fetchDailyFortune]);
@@ -265,7 +268,7 @@ export default function HomePage() {
       
       // 오늘 날짜의 데이터가 있으면 그 데이터를 사용
       if (storedFortune) {
-        console.log('로컬 스토리지에 오늘 날짜의 운세 데이터가 있습니다. API 호출을 건너뜁니다.');
+        console.log('Today\'s fortune data exists in local storage. Skipping API call.');
         setFortune(storedFortune);
         setLoading(false);
         setFetchAttempted(true);
@@ -273,7 +276,7 @@ export default function HomePage() {
       }
       
       // 오늘 날짜의 데이터가 없는 경우에만 API 호출
-      console.log('로컬 스토리지에 오늘 날짜의 운세 데이터가 없습니다. API를 호출합니다.');
+      console.log('No fortune data for today in local storage. Calling API.');
       setFetchAttempted(false);
       setLoading(true);
       fetchDailyFortune(true); // 강제 새로고침
@@ -289,54 +292,99 @@ export default function HomePage() {
   const categories = [
     { 
       key: 'love', 
-      title: '연애운', 
+      title: t('categories.love.title'), 
       color: '#e83e8c', 
       icon: '❤️' 
     },
     { 
       key: 'money', 
-      title: '금전운', 
+      title: t('categories.money.title'), 
       color: '#ffc107', 
       icon: '💰' 
     },
     { 
       key: 'health', 
-      title: '건강운', 
+      title: t('categories.health.title'), 
       color: '#28a745', 
       icon: '💪' 
     },
     { 
       key: 'social', 
-      title: '인간관계', 
+      title: t('categories.social.title'), 
       color: '#17a2b8', 
       icon: '👥' 
     }
   ];
   
+  // 애니메이션 변수
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+  
   return (
-    <div className="container max-w-screen-md mx-auto px-4 py-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">오늘의 운세</h1>
+    <motion.div 
+      className="container max-w-screen-md mx-auto px-4 py-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.header 
+        className="mb-6"
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('headerTitle')}</h1>
         <p className="text-gray-600">
-          {userProfile?.name}님을 위한 {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} 운세입니다.
+          {t('forUser', { name: userProfile?.name || 'User', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) })}
         </p>
-      </header>
+      </motion.header>
       
       {/* 에러 표시 */}
       {error && (
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">
+        <motion.div 
+          className="bg-red-50 text-red-700 p-4 rounded-lg mb-6"
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <p className="flex items-center">
             <span className="mr-2">⚠️</span> {error}
           </p>
-        </div>
+        </motion.div>
       )}
       
       {/* 오늘의 운세 섹션 */}
-      <section className="mb-8">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-purple-100">
+      <motion.section 
+        className="mb-8"
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div 
+          className="bg-white rounded-xl shadow-md overflow-hidden border border-purple-100"
+          whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="bg-gradient-to-r from-purple-600 to-purple-500 p-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
-              <span className="mr-2">✨</span> 오늘의 운세
+              <span className="mr-2">✨</span> {t('headerTitle')}
             </h3>
           </div>
           
@@ -344,148 +392,214 @@ export default function HomePage() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-                <p className="mt-4 text-gray-600">오늘의 운세를 불러오는 중...</p>
+                <p className="mt-4 text-gray-600">{t('loading')}</p>
               </div>
             ) : error ? (
               <div className="text-center py-4">
                 <p className="text-red-500">{error}</p>
-                <button 
+                <motion.button 
                   className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
                   onClick={handleRefresh}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  다시 시도
-                </button>
+                  {t('tryAgain')}
+                </motion.button>
               </div>
             ) : fortune ? (
               <div className="space-y-4">
                 {/* 전체 운세 점수 */}
-                <div className="mb-4">
-                  <h4 className="font-semibold text-gray-800 mb-2">전체 운세</h4>
+                <motion.div 
+                  className="mb-4"
+                  variants={itemVariants}
+                >
+                  <h4 className="font-semibold text-gray-800 mb-2">{t('overall')}</h4>
                   <div className="p-3 bg-purple-50 rounded-lg">
                     <FortuneScore 
                       score={fortune.overall.score} 
-                      label="오늘의 운세 점수" 
+                      label={t('fortuneScore')} 
                       color="#990dfa" 
                     />
                     <p className="text-gray-700 mt-2">{fortune.overall.description}</p>
                   </div>
-                </div>
+                </motion.div>
                 
                 {/* 카테고리별 운세 */}
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-2">카테고리별 운세</h4>
+                <motion.div variants={itemVariants}>
+                  <h4 className="font-semibold text-gray-800 mb-2">{t('categoryTitle')}</h4>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {categories.map(category => (
-                      <CategoryCard 
+                    {categories.map((category, index) => (
+                      <motion.div
                         key={category.key}
-                        title={category.title}
-                        score={fortune.categories[category.key as keyof typeof fortune.categories].score}
-                        description={fortune.categories[category.key as keyof typeof fortune.categories].description}
-                        icon={category.icon}
-                        color={category.color}
-                      />
+                        variants={itemVariants}
+                        custom={index}
+                      >
+                        <CategoryCard
+                          title={category.title}
+                          score={fortune.categories[category.key as keyof typeof fortune.categories].score}
+                          description={fortune.categories[category.key as keyof typeof fortune.categories].description}
+                          icon={category.icon}
+                          color={category.color}
+                        />
+                      </motion.div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
                 
                 {/* 행운의 요소 */}
-                <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg mt-4">
+                <motion.div 
+                  className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg mt-4"
+                  variants={itemVariants}
+                >
                   <div>
-                    <p className="text-sm text-gray-600">오늘의 행운 색상</p>
+                    <p className="text-sm text-gray-600">{t('luckyColor')}</p>
                     <p className="font-medium text-gray-800">
                       <span className="mr-1">🎨</span> {fortune.luckyColor}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">행운의 숫자</p>
+                    <p className="text-sm text-gray-600">{t('luckyNumber')}</p>
                     <p className="font-medium text-gray-800">
                       <span className="mr-1">🔢</span> {fortune.luckyNumber}
                     </p>
                   </div>
-                </div>
+                </motion.div>
                 
                 {/* 오늘의 조언 */}
-                <div className="border-t border-gray-200 pt-3 mt-3">
-                  <h4 className="font-semibold text-gray-800">오늘의 조언</h4>
+                <motion.div 
+                  className="border-t border-gray-200 pt-3 mt-3"
+                  variants={itemVariants}
+                >
+                  <h4 className="font-semibold text-gray-800">{t('advice')}</h4>
                   <div className="mt-2 p-3 bg-purple-50 rounded-lg flex">
                     <span className="text-lg mr-2">😺</span>
                     <p className="text-gray-700">{fortune.advice}</p>
                   </div>
-                </div>
+                </motion.div>
                 
                 {/* 마지막 업데이트 시간 표시 */}
-                <div className="text-right mt-3">
+                <motion.div 
+                  className="text-right mt-3"
+                  variants={itemVariants}
+                >
                   <p className="text-xs text-gray-500">
-                    * 운세 정보는 하루에 한 번만 업데이트됩니다
+                    {t('updateInfo')}
                   </p>
-                </div>
+                </motion.div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-gray-600">운세 데이터를 불러올 수 없습니다.</p>
-                <button 
+                <p className="text-gray-600">{t('error')}</p>
+                <motion.button 
                   className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
                   onClick={handleRefresh}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  다시 시도
-                </button>
+                  {t('tryAgain')}
+                </motion.button>
               </div>
             )}
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
       
       {/* 빠른 메뉴 섹션 */}
-      <section>
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">빠른 메뉴</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <Link href="/chat">
-            <div className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 transition transform hover:scale-105 hover:shadow-md cursor-pointer">
-              <div className="mb-2 text-purple-600">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-8 w-8" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" 
-                  />
-                </svg>
-              </div>
-              <h4 className="font-medium text-gray-800">운세 상담</h4>
-              <p className="text-sm text-gray-600">포춘냥이와 고민상담하기</p>
-            </div>
-          </Link>
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">{t('quickMenu.title')}</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <motion.div variants={itemVariants}>
+            <Link href="/chat">
+              <motion.div 
+                className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 h-full cursor-pointer"
+                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="mb-2 text-purple-600">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-8 w-8" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" 
+                    />
+                  </svg>
+                </div>
+                <h4 className="font-medium text-gray-800">{t('quickMenu.chat.title')}</h4>
+                <p className="text-sm text-gray-600">{t('quickMenu.chat.description')}</p>
+              </motion.div>
+            </Link>
+          </motion.div>
           
-          <Link href="/profile">
-            <div className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 transition transform hover:scale-105 hover:shadow-md cursor-pointer">
-              <div className="mb-2 text-purple-600">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-8 w-8" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
-                  />
-                </svg>
-              </div>
-              <h4 className="font-medium text-gray-800">내 프로필</h4>
-              <p className="text-sm text-gray-600">프로필 정보 / 부적 관리</p>
-            </div>
-          </Link>
+          <motion.div variants={itemVariants}>
+            <Link href="/profile">
+              <motion.div 
+                className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 h-full cursor-pointer"
+                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="mb-2 text-purple-600">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-8 w-8" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                    />
+                  </svg>
+                </div>
+                <h4 className="font-medium text-gray-800">{t('quickMenu.profile.title')}</h4>
+                <p className="text-sm text-gray-600">{t('quickMenu.profile.description')}</p>
+              </motion.div>
+            </Link>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <Link href="/talisman-gallery">
+              <motion.div 
+                className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 h-full cursor-pointer"
+                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="mb-2 text-purple-600">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-8 w-8" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                    />
+                  </svg>
+                </div>
+                <h4 className="font-medium text-gray-800">{t('quickMenu.talisman.title')}</h4>
+                <p className="text-sm text-gray-600">{t('quickMenu.talisman.description')}</p>
+              </motion.div>
+            </Link>
+          </motion.div>
         </div>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
-} 
+}   

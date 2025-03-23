@@ -2,18 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface TalismanPopupProps {
   imageUrl: string;
   onClose: () => void;
   userName?: string;
+  title?: string;
+  darkMode?: boolean;
 }
 
-export default function TalismanPopup({ imageUrl, onClose, userName }: TalismanPopupProps) {
+export default function TalismanPopup({ imageUrl, onClose, userName, title, darkMode = false }: TalismanPopupProps) {
+  const t = useTranslations('talisman');
   const [isOpen, setIsOpen] = useState(false);
   const [isUnrolling, setIsUnrolling] = useState(false);
   const [isFullyVisible, setIsFullyVisible] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Animation sequence starts when popup is mounted
@@ -52,101 +57,204 @@ export default function TalismanPopup({ imageUrl, onClose, userName }: TalismanP
     }, 500);
   };
 
+  // 이미지 저장 함수
+  const handleSaveImage = async () => {
+    try {
+      setSaveMessage(t('saving'));
+      
+      // Fetch the image as a blob
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error(t('saveFailed'));
+      
+      const blob = await response.blob();
+      
+      // 브라우저가 download API를 지원하는지 확인
+      if ('download' in HTMLAnchorElement.prototype) {
+        // Create a temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `talisman_${new Date().getTime()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setSaveMessage(t('saved'));
+        setTimeout(() => setSaveMessage(null), 3000);
+      } else {
+        // Fallback for browsers that don't support the download attribute
+        window.open(imageUrl, '_blank');
+        setSaveMessage(t('saveNewTab'));
+        setTimeout(() => setSaveMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error("이미지 저장 실패:", error);
+      setSaveMessage(t('saveFailed'));
+      setTimeout(() => setSaveMessage(null), 3000);
+    }
+  };
+
+  // 부적 제목 생성
+  const getTalismanTitle = () => {
+    if (title) return title;
+    if (userName) return `{t('yourName')}`;
+    return t('lucky');
+  };
+
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
-        isOpen ? 'opacity-100 bg-black/50' : 'opacity-0 pointer-events-none'
-      }`}
-      onClick={handleClose}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300
+        ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
     >
       <div 
-        className={`relative bg-parchment bg-amber-50 rounded-lg shadow-xl p-4 max-w-md w-full mx-4 transition-all duration-500 transform overflow-hidden ${
-          isOpen ? 'scale-100' : 'scale-95'
-        }`}
-        onClick={(e) => e.stopPropagation()}
+        className={`relative overflow-hidden transition-all duration-500 ease-in-out transform
+          ${isOpen ? 'scale-100' : 'scale-95'}
+          ${isShaking ? 'animate-shake' : ''}`}
+        style={{
+          maxWidth: '95vw',
+          maxHeight: '95vh',
+          perspective: '1000px',
+        }}
       >
-        {/* Scroll top decoration */}
-        <div className="absolute top-0 left-0 right-0 h-6 bg-amber-700 rounded-t-lg flex justify-center items-center">
-          <div className="w-16 h-4 bg-amber-800 rounded-b-lg"></div>
-        </div>
-        
-        {/* Content container */}
-        <div className="pt-8 pb-4">
-          <h3 className="text-xl font-bold text-center mb-4 text-amber-900">
-            {userName ? `${userName}님을 위한 행운의 부적` : '행운의 부적이다냥! 🍀'}
-          </h3>
-          
-          {/* Image container - unrolling scroll animation */}
-          <div 
-            className={`relative mx-auto rounded-md overflow-hidden transition-all duration-1000 transform-gpu ${
-              isUnrolling ? 'opacity-100' : 'h-0 opacity-0'
-            } ${isShaking ? 'animate-bounce' : ''}`}
-            style={{ 
-              width: 'auto', // Auto width to maintain aspect ratio
-              maxWidth: '280px',
-              aspectRatio: '9/16', // 9:16 aspect ratio
-              height: '400px', // Fixed height
-              margin: '0 auto',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              transform: `${isFullyVisible ? 'translateY(0) scale(1)' : 'translateY(-20px) scale(0.98)'}`,
-              transition: 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' // Bounce effect cubic-bezier
-            }}
+        {/* 닫기 버튼 */}
+        <button 
+          onClick={handleClose}
+          className={`absolute top-2 right-2 z-50 p-2 rounded-full flex items-center justify-center
+            ${darkMode ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-800 hover:bg-gray-100'}
+            shadow-lg transition-all`}
+          aria-label="Close"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            className="w-6 h-6"
           >
-            {/* Shadow effect (top) */}
-            <div className={`absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-black/30 to-transparent z-10 transition-opacity duration-700 ${
-              isFullyVisible ? 'opacity-100' : 'opacity-0'
-            }`}></div>
-            
-            <Image
-              src={imageUrl}
-              alt="Talisman Image"
-              fill
-              sizes="(max-width: 768px) 100vw, 280px"
-              className={`object-cover transition-all duration-1200 ${
-                isFullyVisible ? 'scale-100 filter-none' : 'scale-105 blur-sm'
-              }`}
-              style={{
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M6 18L18 6M6 6l12 12" 
             />
-            
-            {/* Shadow effect (bottom) */}
-            <div className={`absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/30 to-transparent z-10 transition-opacity duration-700 ${
-              isFullyVisible ? 'opacity-100' : 'opacity-0'
-            }`}></div>
-            
-            {/* Overlay for unrolling effect */}
-            <div 
-              className={`absolute inset-0 bg-gradient-to-b from-amber-50 to-transparent z-20 transition-all duration-1500 ${
-                isFullyVisible ? 'translate-y-[-100%]' : 'translate-y-0'
-              }`}
-              style={{
-                transformOrigin: 'top',
-                transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)'
-              }}
-            ></div>
+          </svg>
+        </button>
+
+        {/* 두루마기 배경 효과 */}
+        <div 
+          className={`
+            relative 
+            ${darkMode ? 'bg-gray-800' : 'bg-amber-50'}
+            shadow-2xl 
+            rounded-xl 
+            overflow-hidden 
+            transition-all 
+            duration-1000 
+            ease-in-out
+            flex
+            flex-col
+            items-center
+            ${isUnrolling ? 'h-auto' : 'h-0'}
+            ${isFullyVisible ? 'opacity-100' : 'opacity-0'}
+          `}
+          style={{ 
+            minHeight: isUnrolling ? '50vh' : '0', 
+            maxHeight: '90vh',
+            width: '100%',
+            maxWidth: '500px',
+            boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.25)`,
+            transform: `rotateX(${isUnrolling ? '0' : '60deg'})`,
+            transformOrigin: 'top',
+          }}
+        >
+          {/* 부적 타이틀 */}
+          <div className={`w-full text-center py-4 border-b ${darkMode ? 'border-gray-700' : 'border-amber-200'}`}>
+            <h2 className={`font-bold text-xl ${darkMode ? 'text-white' : 'text-amber-800'}`}>
+              {getTalismanTitle()}
+            </h2>
           </div>
-          
-          {/* Button area */}
-          <div className={`mt-6 flex justify-center gap-3 transition-all duration-700 ${
-            isFullyVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}>
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
-            >
-              닫기
-            </button>
-            <a
-              href={imageUrl}
-              download="talisman.jpg"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-amber-800 text-white rounded-md hover:bg-amber-900 transition-colors"
-            >
-              다운로드
-            </a>
+
+          {/* 스크롤 내용 */}
+          <div className="flex-1 overflow-auto w-full p-4">
+            <div className="flex justify-center">
+              <div 
+                className={`relative w-full`}
+                style={{ 
+                  aspectRatio: '9/16', 
+                  maxWidth: '350px',
+                  maxHeight: '80vh',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* 두루마기 위에서 펼쳐지는 애니메이션 배경 */}
+                <div 
+                  className={`absolute inset-0 bg-gradient-to-b ${darkMode ? 'from-gray-800' : 'from-amber-50'} to-transparent z-20 transition-all duration-1500`}
+                  style={{ 
+                    transform: isFullyVisible ? 'scaleY(0)' : 'scaleY(1)',
+                    transformOrigin: 'top',
+                    transitionTimingFunction: 'cubic-bezier(0.33, 1, 0.68, 1)'
+                  }}
+                ></div>
+
+                {/* 스크롤 상단과 하단 그림자 효과 */}
+                <div 
+                  className={`absolute inset-x-0 top-0 h-10 bg-gradient-to-b ${darkMode ? 'from-gray-800' : 'from-amber-50'} to-transparent z-10 transition-opacity duration-700 ${
+                    isFullyVisible ? 'opacity-60' : 'opacity-0'
+                  }`}
+                ></div>
+                
+                <div 
+                  className={`absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t ${darkMode ? 'from-gray-800' : 'from-amber-50'} to-transparent z-10 transition-opacity duration-700 ${
+                    isFullyVisible ? 'opacity-60' : 'opacity-0'
+                  }`}
+                ></div>
+                
+                <Image
+                  src={imageUrl}
+                  alt={t('lucky')}
+                  fill
+                  quality={90}
+                  className={`object-contain rounded-lg transition-all duration-1000 ${
+                    isFullyVisible ? 'scale-100 filter-none' : 'scale-105 blur-sm'
+                  }`}
+                  style={{
+                    transform: isFullyVisible ? 'translateY(0)' : 'translateY(-40%)',
+                    transition: 'transform 1.5s cubic-bezier(0.33, 1, 0.68, 1)',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* 부적 설명 */}
+            <div className={`mt-4 text-center ${darkMode ? 'text-gray-300' : 'text-amber-800'}`}>
+              <p className="text-sm">{t('bringLuck')}</p>
+              
+              {/* 저장 버튼 */}
+              <button
+                onClick={handleSaveImage}
+                className={`mt-4 px-4 py-2 rounded-md ${
+                  darkMode 
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white' 
+                    : 'bg-amber-500 hover:bg-amber-600 text-white'
+                } transition-colors duration-200 flex items-center mx-auto`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                {t('saveButton')}
+              </button>
+              
+              {/* 저장 메시지 */}
+              {saveMessage && (
+                <div className={`mt-2 text-sm ${
+                  saveMessage.includes('실패') 
+                    ? 'text-red-500' 
+                    : darkMode ? 'text-green-400' : 'text-green-600'
+                }`}>
+                  {saveMessage}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

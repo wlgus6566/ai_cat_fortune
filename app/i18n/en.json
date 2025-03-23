@@ -1,0 +1,134 @@
+{
+  "fortune": {
+    "pageTitle": "Daily Fortune",
+    "headerTitle": "Today's Fortune",
+    "forUser": "Daily fortune for {name}, {date}",
+    "loading": "Loading your fortune...",
+    "error": "Unable to load your fortune",
+    "tryAgain": "Try Again",
+    "overall": "Overall Fortune",
+    "fortuneScore": "Fortune Score",
+    "categoryTitle": "Categories",
+    "luckyColor": "Lucky Color",
+    "luckyNumber": "Lucky Number",
+    "advice": "Today's Advice",
+    "updateInfo": "Updated daily at midnight",
+    "categories": {
+      "love": {
+        "title": "Love"
+      },
+      "money": {
+        "title": "Money"
+      },
+      "health": {
+        "title": "Health"
+      },
+      "social": {
+        "title": "Social"
+      }
+    },
+    "quickMenu": {
+      "title": "Quick Menu",
+      "chat": {
+        "title": "Fortune Chat",
+        "description": "Chat with AI about your fortune"
+      },
+      "profile": {
+        "title": "My Profile",
+        "description": "View and edit your profile"
+      },
+      "talisman": {
+        "title": "My Talisman Gallery",
+        "description": "View your collection of lucky talismans"
+      }
+    }
+  },
+  "settings": {
+    "pageTitle": "Settings",
+    "headerTitle": "Settings",
+    "profileSection": "Profile Information",
+    "editProfile": "Edit Profile",
+    "languageSection": "Language Settings",
+    "languageTitle": "Language",
+    "languages": {
+      "ko": "Korean (한국어)",
+      "en": "English"
+    },
+    "subtitle": "Customize your fortune experience",
+    "appearance": "Appearance",
+    "darkMode": "Dark Mode",
+    "darkModeDescription": "Use dark theme for the app",
+    "fortuneSettings": "Fortune Settings",
+    "notifications": "Notifications",
+    "notificationsDescription": "Receive daily fortune notifications",
+    "talismanGallery": "Lucky Talisman Collection",
+    "viewMore": "View More",
+    "noTalismans": "No talismans have been created yet.",
+    "viewFortune": "View Fortune"
+  },
+  "profile": {
+    "pageTitle": "Edit Profile",
+    "headerTitle": "Edit Profile",
+    "name": "Name",
+    "gender": "Gender",
+    "birthDate": "Date of Birth",
+    "calendarType": "Calendar Type",
+    "birthTime": "Birth Time",
+    "save": "Save",
+    "cancel": "Cancel",
+    "profileImage": "Profile Image",
+    "changeImage": "Change Image",
+    "removeImage": "Remove",
+    "imageHelp": "Upload JPG or PNG image, max 5MB size.",
+    "imageError": {
+      "size": "Image size must be less than 5MB.",
+      "type": "Only image files are allowed.",
+      "upload": "An error occurred while uploading the image."
+    },
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "calendarOptions": {
+      "solar": "Solar",
+      "lunar": "Lunar"
+    },
+    "birthTimeUnknown": "Unknown",
+    "nameUnknown": "User",
+    "nameValidation": {
+      "required": "Please enter your name",
+      "tooShort": "Name must be at least 2 characters",
+      "invalidFormat": "Name can only contain letters (no special characters)",
+      "incompleteCharacter": "Please enter complete characters only"
+    },
+    "dateValidation": {
+      "required": "Please select your full date of birth",
+      "invalid": "Invalid date",
+      "future": "Future dates cannot be selected"
+    },
+    "saveSuccess": "Profile has been updated successfully",
+    "saveError": "An error occurred while updating your profile"
+  },
+  "navigation": {
+    "home": "Home",
+    "chat": "Chat",
+    "talisman": "Talismans",
+    "profile": "Settings"
+  },
+  "talisman": {
+    "pageTitle": "Talisman Gallery",
+    "headerTitle": "My Talisman Gallery",
+    "description": "Collection of lucky talismans created after consultation",
+    "loading": "Loading talismans...",
+    "empty": "No talismans have been created yet.",
+    "error": "Failed to load talismans.",
+    "yourName": "Lucky Talisman",
+    "lucky": "Lucky Talisman",
+    "saveButton": "Save",
+    "saving": "Saving image...",
+    "saved": "Image has been saved.",
+    "saveFailed": "Failed to save image.",
+    "saveNewTab": "Image opened in new tab. Long press to save.",
+    "bringLuck": "Carrying this talisman will bring you luck."
+  }
+} 
