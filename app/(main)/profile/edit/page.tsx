@@ -6,6 +6,7 @@ import { useUser } from '@/app/contexts/UserContext';
 import { Gender, CalendarType, BirthTime } from '@/app/types';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import PageHeader from '@/app/components/PageHeader';
 
 // 이름 유효성 검사 함수
 const validateName = (name: string): { isValid: boolean; errorMessage: string } => {
@@ -249,12 +250,15 @@ export default function ProfileEditPage() {
     }
     
     setIsUploadingImage(true);
+    setError('');
     
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
         setProfileImage(event.target.result as string);
         setIsUploadingImage(false);
+        setMessage(t('imageSuccess'));
+        setTimeout(() => setMessage(''), 2000);
       }
     };
     reader.onerror = () => {
@@ -288,13 +292,9 @@ export default function ProfileEditPage() {
   }
   
   return (
-    <div className="container mx-auto p-4 max-w-screen-md">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-purple-800 mb-2">{t('headerTitle')}</h1>
-        <p className="text-purple-600">더 정확한 운세를 위한 정보를 입력해주세요</p>
-      </div>
-      
-      <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500 transition-all hover:shadow-lg">
+    <div className="container mx-auto max-w-screen-md">
+      <PageHeader title={t('headerTitle')} className="bg-white" />
+      <div className="p-4">
         {message && (
           <div className="mb-6 p-4 bg-green-50 text-green-800 rounded-lg border-l-4 border-green-500 flex items-center">
             <span className="text-xl mr-2">✓</span>
@@ -315,7 +315,10 @@ export default function ProfileEditPage() {
               <span className="text-purple-600 mr-1">📷</span> {t('profileImage')}
             </label>
             <div className="flex flex-col items-center space-y-4">
-              <div className="relative rounded-full overflow-hidden border-4 border-purple-200 w-32 h-32 bg-white flex items-center justify-center shadow-md">
+              <div 
+                className="relative rounded-full overflow-hidden border-4 border-purple-200 w-32 h-32 bg-white flex items-center justify-center shadow-md hover:border-purple-300 transition-all cursor-pointer"
+                onClick={openFileSelector}
+              >
                 {profileImage ? (
                   <Image 
                     src={profileImage} 
@@ -325,7 +328,10 @@ export default function ProfileEditPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-5xl text-purple-300">✨</span>
+                  <div className="flex flex-col items-center justify-center w-full h-full">
+                    <span className="text-4xl text-purple-300 mb-1">✨</span>
+                    <span className="text-xs text-purple-400">{t('addImage')}</span>
+                  </div>
                 )}
                 
                 {isUploadingImage && (
@@ -333,22 +339,34 @@ export default function ProfileEditPage() {
                     <div className="animate-spin h-8 w-8 border-4 border-purple-300 rounded-full border-t-purple-500"></div>
                   </div>
                 )}
+                
+                <div className="absolute bottom-0 right-0 bg-purple-500 p-1 rounded-full shadow-md transform translate-x-1 translate-y-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
               
               <div className="flex space-x-2">
                 <button
                   type="button"
                   onClick={openFileSelector}
-                  className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm"
+                  className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm flex items-center"
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                  </svg>
                   {t('changeImage')}
                 </button>
                 {profileImage && (
                   <button
                     type="button"
                     onClick={handleRemoveProfileImage}
-                    className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                    className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm flex items-center"
                   >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
                     {t('removeImage')}
                   </button>
                 )}
@@ -575,8 +593,8 @@ export default function ProfileEditPage() {
         </form>
       </div>
       
-      <div className="text-center mt-8 text-purple-700 text-sm">
-        <p>당신의 정보는 더 정확한 운세 결과를 위해서만 사용됩니다</p>
+      <div className="text-center mt-8 mb-6 text-purple-700 text-sm">
+        <p>{t('profileDataUsage')}</p>
       </div>
     </div>
   );

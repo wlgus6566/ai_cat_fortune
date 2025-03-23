@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { HomeIcon, ChatBubbleOvalLeftIcon, UserIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/app/contexts/UserContext';
@@ -12,30 +12,29 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isProfileComplete, userProfile } = useUser();
+  const { isProfileComplete, isLoaded } = useUser();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations();
 
   // 페이지 로드 시 초기 isProfileComplete가 false일 때 바로 리다이렉트하지 않고
   // 프로필 데이터 로드가 완료될 때까지 기다립니다.
   useEffect(() => {
-    if (isInitialLoad) {
-      // 프로필 데이터가 로드된 경우 초기 로드 상태를 false로 변경
-      if (userProfile !== null) {
-        setIsInitialLoad(false);
+    // 프로필 데이터 로드가 완료된 경우에만 처리
+    if (isLoaded) {
+      // 초기 로드 상태를 false로 변경
+      setIsInitialLoad(false);
+      
+      // 프로필 수정 페이지가 아니고, 프로필이 완성되지 않은 경우에만 리다이렉트
+      if (!isProfileComplete && !pathname.includes('/profile/edit')) {
+        router.push('/profile/edit');
       }
-      return; // 초기 로드 중에는 리다이렉트하지 않음
     }
-    
-    // 초기 로드가 완료된 후에 isProfileComplete가 false이면 리다이렉트
-    if (isProfileComplete === false) {
-      router.push('/profile/edit');
-    }
-  }, [isProfileComplete, router, isInitialLoad, userProfile]);
+  }, [isProfileComplete, router, isLoaded, pathname]);
 
-  // 프로필이 완성되지 않은 경우 로딩 표시
-  if (isInitialLoad || (!isProfileComplete && userProfile === null)) {
+  // 프로필 데이터가 로드되지 않은 경우 로딩 표시
+  if (isInitialLoad || !isLoaded) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white">
         <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>

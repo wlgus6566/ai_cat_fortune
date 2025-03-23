@@ -79,7 +79,10 @@
     "profileImage": "Profile Image",
     "changeImage": "Change Image",
     "removeImage": "Remove",
+    "addImage": "Add photo",
     "imageHelp": "Upload JPG or PNG image, max 5MB size.",
+    "imageSuccess": "Image has been updated successfully.",
+    "profileDataUsage": "Your information is used only for more accurate fortune results.",
     "imageError": {
       "size": "Image size must be less than 5MB.",
       "type": "Only image files are allowed.",
@@ -113,7 +116,7 @@
     "home": "Home",
     "chat": "Chat",
     "talisman": "Talismans",
-    "profile": "Settings"
+    "profile": "Profile"
   },
   "talisman": {
     "pageTitle": "Talisman Gallery",
