@@ -412,9 +412,9 @@ export default function ProfileEditPage() {
                     name="gender"
                     checked={gender === '남성'}
                     onChange={() => setGender('남성')}
-                    className="form-radio h-4 w-4 text-purple-600"
+                    className="form-radio h-4 w-4 text-purple-600 hidden"
                   />
-                  <span className="ml-2 text-purple-900">{t('genderOptions.male')}</span>
+                  <span className="text-purple-900">{t('genderOptions.male')}</span>
                 </label>
                 <label className="inline-flex items-center p-3 bg-white rounded-lg border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors">
                   <input
@@ -422,9 +422,9 @@ export default function ProfileEditPage() {
                     name="gender"
                     checked={gender === '여성'}
                     onChange={() => setGender('여성')}
-                    className="form-radio h-4 w-4 text-purple-600"
+                    className="form-radio h-4 w-4 text-purple-600 hidden"
                   />
-                  <span className="ml-2 text-purple-900">{t('genderOptions.female')}</span>
+                  <span className="text-purple-900">{t('genderOptions.female')}</span>
                 </label>
               </div>
             </div>
@@ -440,9 +440,9 @@ export default function ProfileEditPage() {
                     name="calendar"
                     checked={calendarType === '양력'}
                     onChange={() => setCalendarType('양력')}
-                    className="form-radio h-4 w-4 text-purple-600"
+                    className="form-radio h-4 w-4 text-purple-600 hidden"
                   />
-                  <span className="ml-2 text-purple-900">{t('calendarOptions.solar')}</span>
+                  <span className="text-purple-900">{t('calendarOptions.solar')}</span>
                 </label>
                 <label className="inline-flex items-center p-3 bg-white rounded-lg border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors">
                   <input
@@ -450,9 +450,9 @@ export default function ProfileEditPage() {
                     name="calendar"
                     checked={calendarType === '음력'}
                     onChange={() => setCalendarType('음력')}
-                    className="form-radio h-4 w-4 text-purple-600"
+                    className="form-radio h-4 w-4 text-purple-600 hidden"
                   />
-                  <span className="ml-2 text-purple-900">{t('calendarOptions.lunar')}</span>
+                  <span className="text-purple-900">{t('calendarOptions.lunar')}</span>
                 </label>
               </div>
             </div>

@@ -147,46 +147,7 @@ export default function SettingsPage() {
           </div>
           <div className="relative w-20 h-20">
             <div className="relative w-full h-full">
-              <svg
-                viewBox="0 0 200 200"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full"
-              >
-                {/* 배경 */}
-                <circle cx="100" cy="100" r="90" fill="#FFC0CB" />
-                
-                {/* 눈 */}
-                <circle cx="70" cy="80" r="12" fill="white" />
-                <circle cx="130" cy="80" r="12" fill="white" />
-                <circle cx="70" cy="80" r="6" fill="black" />
-                <circle cx="130" cy="80" r="6" fill="black" />
-                
-                {/* 수염 */}
-                <path d="M40 50L60 65" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                <path d="M160 50L140 65" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                <path d="M40 65L60 70" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                <path d="M160 65L140 70" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                <path d="M40 80L60 75" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                <path d="M160 80L140 75" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                
-                {/* 입 */}
-                <path d="M65 115C75 125 125 125 135 115" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                
-                {/* 코 */}
-                <circle cx="100" cy="95" r="6" fill="#FF9999" />
-                
-                {/* 귀 */}
-                <path d="M60 40L40 20" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                <path d="M140 40L160 20" stroke="black" strokeWidth="4" strokeLinecap="round" />
-                
-                {/* 볼 */}
-                <circle cx="60" cy="90" r="5" fill="#FFCCCC" />
-                <circle cx="140" cy="90" r="5" fill="#FFCCCC" />
-                
-                {/* 하트 */}
-                <path d="M160 130C160 110 140 105 130 115C120 105 100 110 100 130C100 150 130 170 130 170C130 170 160 150 160 130Z" fill="#FF6666" />
-              </svg>
+              <Image src="/cat_1.png" alt="프로필 배너" fill className="object-cover" />
             </div>
           </div>
         </div>
