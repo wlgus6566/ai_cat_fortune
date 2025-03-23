@@ -9,6 +9,7 @@
     "overall": "종합 운세",
     "fortuneScore": "운세 점수",
     "categoryTitle": "카테고리별 운세",
+    "lucky": "행운의 부적",
     "luckyColor": "행운의 색상",
     "luckyNumber": "행운의 숫자",
     "advice": "오늘의 조언",
@@ -44,7 +45,7 @@
     }
   },
   "settings": {
-    "pageTitle": "프로필",
+    "pageTitle": "마이페이지",
     "headerTitle": "프로필",
     "profileSection": "프로필 정보",
     "editProfile": "프로필 수정",
@@ -115,7 +116,7 @@
   "navigation": {
     "home": "홈",
     "chat": "상담",
-    "profile": "프로필"
+    "profile": "마이페이지"
   },
   "talisman": {
     "headerTitle": "나의 부적 갤러리",

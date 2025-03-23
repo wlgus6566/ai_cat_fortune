@@ -44,7 +44,7 @@
     }
   },
   "settings": {
-    "pageTitle": "Profile",
+    "pageTitle": "My Page",
     "headerTitle": "Profile",
     "profileSection": "Profile Information",
     "editProfile": "Edit Profile",
@@ -115,8 +115,7 @@
   "navigation": {
     "home": "Home",
     "chat": "Chat",
-    "talisman": "Talismans",
-    "profile": "Profile"
+    "profile": "My Page"
   },
   "talisman": {
     "pageTitle": "Talisman Gallery",

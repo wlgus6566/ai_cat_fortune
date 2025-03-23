@@ -27,17 +27,17 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
     }, 100);
 
     const timer2 = setTimeout(() => {
-      // 전체 팝업에 흔들림 효과 먼저 적용
+      // 전체 팝업에 흔들림 효과 적용
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 600);
-      
-      // 그 후 두루마기 펼치기 애니메이션
-      setTimeout(() => {
-        setIsUnrolling(true);  // Start unrolling the scroll
-      }, 200);
     }, 500);
 
     const timer3 = setTimeout(() => {
+      // 흔들림 효과 후에 두루마기 펼치기 애니메이션 시작
+      setIsUnrolling(true);  // Start unrolling the scroll
+    }, 1000);
+
+    const timer4 = setTimeout(() => {
       setIsFullyVisible(true);  // Fully unrolled state
     }, 1500);
 
@@ -46,6 +46,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
+      clearTimeout(timer4);
     };
   }, []);
 
@@ -166,7 +167,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
             minHeight: isUnrolling ? '50vh' : '0', 
             maxHeight: '90vh',
             width: '100%',
-            maxWidth: '300px',
+            maxWidth: '400px',
             boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.25)`,
             transform: `rotateX(${isUnrolling ? '0' : '60deg'})`,
             transformOrigin: 'top',
@@ -216,7 +217,7 @@ export default function TalismanPopup({ imageUrl, onClose, userName, title, dark
                 
                 <Image
                   src={imageUrl}
-                  alt={t('lucky', { defaultValue: '행운의 부적' })}
+                  alt={'행운의 부적'}
                   fill
                   quality={90}
                   className={`object-contain rounded-lg transition-all duration-1000 ${
