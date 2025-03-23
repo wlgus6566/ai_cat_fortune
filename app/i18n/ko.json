@@ -44,8 +44,8 @@
     }
   },
   "settings": {
-    "pageTitle": "설정",
-    "headerTitle": "설정",
+    "pageTitle": "프로필",
+    "headerTitle": "프로필",
     "profileSection": "프로필 정보",
     "editProfile": "프로필 수정",
     "languageSection": "언어 설정",
@@ -126,6 +126,7 @@
     "emptyStateDescription": "채팅 상담을 통해 행운의 부적을 생성해보세요!",
     "talismanNumber": "행운의 부적 #{number}",
     "saveButton": "저장하기",
+    "bringLuck": "이 부적을 가지고 있으면 행운이 온다냥!",
     "popup": {
       "title": "행운의 부적",
       "close": "닫기"

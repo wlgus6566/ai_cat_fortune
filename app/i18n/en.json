@@ -44,8 +44,8 @@
     }
   },
   "settings": {
-    "pageTitle": "Settings",
-    "headerTitle": "Settings",
+    "pageTitle": "Profile",
+    "headerTitle": "Profile",
     "profileSection": "Profile Information",
     "editProfile": "Edit Profile",
     "languageSection": "Language Settings",

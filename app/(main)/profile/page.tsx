@@ -137,22 +137,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto pb-24 max-w-screen-md">
-      {/* 헤더 배너 영역 추가 */}
-      <div className="overflow-hidden mb-4 mt-8 mx-4">
-        <div className="flex flex-row items-center justify-between">
-          <div className="max-w-[80%]">
-            <h2 className="text-xl font-bold text-purple-800 mb-2">{userProfile?.name}님과 포춘냥이의<br/>사주 로맨스 시작! 💫🐾</h2>
-            <p className="text-purple-600 mb-4 text-sm">오늘도 운명 같은 메시지를 전해드릴게요🔮</p>
-          </div>
-          <div className="relative w-20 h-20">
-            <div className="relative w-full h-full">
-              <Image src="/cat_1.png" alt="프로필 배너" fill className="object-cover" />
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="container mx-auto pb-12 max-w-screen-md">
+      <h1 className="text-2xl font-bold text-purple-800 mb-2 mt-8 mx-4">{t("settings.pageTitle")}</h1>
       <div className="mx-4">
         <motion.div
           className={`bg-gradient-to-b ${darkMode ? 'from-gray-900 to-gray-800' : 'from-white to-gray-50'}`}
@@ -160,10 +146,11 @@ export default function SettingsPage() {
           initial="hidden"
           animate="visible"
         >
+          
           <motion.div className="max-w-screen-md mx-auto" variants={containerVariants} initial="hidden" animate="visible">
             {/* 프로필 정보 섹션 */}
             <motion.div className="mb-6" variants={itemVariants}>
-              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-purple-100'} rounded-xl shadow-md overflow-hidden border transition-all`}>
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-purple-100'} mt-4 rounded-xl shadow-md overflow-hidden border transition-all`}>
                 <div className={`p-4 flex justify-between  ${darkMode ? 'text-white' : 'text-purple-800'}`}>
                   <h2 className="text-xl font-semibold flex items-center">
                     <span className="mr-2">✨</span>
@@ -275,7 +262,6 @@ export default function SettingsPage() {
                 </div>
               </div>
             </motion.div>
-
             {/* 언어 설정 섹션 */}
             <motion.div className="mb-6" variants={itemVariants}>
               <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-purple-100'} rounded-xl shadow-md overflow-hidden border transition-all`}>
@@ -358,8 +344,7 @@ export default function SettingsPage() {
             </motion.div>
 
             {/* 앱 정보 섹션 */}
-            <motion.div className="mt-6 text-center" variants={itemVariants}>
-              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-purple-100'} rounded-xl shadow-md p-6 border`}>
+            <motion.div className="mt-12 text-center" variants={itemVariants}>
                 <div className="flex justify-center mb-3">
                   <div className={`w-12 h-12 ${darkMode ? 'bg-purple-700' : 'bg-purple-100'} rounded-full flex items-center justify-center`}>
                     <span className="text-xl">🔮</span>
@@ -372,7 +357,6 @@ export default function SettingsPage() {
                   <span className={`${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>|</span>
                   <button className={`${darkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-800'} text-sm`}>개인정보처리방침</button>
                 </div>
-              </div>
             </motion.div>
 
             <motion.div className={`text-center mt-8 ${darkMode ? 'text-purple-400' : 'text-purple-700'} text-sm`} variants={itemVariants}>

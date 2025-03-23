@@ -344,18 +344,18 @@ export default function HomePage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <motion.header 
-        className="mb-6"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('headerTitle')}</h1>
-        <p className="text-gray-600">
-          {t('forUser', { name: userProfile?.name || 'User', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) })}
-        </p>
-      </motion.header>
-      
+        {/* 헤더 배너 영역 추가 */}
+        <div className="flex flex-row items-center justify-between">
+          <div className="max-w-[80%]">
+            <h2 className="text-2xl font-bold text-purple-800 mb-2">오늘의 운세 💫🐾</h2>
+            <p className="text-purple-600 mb-4 text-sm">오늘도 운명 같은 메시지를 전해드릴게요🔮</p>
+          </div>
+          {/* <div className="relative w-20 h-20">
+            <div className="relative w-full h-full">
+              <Image src="/cat_1.png" alt="프로필 배너" fill className="object-cover" />
+            </div>
+          </div> */}
+      </div>
       {/* 에러 표시 */}
       {error && (
         <motion.div 
@@ -371,6 +371,7 @@ export default function HomePage() {
       )}
       
       {/* 오늘의 운세 섹션 */}
+      
       <motion.section 
         className="mb-8"
         variants={itemVariants}
@@ -384,7 +385,7 @@ export default function HomePage() {
         >
           <div className="bg-gradient-to-r from-purple-600 to-purple-500 p-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
-              <span className="mr-2">✨</span> {t('headerTitle')}
+              <span className="mr-2">✨</span> {t('forUser', { name: userProfile?.name || 'User', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) })}
             </h3>
           </div>
           
