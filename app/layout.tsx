@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang={locale}>
       <head>
-        <title>Fortune AI - Check Your Daily Fortune</title>
+        <title>포춘냥이</title>
         <meta name="description" content="AI-based fortune telling and consultation service" />
       </head>
       <body

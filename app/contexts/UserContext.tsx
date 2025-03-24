@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { UserProfile } from '../types';
+import { UserProfile } from '../type/types';
 
 interface UserContextType {
   userProfile: UserProfile | null;

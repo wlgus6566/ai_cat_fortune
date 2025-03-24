@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { ConcernType, UserProfile } from '../types';
+import { ConcernType, UserProfile } from '../type/types';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({

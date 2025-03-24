@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Replicate from 'replicate'
-import { IErrorResponse } from '@/app/types'
+import { IErrorResponse } from '@/app/type/types'
 import { saveTalismanImage } from '@/app/lib/storage'
 
 // Replicate 클라이언트 초기화

@@ -1,4 +1,4 @@
-import { ConcernType, SubConcernType, DetailedConcern } from './types';
+import { ConcernType, SubConcernType, DetailedConcern } from './type/types';
 
 export const CONCERN_TYPES: ConcernType[] = ['연애', '직장', '돈', '심리', '인간관계', '라이프스타일'];
 

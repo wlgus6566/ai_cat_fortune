@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/contexts/UserContext';
-import { Gender, CalendarType, BirthTime } from '@/app/types';
+import { Gender, CalendarType, BirthTime } from '@/app/type/types';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import PageHeader from '@/app/components/PageHeader';

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ChatMessage from './ChatMessage';
 import TalismanPopup from './TalismanPopup';
-import { ChatMessage as ChatMessageType, ChatStep, ConcernType, InputMode, UserProfile } from '../types';
+import { ChatMessage as ChatMessageType, ChatStep, ConcernType, InputMode, UserProfile } from '../type/types';
 import { CONCERN_TYPES, DETAILED_CONCERNS } from '../data';
 import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from '../data.en'; // ✅ 영어 데이터 불러오기
 // 직접 입력창 컴포넌트

@@ -1,4 +1,4 @@
-import { ChatMessage as ChatMessageType } from '../types';
+import { ChatMessage as ChatMessageType } from '../type/types';
 import Image from 'next/image';
 import { useState } from 'react';
 

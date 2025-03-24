@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { AppTab } from '@/app/types';
+import { AppTab } from '@/app/type/types';
 
 export default function BottomNavigation() {
   const pathname = usePathname();

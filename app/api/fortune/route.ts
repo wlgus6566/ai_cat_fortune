@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFortuneResponse } from '@/app/lib/openai';
-import { ConcernType, UserProfile } from '@/app/types';
+import { ConcernType, UserProfile } from '@/app/type/types';
 
 export async function POST(request: NextRequest) {
   try {

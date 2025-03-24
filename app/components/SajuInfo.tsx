@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SajuElements } from '@/app/types';
+import { SajuElements } from '@/app/type/types';
 
 interface SajuInfoProps {
   birthInfo: string;

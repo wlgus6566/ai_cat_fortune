@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useUser } from '@/app/contexts/UserContext';
-import { Gender, CalendarType, BirthTime } from '@/app/types';
+import { Gender, CalendarType, BirthTime } from '@/app/type/types';
 
 // 이름 유효성 검사 함수
 const validateName = (name: string): { isValid: boolean; errorMessage: string } => {

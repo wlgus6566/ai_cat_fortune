@@ -105,9 +105,6 @@ body {
              talismanShake 0.8s ease-in-out 1.2s;
 }
 
-/* .animate-shake {
-  animation: talismanShake 0.5s ease-in-out;
-} */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
