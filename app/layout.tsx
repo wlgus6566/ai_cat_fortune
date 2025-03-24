@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "./contexts/UserContext";
 import { NextIntlClientProvider } from "next-intl";
@@ -7,18 +7,19 @@ import { Providers } from './providers';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'AI Fortune',
-  description: 'AI powered fortune telling application',
+  title: '포춘냥이 - AI 운세',
+  description: '개인 맞춤형 AI 운세 상담 서비스',
+  icons: {
+    icon: '/favicon.ico',
+  },
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  themeColor: '#990dfa',
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSansKr = Noto_Sans_KR({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ['300', '400', '500', '700'],
+  variable: "--font-noto-sans",
 });
 
 export default function RootLayout({
@@ -28,12 +29,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <head>
-        <title>포춘냥이</title>
-        <meta name="description" content="AI-based fortune telling and consultation service" />
-      </head>
+      <head />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${notoSansKr.variable} antialiased`}
       >
         <Providers>
           <NextIntlClientProvider locale="ko" messages={messages["ko"]}>

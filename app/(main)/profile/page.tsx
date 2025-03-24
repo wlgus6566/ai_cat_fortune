@@ -18,38 +18,12 @@ export default function ProfilePage() {
   const [showPopup, setShowPopup] = useState(false)
   const [talismans, setTalismans] = useState<string[]>([])
 
-  // 다크모드 상태
-  const [darkMode, setDarkMode] = useState<boolean>(false)
-
-  // 컴포넌트 로드 시 다크모드 설정 가져오기
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedDarkMode = localStorage.getItem("dark_mode_enabled")
-      if (storedDarkMode !== null) {
-        setDarkMode(storedDarkMode === "true")
-      }
-    }
-  }, [])
-
   // 로그인 되어있지 않으면 로그인 페이지로 리디렉션
   useEffect(() => {
     if (!isAuthenticated && typeof window !== "undefined") {
       router.push("/auth/signin");
     }
   }, [isAuthenticated, router]);
-
-  // 샘플 부적 이미지 (실제 구현에서는 API 호출로 대체)
-  useEffect(() => {
-    if (userProfile?.id) {
-      // 실제 구현에서는 API에서 사용자의 부적을 가져오는 로직으로 대체
-      const sampleTalismans = [
-        "/images/talisman1.png",
-        "/images/talisman2.png",
-        "/images/talisman3.png",
-      ]
-      setTalismans(sampleTalismans) // 샘플 데이터로 최대 3개만 보여줌
-    }
-  }, [userProfile?.id])
 
   // 사용자의 부적 가져오기
   useEffect(() => {
@@ -67,9 +41,24 @@ export default function ProfilePage() {
         const data = await response.json();
         if (data.talismans && data.talismans.length > 0) {
           setTalismans(data.talismans.slice(0, 3)); // 최대 3개만 표시
+        } else {
+          // API 결과가 없는 경우 샘플 데이터 사용
+          const sampleTalismans = [
+            "/images/talisman1.png",
+            "/images/talisman2.png",
+            "/images/talisman3.png",
+          ]
+          setTalismans(sampleTalismans)
         }
       } catch (error) {
         console.error('부적 데이터 로딩 중 오류:', error);
+        // 에러 시 샘플 데이터 사용
+        const sampleTalismans = [
+          "/images/talisman1.png",
+          "/images/talisman2.png",
+          "/images/talisman3.png",
+        ]
+        setTalismans(sampleTalismans)
       }
     };
     
@@ -126,22 +115,56 @@ export default function ProfilePage() {
   // 로그인 되어있지 않으면 로딩 상태 표시
   if (!isAuthenticated) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9]">
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
+    <div className="min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] pb-16">
+      {/* 배경 장식 요소 */}
+      <div className="absolute top-20 left-5 w-24 h-24 opacity-10 z-0">
+        <motion.div 
+          className="absolute w-full h-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
+        >
+          {[...Array(8)].map((_, i) => (
+            <div 
+              key={i} 
+              className="absolute w-1 h-1 bg-[#990dfa] rounded-full"
+              style={{ 
+                left: '50%', 
+                top: '50%', 
+                transform: `rotate(${i * 45}deg) translate(40px) rotate(${i * 45}deg)` 
+              }}
+            />
+          ))}
+        </motion.div>
+      </div>
+      
+      <div className="absolute top-40 right-10 text-[#FFD966] opacity-70">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], rotate: 90 }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="text-base"
+        >
+          ✨
+        </motion.div>
+      </div>
+      
       {/* 헤더 */}
       <PageHeader 
         title={t("settings.pageTitle")}
-        className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-white'}`}
+        className="bg-white shadow-md relative z-10"
         rightElement={
           <div className="flex space-x-2">
             <button onClick={handleGoToSettings} className="p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#3B2E7E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -152,72 +175,72 @@ export default function ProfilePage() {
       
       <div className="container mx-auto pb-12 max-w-screen-md">
         <motion.div
-          className={`mx-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}
+          className="mx-4 text-[#3B2E7E]"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* 프로필 정보 섹션 */}
           <motion.div className="mb-6" variants={itemVariants}>
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl overflow-hidden transition-all flex flex-col items-center py-6 px-4 mt-4`}>
+            <div className="bg-white rounded-3xl overflow-hidden transition-all flex flex-col items-center py-6 px-4 mt-4 shadow-md">
               {userProfile && (
                 <>
                   <div className="relative mb-3">
                     {userProfile.profileImageUrl ? (
                       <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-md">
-                        <Image
+                        {/* <Image
                           src={userProfile.profileImageUrl}
                           alt={userProfile.name || t("profile.nameUnknown")}
                           width={80}
                           height={80}
                           className="w-full h-full object-cover"
-                        />
+                        /> */}
                       </div>
                     ) : (
-                      <div className={`w-20 h-20 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full flex items-center justify-center border-2 border-white shadow-md`}>
+                      <div className="w-20 h-20 bg-[#EAE1F4] rounded-full flex items-center justify-center border-2 border-white shadow-md">
                         <span className="text-2xl">👤</span>
                       </div>
                     )}
                     <button
                       onClick={handleEditProfile}
-                      className={`absolute bottom-0 right-0 w-7 h-7 ${darkMode ? 'bg-blue-600' : 'bg-blue-500'} rounded-full flex items-center justify-center shadow-md`}
+                      className="absolute bottom-0 right-0 w-7 h-7 bg-[#990dfa] rounded-full flex items-center justify-center shadow-md"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </button>
                   </div>
-                  <h3 className={`font-medium text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>
-                    {userProfile.name || t("profile.nameUnknown")} {userProfile.id && <span className="text-gray-400 text-sm">23</span>}
+                  <h3 className="font-bold text-lg text-[#3B2E7E] mb-1 font-heading">
+                    {userProfile.name || t("profile.nameUnknown")}
                   </h3>
                 </>
               )}
               
               {/* 프로필 정보 */}
-              <div className={`flex justify-center mt-4 w-full max-w-sm`}>
-                <div className={`w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-xl p-4`}>
+              <div className="flex justify-center mt-4 w-full max-w-sm">
+                <div className="w-full bg-[#F9F9F9] rounded-xl p-4 shadow-sm">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t("profile.gender")}</p>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      <p className="text-sm text-[#3B2E7E]/70">{t("profile.gender")}</p>
+                      <p className="text-sm font-medium text-[#3B2E7E]">
                         {userProfile?.gender ? t(`profile.genderOptions.${userProfile.gender === '여성' ? 'female' : 'male'}`) : "-"}
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t("profile.birthDate")}</p>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      <p className="text-sm text-[#3B2E7E]/70">{t("profile.birthDate")}</p>
+                      <p className="text-sm font-medium text-[#3B2E7E]">
                         {userProfile?.birthDate ? userProfile.birthDate : "-"}
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t("profile.calendarType")}</p>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      <p className="text-sm text-[#3B2E7E]/70">{t("profile.calendarType")}</p>
+                      <p className="text-sm font-medium text-[#3B2E7E]">
                         {userProfile?.calendarType ? t(`profile.calendarOptions.${userProfile.calendarType === '양력' ? 'solar' : 'lunar'}`) : "-"}
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t("profile.birthTime")}</p>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      <p className="text-sm text-[#3B2E7E]/70">{t("profile.birthTime")}</p>
+                      <p className="text-sm font-medium text-[#3B2E7E]">
                         {userProfile?.birthTime || t("profile.birthTimeUnknown")}
                       </p>
                     </div>
@@ -228,7 +251,7 @@ export default function ProfilePage() {
               {/* 로그아웃 버튼 */}
               <button
                 onClick={handleLogout}
-                className={`mt-4 px-4 py-2 ${darkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white rounded-lg text-sm transition-colors`}
+                className="mt-4 px-5 py-2 bg-[#FC5C65]/90 hover:bg-[#FC5C65] text-white rounded-full text-sm transition-colors shadow-sm hover:shadow font-medium"
               >
                 로그아웃
               </button>
@@ -237,7 +260,7 @@ export default function ProfilePage() {
           
           {/* 구독 섹션 */}
           <motion.div className="mb-6" variants={itemVariants}>
-            <div className={`${darkMode ? 'bg-purple-900' : 'bg-purple-600'} rounded-xl shadow-md overflow-hidden p-4 text-white`}>
+            <div className="bg-purple-500 rounded-3xl shadow-md overflow-hidden p-4 text-white">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,8 +269,8 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-lg">{t("settings.subscription.title")}</h3>
-                  <p className="text-sm text-white/80 mb-3">{t("settings.subscription.description")}</p>
-                  <button className={`px-4 py-2 bg-white text-purple-600 rounded-full text-sm font-medium`}>
+                  <p className="text-sm text-white/90 mb-3">{t("settings.subscription.description")}</p>
+                  <button className="px-5 py-2 bg-white text-[#990dfa] rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-all">
                     {t("settings.subscription.benefits")}
                   </button>
                 </div>
@@ -257,13 +280,13 @@ export default function ProfilePage() {
           
           {/* 부적 갤러리 미리보기 */}
           <motion.div className="mb-6" variants={itemVariants}>
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md overflow-hidden p-4`}>
+            <div className="bg-white rounded-3xl shadow-md overflow-hidden p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <span className="w-8 h-8 mr-3 flex items-center justify-center">✨</span>
-                  <span className="font-medium">{t("settings.menu.talismanGallery")}</span>
+                  <span className="font-medium text-[#3B2E7E]">{t("settings.menu.talismanGallery")}</span>
                 </div>
-                <Link href="/talisman-gallery" className={`text-sm ${darkMode ? 'text-purple-400' : 'text-purple-600'} font-medium`}>
+                <Link href="/talisman-gallery" className="text-sm text-[#990dfa] font-medium hover:underline">
                   {t("settings.viewMore")}
                 </Link>
               </div>
@@ -273,7 +296,7 @@ export default function ProfilePage() {
                   {talismans.map((talismanUrl, index) => (
                     <div
                       key={index}
-                      className={`border ${darkMode ? 'border-gray-700' : 'border-gray-200'} rounded-lg overflow-hidden cursor-pointer relative`}
+                      className="border border-[#990dfa]/10 rounded-xl overflow-hidden cursor-pointer relative shadow-sm hover:shadow-md transition-all"
                       onClick={() => handleTalismanClick(talismanUrl)}
                     >
                       <div className="w-full" style={{ aspectRatio: '9/16' }}>
@@ -283,13 +306,14 @@ export default function ProfilePage() {
                           width={150}
                           height={260}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          className="hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className={`text-center py-6 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <div className="text-center py-6 text-[#3B2E7E]/60">
                   <p>{t("settings.noTalismans")}</p>
                 </div>
               )}
@@ -298,25 +322,25 @@ export default function ProfilePage() {
           
           {/* 메뉴 항목들 */}
           <motion.div className="mb-6" variants={itemVariants}>
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md overflow-hidden`}>
+            <div className="bg-white rounded-3xl shadow-md overflow-hidden">
               <div>
-                <Link href="/chat-archive" className="flex items-center justify-between p-4">
+                <Link href="/chat-archive" className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors">
                   <div className="flex items-center">
                     <span className="w-8 h-8 mr-3 flex items-center justify-center">💬</span>
-                    <span>{t("settings.menu.chatArchive")}</span>
+                    <span className="text-[#3B2E7E]">{t("settings.menu.chatArchive")}</span>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#3B2E7E]/60" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
                 </Link>
               </div>
-              <div className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                <Link href="/ai-profile" className="flex items-center justify-between p-4">
+              <div className="border-t border-[#990dfa]/10">
+                <Link href="/ai-profile" className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors">
                   <div className="flex items-center">
                     <span className="w-8 h-8 mr-3 flex items-center justify-center">🤖</span>
-                    <span>{t("settings.menu.aiProfile")}</span>
+                    <span className="text-[#3B2E7E]">{t("settings.menu.aiProfile")}</span>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#3B2E7E]/60" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
                 </Link>
@@ -331,7 +355,7 @@ export default function ProfilePage() {
         <TalismanPopup 
           imageUrl={selectedTalisman} 
           onClose={() => setShowPopup(false)}
-          darkMode={darkMode}
+          darkMode={false}
           title={t("talisman.popup.title")}
         />
       )}

@@ -320,13 +320,14 @@ export default function ProfileEditPage() {
                 onClick={openFileSelector}
               >
                 {profileImage ? (
-                  <Image 
-                    src={profileImage} 
-                    alt={t('profileImage')} 
-                    width={128} 
-                    height={128} 
-                    className="w-full h-full object-cover"
-                  />
+                  <></>
+                  // <Image 
+                  //   src={profileImage} 
+                  //   alt={t('profileImage')} 
+                  //   width={128} 
+                  //   height={128} 
+                  //   className="w-full h-full object-cover"
+                  // />
                 ) : (
                   <div className="flex flex-col items-center justify-center w-full h-full">
                     <span className="text-4xl text-purple-300 mb-1">✨</span>

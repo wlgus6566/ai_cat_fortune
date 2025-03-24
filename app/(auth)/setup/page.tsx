@@ -348,12 +348,13 @@ export default function SetupPage() {
             <div className="flex flex-col items-center">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-purple-200 mb-4">
                 {profileImage ? (
-                  <Image 
-                    src={profileImage} 
-                    alt="프로필 이미지" 
-                    fill 
-                    className="object-cover"
-                  />
+                  <></>
+                  // <Image 
+                  //   src={profileImage} 
+                  //   alt="프로필 이미지" 
+                  //   fill 
+                  //   className="object-cover"
+                  // />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                     <svg 

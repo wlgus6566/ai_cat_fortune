@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { HomeIcon, ChatBubbleOvalLeftIcon, UserIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, ChatBubbleOvalLeftIcon, UserIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/app/contexts/UserContext';
 import { useTranslations } from 'next-intl';
 
@@ -36,45 +36,97 @@ export default function MainLayout({
   // 프로필 데이터가 로드되지 않은 경우 로딩 표시
   if (isInitialLoad || !isLoaded) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white">
-        <div className="animate-spin h-10 w-10 border-4 border-purple-500 rounded-full border-t-transparent"></div>
-        <p className="mt-4 text-purple-600">프로필 확인 중...</p>
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9]">
+        <div className="relative">
+          <div className="animate-spin h-12 w-12 border-4 border-[#990dfa] rounded-full border-t-transparent"></div>
+          <div className="absolute top-0 left-0 h-12 w-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
+        </div>
+        <p className="mt-4 text-[#3B2E7E] font-medium">프로필 확인 중...</p>
+        <div className="mt-2 flex space-x-1">
+          {[...Array(3)].map((_, i) => (
+            <div 
+              key={i} 
+              className="h-1 w-1 rounded-full bg-[#990dfa] animate-bounce" 
+              style={{animationDelay: `${i * 0.15}s`}}
+            ></div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-50 to-white pb-16">
-      <main className="flex-grow">{children}</main>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] pb-16">
+      {/* 배경 장식 요소 */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
+        {/* 별 장식 */}
+        <div className="absolute top-[10%] right-[15%] h-1 w-1 bg-[#FFD966] rounded-full animate-twinkle"></div>
+        <div className="absolute top-[20%] left-[10%] h-1.5 w-1.5 bg-[#FFD966] rounded-full animate-twinkle" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute top-[40%] right-[20%] h-1 w-1 bg-white rounded-full animate-twinkle" style={{animationDelay: '0.7s'}}></div>
+        <div className="absolute top-[60%] left-[20%] h-2 w-2 bg-[#FFD966] rounded-full animate-twinkle" style={{animationDelay: '2s'}}></div>
+        
+        {/* 구름 장식 */}
+        <div className="absolute top-[15%] left-[5%] w-16 h-6 bg-white opacity-40 rounded-full"></div>
+        <div className="absolute top-[15%] left-[10%] w-10 h-8 bg-white opacity-40 rounded-full"></div>
+        <div className="absolute top-[70%] right-[5%] w-16 h-6 bg-white opacity-40 rounded-full"></div>
+        <div className="absolute top-[70%] right-[10%] w-10 h-8 bg-white opacity-40 rounded-full"></div>
+      </div>
+      
+      <main className="flex-grow relative z-1">{children}</main>
       
       {/* 하단 네비게이션 바 */}
-      <nav className="fixed bottom-0 w-full bg-white shadow-md z-10">
+      <nav className="fixed bottom-0 w-full bg-white shadow-lg z-10 rounded-t-xl overflow-hidden">
         <div className="max-w-screen-md mx-auto flex justify-around">
           {/* 홈 버튼 */}
           <Link
             href="/"
-            className="flex flex-col items-center justify-center p-3 w-1/3 hover:bg-gray-100"
+            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
+              pathname === '/' 
+                ? 'text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent'
+                : 'text-gray-600 hover:bg-[#990dfa]/5'
+            }`}
           >
-            <HomeIcon className="h-6 w-6 text-gray-500" />
-            <span className="text-xs text-gray-500 mt-1">{t('navigation.home')}</span>
+            <HomeIcon className={`h-6 w-6 ${pathname === '/' ? 'text-[#990dfa]' : 'text-gray-600'}`} />
+            <span className="text-xs mt-1 font-medium">{t('navigation.home')}</span>
           </Link>
           
           {/* 채팅 버튼 */}
           <Link
             href="/chat"
-            className="flex flex-col items-center justify-center p-3 w-1/3 hover:bg-gray-100"
+            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
+              pathname.includes('/chat') 
+                ? 'text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent'
+                : 'text-gray-600 hover:bg-[#990dfa]/5'
+            }`}
           >
-            <ChatBubbleOvalLeftIcon className="h-6 w-6 text-gray-500" />
-            <span className="text-xs text-gray-500 mt-1">{t('navigation.chat')}</span>
+            <ChatBubbleOvalLeftIcon className={`h-6 w-6 ${pathname.includes('/chat') ? 'text-[#990dfa]' : 'text-gray-600'}`} />
+            <span className="text-xs mt-1 font-medium">{t('navigation.chat')}</span>
+          </Link>
+          
+          {/* 부적 갤러리 버튼 */}
+          <Link
+            href="/talisman-gallery"
+            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
+              pathname.includes('/talisman-gallery') 
+                ? 'text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent'
+                : 'text-gray-600 hover:bg-[#990dfa]/5'
+            }`}
+          >
+            <SparklesIcon className={`h-6 w-6 ${pathname.includes('/talisman-gallery') ? 'text-[#990dfa]' : 'text-gray-600'}`} />
+            <span className="text-xs mt-1 font-medium">{t('navigation.talisman')}</span>
           </Link>
           
           {/* 프로필 버튼 */}
           <Link
             href="/profile"
-            className="flex flex-col items-center justify-center p-3 w-1/3 hover:bg-gray-100"
+            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
+              pathname.includes('/profile') 
+                ? 'text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent'
+                : 'text-gray-600 hover:bg-[#990dfa]/5'
+            }`}
           >
-            <UserIcon className="h-6 w-6 text-gray-500" />
-            <span className="text-xs text-gray-500 mt-1">{t('navigation.profile')}</span>
+            <UserIcon className={`h-6 w-6 ${pathname.includes('/profile') ? 'text-[#990dfa]' : 'text-gray-600'}`} />
+            <span className="text-xs mt-1 font-medium">{t('navigation.profile')}</span>
           </Link>
         </div>
       </nav>

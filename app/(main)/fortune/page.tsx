@@ -21,13 +21,13 @@ const FortuneScore: React.FC<FortuneScoreProps> = ({ score, maxScore = 5, label,
   
   return (
     <div className="mb-4">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+      <div className="flex justify-between items-center mb-1.5">
+        <span className="text-sm font-medium text-gray-700 font-subheading">{label}</span>
         <span className="text-sm font-bold" style={{ color }}>{score}/{maxScore}</span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
+      <div className="w-full bg-gray-200 rounded-full h-3">
         <div 
-          className="h-2.5 rounded-full" 
+          className="h-3 rounded-full transition-all duration-1000" 
           style={{ 
             width: `${percentage}%`,
             backgroundColor: color
@@ -49,12 +49,12 @@ interface CategoryCardProps {
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ title, score, description, icon, color }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 transition transform hover:shadow-md">
+    <div className="card-magic p-4 flex flex-col h-full">
       <div className="flex items-center mb-2">
         <div className="text-2xl mr-2" style={{ color }}>
           {icon}
         </div>
-        <h4 className="font-medium text-gray-800">{title}</h4>
+        <h4 className="font-medium text-[#3B2E7E]">{title}</h4>
       </div>
       <div className="mb-2">
         <FortuneScore score={score} label={`${title} Score`} color={color} />
@@ -63,6 +63,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, score, description, 
     </div>
   );
 };
+
+// 별자리 아이콘 컴포넌트
+const StarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-[#FFD966]">
+    <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.2 7-6.2-4.4-6.2 4.4 2.2-7-6-4.6h7.6z" fill="currentColor" />
+  </svg>
+);
 
 // 로컬 스토리지 관련 함수들
 const getStorageKey = (userId: string, day?: string) => {
@@ -339,27 +346,65 @@ export default function HomePage() {
   
   return (
     <motion.div 
-      className="container max-w-screen-md mx-auto px-4 py-6"
+      className="container max-w-screen-md mx-auto px-4 py-6 relative z-1"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-        {/* 헤더 배너 영역 추가 */}
-        <div className="flex flex-row items-center justify-between">
-          <div className="max-w-[80%]">
-            <h2 className="text-2xl font-bold text-purple-800 mb-2">오늘의 운세 💫🐾</h2>
-            <p className="text-purple-600 mb-4 text-sm">오늘도 운명 같은 메시지를 전해드릴게요🔮</p>
-          </div>
-          {/* <div className="relative w-20 h-20">
-            <div className="relative w-full h-full">
-              <Image src="/cat_1.png" alt="프로필 배너" fill className="object-cover" />
-            </div>
-          </div> */}
+      {/* 배경 장식 요소들 */}
+      <div className="absolute top-10 right-5 w-24 h-24 opacity-10 z-0">
+        <motion.div 
+          className="absolute w-full h-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
+        >
+          {[...Array(8)].map((_, i) => (
+            <div 
+              key={i} 
+              className="absolute w-1 h-1 bg-[#990dfa] rounded-full"
+              style={{ 
+                left: '50%', 
+                top: '50%', 
+                transform: `rotate(${i * 45}deg) translate(40px) rotate(${i * 45}deg)` 
+              }}
+            />
+          ))}
+        </motion.div>
       </div>
+        
+      {/* 헤더 배너 영역 */}
+      <motion.div 
+        className="flex flex-row items-center justify-between mb-6"
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="max-w-[70%]">
+          <h1 className="text-2xl font-bold text-[#3B2E7E] mb-1 font-heading">{t('headerTitle')}</h1>
+          <p className="text-[#990dfa] text-sm font-medium">
+            {userProfile?.name ? t('forUser', { 
+              name: userProfile.name, 
+              date: new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }) 
+            }) : t('headerTitle')}
+          </p>
+        </div>
+        <motion.div 
+          className="w-24 h-24 relative"
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <img 
+            src="/cat.png" 
+            alt="마법사 고양이" 
+            className="w-full h-full object-contain"
+          />
+        </motion.div>
+      </motion.div>
+      
       {/* 에러 표시 */}
       {error && (
         <motion.div 
-          className="bg-red-50 text-red-700 p-4 rounded-lg mb-6"
+          className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 shadow-sm border border-red-100"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
@@ -371,7 +416,6 @@ export default function HomePage() {
       )}
       
       {/* 오늘의 운세 섹션 */}
-      
       <motion.section 
         className="mb-8"
         variants={itemVariants}
@@ -379,27 +423,42 @@ export default function HomePage() {
         animate="visible"
       >
         <motion.div 
-          className="bg-white rounded-xl shadow-md overflow-hidden border border-purple-100"
-          whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+          className="card-magic p-0 overflow-hidden"
+          whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(153, 13, 250, 0.15)' }}
           transition={{ duration: 0.3 }}
         >
-          <div className="bg-gradient-to-r from-purple-600 to-purple-500 p-4">
+          <div className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] p-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
-              <span className="mr-2">✨</span> {t('forUser', { name: userProfile?.name || 'User', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) })}
+              <span className="mr-2 flex">
+                <StarIcon />
+              </span>
+              {t('overall')}
             </h3>
           </div>
           
           <div className="p-5">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-8">
-                <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-                <p className="mt-4 text-gray-600">{t('loading')}</p>
+                <div className="relative">
+                  <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
+                  <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
+                </div>
+                <p className="mt-4 text-[#3B2E7E] font-medium">{t('loading')}</p>
+                <div className="mt-2 flex space-x-1">
+                  {[...Array(3)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className="h-1 w-1 rounded-full bg-[#990dfa] animate-bounce" 
+                      style={{animationDelay: `${i * 0.15}s`}}
+                    ></div>
+                  ))}
+                </div>
               </div>
             ) : error ? (
-              <div className="text-center py-4">
-                <p className="text-red-500">{error}</p>
+              <div className="text-center py-8">
+                <p className="text-red-500 mb-4">{error}</p>
                 <motion.button 
-                  className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+                  className="btn-magic btn-shine"
                   onClick={handleRefresh}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -408,26 +467,31 @@ export default function HomePage() {
                 </motion.button>
               </div>
             ) : fortune ? (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* 전체 운세 점수 */}
                 <motion.div 
                   className="mb-4"
                   variants={itemVariants}
                 >
-                  <h4 className="font-semibold text-gray-800 mb-2">{t('overall')}</h4>
-                  <div className="p-3 bg-purple-50 rounded-lg">
-                    <FortuneScore 
-                      score={fortune.overall.score} 
-                      label={t('fortuneScore')} 
-                      color="#990dfa" 
-                    />
-                    <p className="text-gray-700 mt-2">{fortune.overall.description}</p>
+                  <div className="p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-[#3B2E7E]">{t('fortuneScore')}</h4>
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`w-4 h-4 rounded-full mx-0.5 ${i < fortune.overall.score ? 'bg-[#990dfa]' : 'bg-gray-200'}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-gray-700 font-handwriting text-xl leading-relaxed">{fortune.overall.description}</p>
                   </div>
                 </motion.div>
                 
                 {/* 카테고리별 운세 */}
                 <motion.div variants={itemVariants}>
-                  <h4 className="font-semibold text-gray-800 mb-2">{t('categoryTitle')}</h4>
+                  <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">{t('categoryTitle')}</h4>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {categories.map((category, index) => (
                       <motion.div
@@ -449,18 +513,18 @@ export default function HomePage() {
                 
                 {/* 행운의 요소 */}
                 <motion.div 
-                  className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg mt-4"
+                  className="flex justify-between p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl"
                   variants={itemVariants}
                 >
-                  <div>
-                    <p className="text-sm text-gray-600">{t('luckyColor')}</p>
-                    <p className="font-medium text-gray-800">
+                  <div className="text-center bg-white px-4 py-3 rounded-lg shadow-sm flex-1 mx-1">
+                    <p className="text-xs text-gray-500 mb-1">{t('luckyColor')}</p>
+                    <p className="font-medium text-[#3B2E7E] flex items-center justify-center">
                       <span className="mr-1">🎨</span> {fortune.luckyColor}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">{t('luckyNumber')}</p>
-                    <p className="font-medium text-gray-800">
+                  <div className="text-center bg-white px-4 py-3 rounded-lg shadow-sm flex-1 mx-1">
+                    <p className="text-xs text-gray-500 mb-1">{t('luckyNumber')}</p>
+                    <p className="font-medium text-[#3B2E7E] flex items-center justify-center">
                       <span className="mr-1">🔢</span> {fortune.luckyNumber}
                     </p>
                   </div>
@@ -468,13 +532,25 @@ export default function HomePage() {
                 
                 {/* 오늘의 조언 */}
                 <motion.div 
-                  className="border-t border-gray-200 pt-3 mt-3"
+                  className="pt-3 mt-3 relative"
                   variants={itemVariants}
                 >
-                  <h4 className="font-semibold text-gray-800">{t('advice')}</h4>
-                  <div className="mt-2 p-3 bg-purple-50 rounded-lg flex">
-                    <span className="text-lg mr-2">😺</span>
-                    <p className="text-gray-700">{fortune.advice}</p>
+                  <h4 className="font-medium text-[#3B2E7E] mb-2 font-subheading">{t('advice')}</h4>
+                  <div className="p-4 bg-white rounded-xl shadow-sm border border-[#990dfa]/20 magic-bg">
+                    <div className="flex">
+                      <span className="text-2xl mr-3 flex-shrink-0">😺</span>
+                      <p className="text-gray-700 font-handwriting text-xl leading-relaxed">{fortune.advice}</p>
+                    </div>
+                  </div>
+                  
+                  {/* 별 장식 */}
+                  <div className="absolute -top-1 -right-1 text-[#FFD966]">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    >
+                      <StarIcon />
+                    </motion.div>
                   </div>
                 </motion.div>
                 
@@ -490,9 +566,9 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-gray-600">{t('error')}</p>
+                <p className="text-[#3B2E7E] mb-4">{t('error')}</p>
                 <motion.button 
-                  className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+                  className="btn-magic"
                   onClick={handleRefresh}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -510,20 +586,21 @@ export default function HomePage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="mb-16"
       >
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">{t('quickMenu.title')}</h3>
+        <h3 className="text-lg font-bold text-[#3B2E7E] mb-4 font-heading">{t('quickMenu.title')}</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <motion.div variants={itemVariants}>
             <Link href="/chat">
               <motion.div 
-                className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 h-full cursor-pointer"
-                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                className="card-magic p-5 h-full cursor-pointer"
+                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(153, 13, 250, 0.15)' }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="mb-2 text-purple-600">
+                <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className="h-8 w-8" 
+                    className="h-6 w-6" 
                     fill="none" 
                     viewBox="0 0 24 24" 
                     stroke="currentColor"
@@ -536,7 +613,7 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-800">{t('quickMenu.chat.title')}</h4>
+                <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">{t('quickMenu.chat.title')}</h4>
                 <p className="text-sm text-gray-600">{t('quickMenu.chat.description')}</p>
               </motion.div>
             </Link>
@@ -545,14 +622,14 @@ export default function HomePage() {
           <motion.div variants={itemVariants}>
             <Link href="/profile">
               <motion.div 
-                className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 h-full cursor-pointer"
-                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                className="card-magic p-5 h-full cursor-pointer"
+                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(153, 13, 250, 0.15)' }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="mb-2 text-purple-600">
+                <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className="h-8 w-8" 
+                    className="h-6 w-6" 
                     fill="none" 
                     viewBox="0 0 24 24" 
                     stroke="currentColor"
@@ -565,7 +642,7 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-800">{t('quickMenu.profile.title')}</h4>
+                <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">{t('quickMenu.profile.title')}</h4>
                 <p className="text-sm text-gray-600">{t('quickMenu.profile.description')}</p>
               </motion.div>
             </Link>
@@ -574,14 +651,14 @@ export default function HomePage() {
           <motion.div variants={itemVariants}>
             <Link href="/talisman-gallery">
               <motion.div 
-                className="bg-white rounded-xl shadow-sm border border-purple-100 p-4 h-full cursor-pointer"
-                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                className="card-magic p-5 h-full cursor-pointer"
+                whileHover={{ y: -5, scale: 1.02, boxShadow: '0 10px 25px -5px rgba(153, 13, 250, 0.15)' }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="mb-2 text-purple-600">
+                <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className="h-8 w-8" 
+                    className="h-6 w-6" 
                     fill="none" 
                     viewBox="0 0 24 24" 
                     stroke="currentColor"
@@ -590,11 +667,11 @@ export default function HomePage() {
                       strokeLinecap="round" 
                       strokeLinejoin="round" 
                       strokeWidth={2} 
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                      d="M13 10V3L4 14h7v7l9-11h-7z" 
                     />
                   </svg>
                 </div>
-                <h4 className="font-medium text-gray-800">{t('quickMenu.talisman.title')}</h4>
+                <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">{t('quickMenu.talisman.title')}</h4>
                 <p className="text-sm text-gray-600">{t('quickMenu.talisman.description')}</p>
               </motion.div>
             </Link>
