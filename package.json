@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.8.0",
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.49.1",
     "@types/uuid": "^10.0.0",
@@ -16,6 +17,7 @@
     "drizzle-orm": "^0.40.1",
     "framer-motion": "^12.5.0",
     "next": "15.2.3",
+    "next-auth": "^4.24.11",
     "next-intl": "^4.0.2",
     "openai": "^4.87.4",
     "postgres": "^3.4.5",

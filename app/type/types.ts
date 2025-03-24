@@ -41,8 +41,8 @@ export interface DetailedConcern {
 export type DetailedConcerns = Record<ConcernType, DetailedConcern>;
 
 // 사용자 프로필 관련 타입 정의
-export type Gender = '남성' | '여성';
-export type CalendarType = '양력' | '음력';
+export type Gender = '남성' | '여성' | null;
+export type CalendarType = '양력' | '음력' | null;
 export type BirthTime = 
   | '자시(23:00-01:00)' 
   | '축시(01:00-03:00)' 

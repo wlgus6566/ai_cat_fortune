@@ -11,7 +11,7 @@ import PageHeader from "@/app/components/PageHeader"
 import TalismanPopup from "@/app/components/TalismanPopup"
 
 export default function ProfilePage() {
-  const { userProfile } = useUser()
+  const { userProfile, isAuthenticated, logout } = useUser()
   const t = useTranslations()
   const router = useRouter()
   const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null)
@@ -30,6 +30,13 @@ export default function ProfilePage() {
       }
     }
   }, [])
+
+  // 로그인 되어있지 않으면 로그인 페이지로 리디렉션
+  useEffect(() => {
+    if (!isAuthenticated && typeof window !== "undefined") {
+      router.push("/auth/signin");
+    }
+  }, [isAuthenticated, router]);
 
   // 샘플 부적 이미지 (실제 구현에서는 API 호출로 대체)
   useEffect(() => {
@@ -85,6 +92,16 @@ export default function ProfilePage() {
     setShowPopup(true)
   }
 
+  // 로그아웃 처리
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/");
+    } catch (error) {
+      console.error("로그아웃 중 오류가 발생했습니다:", error);
+    }
+  };
+
   // 애니메이션 변수
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -104,6 +121,15 @@ export default function ProfilePage() {
       opacity: 1,
       transition: { type: "spring", stiffness: 100 },
     },
+  }
+
+  // 로그인 되어있지 않으면 로딩 상태 표시
+  if (!isAuthenticated) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'}`}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      </div>
+    );
   }
 
   return (
@@ -174,7 +200,7 @@ export default function ProfilePage() {
                     <div className="flex justify-between">
                       <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t("profile.gender")}</p>
                       <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                        {userProfile?.gender ? t(`profile.genderOptions.${userProfile.gender}`) : "-"}
+                        {userProfile?.gender ? t(`profile.genderOptions.${userProfile.gender === '여성' ? 'female' : 'male'}`) : "-"}
                       </p>
                     </div>
                     <div className="flex justify-between">
@@ -186,7 +212,7 @@ export default function ProfilePage() {
                     <div className="flex justify-between">
                       <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t("profile.calendarType")}</p>
                       <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                        {userProfile?.calendarType ? t(`profile.calendarOptions.${userProfile.calendarType}`) : "-"}
+                        {userProfile?.calendarType ? t(`profile.calendarOptions.${userProfile.calendarType === '양력' ? 'solar' : 'lunar'}`) : "-"}
                       </p>
                     </div>
                     <div className="flex justify-between">
@@ -198,6 +224,14 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+              
+              {/* 로그아웃 버튼 */}
+              <button
+                onClick={handleLogout}
+                className={`mt-4 px-4 py-2 ${darkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white rounded-lg text-sm transition-colors`}
+              >
+                로그아웃
+              </button>
             </div>
           </motion.div>
           

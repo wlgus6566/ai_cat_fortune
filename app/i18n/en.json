@@ -103,12 +103,12 @@
       "upload": "An error occurred while uploading the image."
     },
     "genderOptions": {
-      "남성": "Male",
-      "여성": "Female"
+      "male": "Male",
+      "female": "Female"
     },
     "calendarOptions": {
-      "양력": "Solar",
-      "음력": "Lunar"
+      "solar": "Solar",
+      "lunar": "Lunar"
     },
     "birthTimeUnknown": "Unknown",
     "nameUnknown": "User",
@@ -155,6 +155,26 @@
     "popup": {
       "title": "Lucky Talisman",
       "close": "Close"
+    }
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "signInWith": "Sign in with {provider}",
+    "orContinueWith": "or continue with",
+    "errorTitle": "Authentication Error",
+    "tryAgain": "Try Again",
+    "errorCode": "Error Code",
+    "bgAlt": "Login background image",
+    "catWizardAlt": "Cat Wizard",
+    "errors": {
+      "default": "An error occurred during authentication",
+      "accessDenied": "Access denied. Please check your account permissions",
+      "callback": "There was a problem with the authentication callback",
+      "oauthSignin": "There was a problem with the OAuth sign-in",
+      "oauthCallback": "There was a problem with the OAuth callback",
+      "sessionRequired": "You need to be signed in to access this page"
     }
   }
 } 

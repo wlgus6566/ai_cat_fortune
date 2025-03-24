@@ -71,14 +71,14 @@
     "comments": "댓글",
     "appSettings": "앱 설정",
     "subscription": {
-      "title": "Basic으로 구독하면",
+      "title": "냥이 구독의 문을 열면 이런 행운이!",
       "description": "무제한 상담 기능으로 마음껏 운세를 확인해보세요!",
       "benefits": "혜택 자세히 보기"
     },
     "menu": {
       "talismanGallery": "부적 갤러리",
       "chatArchive": "상담 보관함",
-      "aiProfile": "AI 프로필 만들기"
+      "aiProfile": "별자리+사주 AI 프로필냥"
     }
   },
   "profile": {
@@ -104,12 +104,12 @@
       "upload": "이미지 업로드 중 오류가 발생했습니다."
     },
     "genderOptions": {
-      "남성": "남성",
-      "여성": "여성"
+      "male": "남성",
+      "female": "여성"
     },
     "calendarOptions": {
-      "양력": "양력",
-      "음력": "음력"
+      "solar": "양력",
+      "lunar": "음력"
     },
     "birthTimeUnknown": "모름",
     "nameUnknown": "사용자",
@@ -146,6 +146,26 @@
     "popup": {
       "title": "행운의 부적",
       "close": "닫기"
+    }
+  },
+  "auth": {
+    "signIn": "로그인",
+    "signUp": "회원가입",
+    "signOut": "로그아웃",
+    "signInWith": "{provider}로 로그인",
+    "orContinueWith": "또는 다른 방법으로 계속하기",
+    "errorTitle": "인증 오류",
+    "tryAgain": "다시 시도하기",
+    "errorCode": "오류 코드",
+    "bgAlt": "로그인 배경 이미지",
+    "catWizardAlt": "고양이 마법사",
+    "errors": {
+      "default": "인증 중 오류가 발생했습니다",
+      "accessDenied": "접근이 거부되었습니다. 계정 권한을 확인해주세요",
+      "callback": "인증 콜백 처리 중 문제가 발생했습니다",
+      "oauthSignin": "소셜 로그인 시작 중 문제가 발생했습니다",
+      "oauthCallback": "소셜 로그인 콜백 처리 중 문제가 발생했습니다",
+      "sessionRequired": "이 페이지에 접근하려면 로그인이 필요합니다"
     }
   }
 } 
