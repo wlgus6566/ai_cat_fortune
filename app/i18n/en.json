@@ -64,7 +64,21 @@
     "talismanGallery": "Lucky Talisman Collection",
     "viewMore": "View More",
     "noTalismans": "No talismans have been created yet.",
-    "viewFortune": "View Fortune"
+    "viewFortune": "View Fortune",
+    "items": "Items",
+    "likes": "Likes",
+    "comments": "Comments",
+    "appSettings": "App Settings",
+    "subscription": {
+      "title": "Subscribe with Basic",
+      "description": "Unlimited fortune consultations to check your luck!",
+      "benefits": "View Detailed Benefits"
+    },
+    "menu": {
+      "talismanGallery": "Talisman Gallery",
+      "chatArchive": "Chat Archive",
+      "aiProfile": "Create AI Profile"
+    }
   },
   "profile": {
     "pageTitle": "Edit Profile",
@@ -89,12 +103,12 @@
       "upload": "An error occurred while uploading the image."
     },
     "genderOptions": {
-      "male": "Male",
-      "female": "Female"
+      "남성": "Male",
+      "여성": "Female"
     },
     "calendarOptions": {
-      "solar": "Solar",
-      "lunar": "Lunar"
+      "양력": "Solar",
+      "음력": "Lunar"
     },
     "birthTimeUnknown": "Unknown",
     "nameUnknown": "User",
@@ -115,7 +129,8 @@
   "navigation": {
     "home": "Home",
     "chat": "Chat",
-    "profile": "My Page"
+    "profile": "My Page",
+    "talisman": "Talisman"
   },
   "talisman": {
     "pageTitle": "Talisman Gallery",

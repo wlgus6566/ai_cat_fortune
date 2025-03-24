@@ -311,7 +311,7 @@ export async function POST(request: Request) {
         })
     } catch (error) {
         console.error('Image generation error:', error)
-        return NextResponse.json(
+  return NextResponse.json(
             {
                 success: false,
                 error: {

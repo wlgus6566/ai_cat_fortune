@@ -63,9 +63,23 @@
     "notifications": "알림 설정",
     "notificationsDescription": "매일 운세 정보 알림 받기",
     "talismanGallery": "행운의 부적 모음",
-    "viewMore": "더보기",
-    "noTalismans": "아직 생성된 부적이 없습니다.",
-    "viewFortune": "운세보기"
+    "viewMore": "더 보기",
+    "noTalismans": "아직 생성된 부적 이미지가 없습니다.",
+    "viewFortune": "운세 보기",
+    "items": "보유 아이템",
+    "likes": "좋아요",
+    "comments": "댓글",
+    "appSettings": "앱 설정",
+    "subscription": {
+      "title": "Basic으로 구독하면",
+      "description": "무제한 상담 기능으로 마음껏 운세를 확인해보세요!",
+      "benefits": "혜택 자세히 보기"
+    },
+    "menu": {
+      "talismanGallery": "부적 갤러리",
+      "chatArchive": "상담 보관함",
+      "aiProfile": "AI 프로필 만들기"
+    }
   },
   "profile": {
     "pageTitle": "프로필 수정",
@@ -90,12 +104,12 @@
       "upload": "이미지 업로드 중 오류가 발생했습니다."
     },
     "genderOptions": {
-      "male": "남성",
-      "female": "여성"
+      "남성": "남성",
+      "여성": "여성"
     },
     "calendarOptions": {
-      "solar": "양력",
-      "lunar": "음력"
+      "양력": "양력",
+      "음력": "음력"
     },
     "birthTimeUnknown": "모름",
     "nameUnknown": "사용자",
@@ -116,7 +130,8 @@
   "navigation": {
     "home": "홈",
     "chat": "상담",
-    "profile": "마이페이지"
+    "profile": "마이페이지",
+    "talisman": "부적"
   },
   "talisman": {
     "headerTitle": "나의 부적 갤러리",
