@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import Link from "next/link";
 import { DailyFortune } from "@/app/lib/openai";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-
+import Image from "next/image";
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
   score: number;
@@ -174,173 +174,141 @@ const storeFortune = (userId: string, fortune: DailyFortune) => {
 export default function HomePage() {
   const { userProfile, isProfileComplete } = useUser();
   const [fortune, setFortune] = useState<DailyFortune | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fetchAttempted, setFetchAttempted] = useState(false);
   const [isApiCallInProgress, setIsApiCallInProgress] = useState(false);
+  const [hasViewedFortune, setHasViewedFortune] = useState(false);
   const t = useTranslations("fortune");
-  const initialFetchRef = useRef(false);
 
   // 오늘의 운세 데이터 가져오기
-  const fetchDailyFortune = useCallback(
-    async (forceRefresh = false) => {
-      // 이미 API 호출이 진행 중이면 리턴
-      if (isApiCallInProgress) {
-        console.log("API call is already in progress.");
-        return;
-      }
-
-      if (
-        !isProfileComplete ||
-        !userProfile ||
-        (fetchAttempted && !forceRefresh)
-      ) {
-        return;
-      }
-
-      // 이전 날짜의 운세 데이터 모두 삭제
-      if (userProfile) {
-        clearAllPreviousFortuneData(userProfile.id);
-      }
-
-      // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
-      const storedFortune = getStoredFortune(userProfile.id);
-      if (storedFortune) {
-        console.log("Loaded today's fortune data from local storage.");
-        setFortune(storedFortune);
-        setLoading(false);
-        setFetchAttempted(true);
-        return;
-      }
-
-      // 오늘 날짜의 데이터가 없는 경우에만 API 호출
-      try {
-        setLoading(true);
-        setFetchAttempted(true);
-        setIsApiCallInProgress(true); // API 호출 시작
-        console.log("API call started: /api/fortune/daily");
-
-        const response = await fetch("/api/fortune/daily", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userName: userProfile.name,
-            userProfile: userProfile,
-          }),
-        });
-
-        const responseData = await response.json();
-
-        if (!response.ok || responseData.error) {
-          throw new Error(
-            responseData.message || "Failed to get fortune data."
-          );
-        }
-
-        const dailyFortune = responseData.data;
-        console.log("API response success: Received fortune data.");
-
-        // 로컬 스토리지에 운세 데이터 저장
-        storeFortune(userProfile.id, dailyFortune);
-
-        setFortune(dailyFortune);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching today's fortune:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while loading today's fortune."
-        );
-      } finally {
-        setLoading(false);
-        setIsApiCallInProgress(false); // API 호출 종료
-        console.log("API call ended");
-      }
-    },
-    [isProfileComplete, userProfile, fetchAttempted, isApiCallInProgress]
-  );
-
-  // 초기 데이터 로딩 로직
-  useEffect(() => {
-    // strict 모드에서 중복 실행 방지
-    if (initialFetchRef.current) return;
-
-    if (isProfileComplete && userProfile && !isApiCallInProgress) {
-      // 이미 fortune 데이터가 있으면 API 호출하지 않음
-      if (fortune) {
-        return;
-      }
-
-      // 로컬 스토리지에서 오늘 운세 데이터 가져오기 시도
-      const storedFortune = getStoredFortune(userProfile.id);
-      if (storedFortune) {
-        console.log(
-          "useEffect: Loaded today's fortune data from local storage."
-        );
-        setFortune(storedFortune);
-        setLoading(false);
-        setFetchAttempted(true);
-        return;
-      }
-
-      // 저장된 데이터가 없는 경우에만 API 호출
-      console.log(
-        "useEffect: No fortune data for today in local storage. Calling API."
-      );
-      initialFetchRef.current = true;
-      fetchDailyFortune(false);
+  const fetchDailyFortune = useCallback(async () => {
+    if (isApiCallInProgress || !userProfile) {
+      return;
     }
-  }, [
-    isProfileComplete,
-    userProfile,
-    fortune,
-    isApiCallInProgress,
-    fetchDailyFortune,
-  ]);
 
-  // 이전 날짜 데이터 정리
+    try {
+      setLoading(true);
+      setIsApiCallInProgress(true);
+      console.log("API call started: /api/fortune/daily");
+
+      const response = await fetch("/api/fortune/daily", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userName: userProfile.name,
+          userProfile: userProfile,
+        }),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok || responseData.error) {
+        throw new Error(responseData.message || "Failed to get fortune data.");
+      }
+
+      const dailyFortune = responseData.data;
+      console.log("API response success: Received fortune data.");
+
+      // 로컬 스토리지에 운세 데이터 저장
+      storeFortune(userProfile.id, dailyFortune);
+
+      setFortune(dailyFortune);
+      setHasViewedFortune(true);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching today's fortune:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while loading today's fortune."
+      );
+    } finally {
+      setLoading(false);
+      setIsApiCallInProgress(false);
+      console.log("API call ended");
+    }
+  }, [userProfile, isApiCallInProgress]);
+
+  // 초기 로딩 시 저장된 운세 데이터 확인
   useEffect(() => {
     if (userProfile) {
+      const storedFortune = getStoredFortune(userProfile.id);
+      if (storedFortune) {
+        setFortune(storedFortune);
+        setHasViewedFortune(true);
+      }
       clearAllPreviousFortuneData(userProfile.id);
     }
   }, [userProfile]);
 
-  // 새로고침 핸들러
-  const handleRefresh = () => {
-    // 이미 API 호출이 진행 중이면 리턴
-    if (isApiCallInProgress) {
-      return;
-    }
-
-    // 오늘 날짜의 데이터가 있는지 확인
-    if (userProfile) {
-      const storedFortune = getStoredFortune(userProfile.id);
-
-      // 오늘 날짜의 데이터가 있으면 그 데이터를 사용
-      if (storedFortune) {
-        console.log(
-          "Today's fortune data exists in local storage. Skipping API call."
-        );
-        setFortune(storedFortune);
-        setLoading(false);
-        setFetchAttempted(true);
-        return;
-      }
-
-      // 오늘 날짜의 데이터가 없는 경우에만 API 호출
-      console.log("No fortune data for today in local storage. Calling API.");
-      setFetchAttempted(false);
-      setLoading(true);
-      fetchDailyFortune(true); // 강제 새로고침
-    }
-  };
-
   if (!isProfileComplete) {
-    // 프로필이 완성되지 않은 경우 (이미 MainLayout에서 리다이렉트 처리)
     return null;
+  }
+
+  // 운세 보기 전 초기 화면
+  if (!hasViewedFortune) {
+    return (
+      <motion.div
+        className="container max-w-screen-md mx-auto px-4 py-6 relative z-1 min-h-screen flex flex-col items-center justify-end"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Image
+          src="/bg_0.png"
+          alt={"배경이미지"}
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-[#3B2E7E] mb-4 font-heading">
+            {t("headerTitle")}
+          </h1>
+        </div>
+
+        <div className="relative mb-20">
+          {/* 말풍선 */}
+          <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl px-6 py-3 shadow-lg">
+            <p className="text-[#3B2E7E] text-lg whitespace-nowrap">
+              운세볼꺼냥? 🔮
+            </p>
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
+          </div>
+
+          {/* 캐릭터 */}
+          <motion.div
+            className="w-60 h-60 relative"
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src="/cat_origin.png"
+              alt="마법사 고양이"
+              className="w-full h-full object-contain"
+            />
+          </motion.div>
+        </div>
+
+        <motion.button
+          className="btn-magic w-full max-w-md py-4 text-lg font-medium"
+          onClick={fetchDailyFortune}
+          disabled={loading}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {loading ? "운세를 확인하는 중..." : "오늘의 운세 보기"}
+        </motion.button>
+
+        {error && (
+          <div className="mt-4 text-red-500 text-center">
+            <p>{error}</p>
+          </div>
+        )}
+      </motion.div>
+    );
   }
 
   // 각 카테고리별 색상 및 아이콘
@@ -446,12 +414,12 @@ export default function HomePage() {
           </p>
         </div>
         <motion.div
-          className="w-24 h-24 relative"
+          className="w-36 h-36 relative"
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
           <img
-            src="/cat.png"
+            src="/cat_3.png"
             alt="마법사 고양이"
             className="w-full h-full object-contain"
           />
@@ -521,7 +489,7 @@ export default function HomePage() {
                 <p className="text-red-500 mb-4">{error}</p>
                 <motion.button
                   className="btn-magic btn-shine"
-                  onClick={handleRefresh}
+                  onClick={fetchDailyFortune}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -651,7 +619,7 @@ export default function HomePage() {
                 <p className="text-[#3B2E7E] mb-4">{t("error")}</p>
                 <motion.button
                   className="btn-magic"
-                  onClick={handleRefresh}
+                  onClick={fetchDailyFortune}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
