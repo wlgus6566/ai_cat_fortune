@@ -1,8 +1,14 @@
-import { config } from 'dotenv';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 
-config({ path: '.env.local' }); // or .env.local
+// DB 연결 문자열
+const connectionString = process.env.DATABASE_URL!;
 
-const client = postgres(process.env.DATABASE_URL!);
-export const db = drizzle({ client });
+// PostgreSQL 클라이언트
+const client = postgres(connectionString);
+
+// Drizzle ORM 인스턴스 생성
+export const db: PostgresJsDatabase<typeof schema> = drizzle(client, {
+  schema,
+});

@@ -44,6 +44,7 @@
     }
   },
   "settings": {
+    "title": "Settings",
     "pageTitle": "My Page",
     "headerTitle": "Profile",
     "profileSection": "Profile Information",
@@ -64,6 +65,7 @@
     "talismanGallery": "Lucky Talisman Collection",
     "viewMore": "View More",
     "noTalismans": "No talismans have been created yet.",
+    "createTalismans": "Create Talisman",
     "viewFortune": "View Fortune",
     "items": "Items",
     "likes": "Likes",
@@ -177,4 +179,4 @@
       "sessionRequired": "You need to be signed in to access this page"
     }
   }
-} 
+}

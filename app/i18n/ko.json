@@ -45,6 +45,7 @@
     }
   },
   "settings": {
+    "title": "설정",
     "pageTitle": "마이페이지",
     "headerTitle": "프로필",
     "profileSection": "프로필 정보",
@@ -64,7 +65,8 @@
     "notificationsDescription": "매일 운세 정보 알림 받기",
     "talismanGallery": "행운의 부적 모음",
     "viewMore": "더 보기",
-    "noTalismans": "아직 생성된 부적 이미지가 없습니다.",
+    "noTalismans": "아직 생성된 부적 이미지가 없다냥.",
+    "createTalismans": "상담받고 부적 만들기",
     "viewFortune": "운세 보기",
     "items": "보유 아이템",
     "likes": "좋아요",

@@ -22,6 +22,13 @@
       "when": 1742531744589,
       "tag": "0002_heavy_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1742867386848,
+      "tag": "0003_grey_katie_power",
+      "breakpoints": true
     }
   ]
 }

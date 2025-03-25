@@ -7,6 +7,7 @@ const publicPaths = [
   '/auth/signin',
   '/auth/error',
   '/api/auth',
+  '/setup',
 ];
 
 // 정적 파일 및 API 경로 체크 헬퍼 함수

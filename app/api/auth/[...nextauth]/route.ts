@@ -62,13 +62,20 @@ export const authOptions: NextAuthOptions = {
     },
     async redirect({ url, baseUrl }) {
       console.log('[Redirect Callback]', { url, baseUrl });
+      
+      // 로그인 성공 후 기본 리다이렉트를 setup 페이지로 변경
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/setup`;
+      }
+      
       // 안전한 URL로 리다이렉션
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
       } else if (url.startsWith(baseUrl)) {
         return url;
       }
-      return baseUrl;
+      
+      return `${baseUrl}/setup`;
     },
     async signIn({ user, account, profile }) {
       console.log('[SignIn Callback] 시작', { 
