@@ -1,22 +1,22 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap");
 
 :root {
   --background: #f9f9f9;
   --foreground: #171717;
-  
+
   /* 디자인 가이드 컬러 */
   --color-primary: #990dfa;
-  --color-secondary: #3B2E7E;
-  --color-accent: #FFD966;
-  --color-bg-gradient-start: #EAE1F4;
-  --color-bg-gradient-end: #F9F9F9;
-  
+  --color-secondary: #3b2e7e;
+  --color-accent: #ffd966;
+  --color-bg-gradient-start: #eae1f4;
+  --color-bg-gradient-end: #f9f9f9;
+
   /* 상태 컬러 */
-  --color-success: #4CAF50;
-  --color-warning: #FFC107;
-  --color-error: #F44336;
+  --color-success: #4caf50;
+  --color-warning: #ffc107;
+  --color-error: #f44336;
 }
 
 @theme inline {
@@ -30,7 +30,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    
+
     /* 다크 모드 컬러 */
     --color-primary: #b15bff;
     --color-secondary: #6d62a9;
@@ -43,7 +43,7 @@
 body {
   background: var(--background);
   color: #000;
-  font-family: 'Noto Sans KR', Arial, sans-serif;
+  font-family: "Noto Sans KR", Arial, sans-serif;
   overflow-x: hidden;
 }
 
@@ -59,7 +59,7 @@ body {
 }
 
 .font-handwriting {
-  font-family: 'Nanum Pen Script', cursive;
+  font-family: "Nanum Pen Script", cursive;
 }
 
 /* 카드 스타일 */
@@ -87,16 +87,50 @@ body {
   @apply rounded-full px-6 py-3 font-medium shadow-md transition-all;
   background: linear-gradient(135deg, var(--color-primary), #7609c1);
   color: white;
+  position: absolute;
+  left: 50%;
+  bottom: 105px;
+  z-index: 10;
+  width: 90%;
+  transform: translateX(-50%) !important;
 }
 
-.btn-magic:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(153, 13, 250, 0.3);
+/* 마법 로딩 이펙트 */
+/* .btn-magic-loading {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.btn-magic:active {
-  transform: translateY(0);
+.btn-magic-loading::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
+  animation: sparkle-spin 1.5s linear infinite;
+  z-index: 0;
 }
+
+@keyframes sparkle-spin {
+  0% {
+    transform: rotate(0deg) translate(0, 0);
+  }
+  100% {
+    transform: rotate(360deg) translate(0, 0);
+  }
+}
+
+.btn-magic-loading span {
+  position: relative;
+  z-index: 1;
+} */
 
 /* 반짝이 효과 */
 .btn-shine {
@@ -105,7 +139,7 @@ body {
 }
 
 .btn-shine::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
@@ -125,7 +159,8 @@ body {
   0% {
     transform: translateX(-100%) rotate(30deg);
   }
-  20%, 100% {
+  20%,
+  100% {
     transform: translateX(100%) rotate(30deg);
   }
 }
@@ -139,8 +174,15 @@ body {
 
 /* 타이핑 애니메이션 */
 @keyframes typingDot {
-  0%, 100% { opacity: 0.3; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-2px); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
 }
 
 .typing-dot {
@@ -164,8 +206,15 @@ body {
 
 /* 별 깜빡임 애니메이션 */
 @keyframes twinkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.7); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
 }
 
 .animate-twinkle {
@@ -208,24 +257,43 @@ body {
 /* 부적 애니메이션 클래스 */
 .animate-talisman-appear {
   animation: talismanUnroll 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-             talismanShake 0.8s ease-in-out 1.2s;
+    talismanShake 0.8s ease-in-out 1.2s;
 }
 
 /* 흔들림 애니메이션 */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 .animate-shake {
-  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 /* 둥둥 떠다니는 애니메이션 */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
@@ -246,12 +314,16 @@ body {
 }
 
 .magic-bg::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(153, 13, 250, 0.08) 0%, rgba(153, 13, 250, 0) 70%);
+  background: radial-gradient(
+    circle at center,
+    rgba(153, 13, 250, 0.08) 0%,
+    rgba(153, 13, 250, 0) 70%
+  );
   z-index: -1;
 }

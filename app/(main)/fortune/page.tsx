@@ -181,13 +181,14 @@ export default function HomePage() {
   const t = useTranslations("fortune");
 
   // 고양이 상태 관리
-  const [catState, setCatState] = useState<"origin" | "concern" | "wink">(
-    "origin"
-  );
-  const catStates: ("origin" | "concern" | "wink")[] = [
+  const [catState, setCatState] = useState<
+    "origin" | "concern" | "wink" | "hi"
+  >("origin");
+  const catStates: ("origin" | "concern" | "wink" | "hi")[] = [
     "origin",
     "concern",
     "wink",
+    "hi",
   ];
   const getRandomCatState = () => {
     const randomIndex = Math.floor(Math.random() * catStates.length);
@@ -202,14 +203,14 @@ export default function HomePage() {
   };
   // 말풍선 메시지 풀과 해당하는 고양이 상태
   const speechMessages = [
-    { text: "오늘 운세를 점쳐볼까냥~?🪄", state: "origin" as const },
+    { text: "오늘 운세를 점쳐볼까냥~?", state: "origin" as const },
     { text: "마법이 느껴지는 하루가 될지도 몰라!🦄", state: "wink" as const },
     { text: "고민이 있다면, 내가 들어줄게냥.", state: "concern" as const },
     {
       text: "💫 오늘은 뭔가 특별해보인다냥~",
       state: "origin" as const,
     },
-    { text: "별들이 속삭이고 있어, 열어보자!", state: "wink" as const },
+    { text: "별들이 속삭이고 있어, 열어보자!", state: "hi" as const },
   ];
 
   // 랜덤 메시지 선택 함수
@@ -225,44 +226,40 @@ export default function HomePage() {
     let animationTimer: NodeJS.Timeout;
 
     const runAnimation = () => {
-      // 랜덤 메시지 선택
       const message = getRandomMessage();
 
-      // 선택된 메시지에 맞는 상태 설정
       setCatState(message.state);
       setBubbleMessage(message.text);
       setShowSpeechBubble(true);
 
-      // 6초 후 말풍선 숨기기
+      // 8초 후 말풍선 숨기기
       animationTimer = setTimeout(() => {
         setShowSpeechBubble(false);
 
-        // 1초 후 기본 상태로 돌아가기
+        // 2초 후 기본 상태로 복귀
         animationTimer = setTimeout(() => {
           setCatState("origin");
 
-          // 4초 후 애니메이션 반복
-          animationTimer = setTimeout(runAnimation, 4000);
-        }, 1000);
-      }, 6000);
+          // 5초 후 다음 애니메이션 실행
+          animationTimer = setTimeout(runAnimation, 5000);
+        }, 2000);
+      }, 8000);
     };
 
-    // 애니메이션 시작 (처음 로드 시 2초 후 시작)
+    // 처음 시작할 때도 동일하게 반영
     const initialDelay = setTimeout(() => {
       const firstMessage = getRandomMessage();
       setCatState(firstMessage.state);
       setBubbleMessage(firstMessage.text);
       setShowSpeechBubble(true);
 
-      // 첫 번째 말풍선 7초 후 시작
       animationTimer = setTimeout(() => {
         setShowSpeechBubble(false);
         setCatState("origin");
 
-        // 3초 후 애니메이션 실행
-        animationTimer = setTimeout(runAnimation, 3000);
-      }, 7000);
-    }, 2000);
+        animationTimer = setTimeout(runAnimation, 5000); // 처음도 5초 기다려서 반복
+      }, 8000);
+    }, 2000); // 첫 시작은 그대로 2초 뒤에 실행
 
     // 컴포넌트 unmount 시 타이머 정리
     return () => {
@@ -283,7 +280,7 @@ export default function HomePage() {
 
     // 0.5초 후 말풍선 다시 표시
     setTimeout(() => {
-      setBubbleMessage("운세를 읽고 있어요...");
+      setBubbleMessage("운세를 읽고 있다냥...");
       setShowSpeechBubble(true);
 
       // 1초 후에 API 호출 시작
@@ -366,6 +363,8 @@ export default function HomePage() {
         return "/cat_concern.png";
       case "wink":
         return "/cat_wink.png";
+      case "hi":
+        return "/cat_hi.png";
       default:
         return "/cat_origin.png";
     }
@@ -387,13 +386,7 @@ export default function HomePage() {
           className="object-cover"
           priority
         />
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[#3B2E7E] mb-4 font-heading">
-            {t("headerTitle")}
-          </h1>
-        </div>
-
-        <div className="relative mb-24">
+        <div className="relative">
           {/* 말풍선 */}
           <AnimatePresence>
             {showSpeechBubble && (
@@ -414,34 +407,31 @@ export default function HomePage() {
 
           {/* 캐릭터 */}
           <motion.div
-            className="w-60 h-60 relative cursor-pointer"
+            className="w-60 h-60 mt-5 relative cursor-pointer"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            onClick={handleCatClick} // 여기!
+            onClick={handleCatClick}
           >
             <AnimatePresence mode="wait">
               <motion.img
                 key={catState}
                 src={getCatImage()}
                 alt="마법사 고양이"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
                 className="w-full h-full object-contain"
               />
             </AnimatePresence>
           </motion.div>
         </div>
-
         <motion.button
-          className="btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1"
+          className={`btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1 ${
+            loading ? "btn-magic-loading" : ""
+          }`}
           onClick={fetchDailyFortune}
           disabled={loading}
-          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.02 }}
         >
-          {loading ? "운세를 확인하는 중..." : "오늘의 운세 보기"}
+          <span>{loading ? "운세를 확인하는 중..." : "오늘의 운세 보기"}</span>
         </motion.button>
 
         {error && (
@@ -556,13 +546,14 @@ export default function HomePage() {
           </p>
         </div>
         <motion.div
-          className="w-36 h-36 relative"
+          className="w-30 h-30 relative"
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
-          <img
+          <Image
             src="/cat_origin.png"
             alt="마법사 고양이"
+            fill
             className="w-full h-full object-contain"
           />
         </motion.div>
