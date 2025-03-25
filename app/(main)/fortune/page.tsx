@@ -5,7 +5,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import Link from "next/link";
 import { DailyFortune } from "@/app/lib/openai";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
@@ -180,56 +180,155 @@ export default function HomePage() {
   const [hasViewedFortune, setHasViewedFortune] = useState(false);
   const t = useTranslations("fortune");
 
+  // 고양이 상태 관리
+  const [catState, setCatState] = useState<"origin" | "concern" | "wink">(
+    "origin"
+  );
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [bubbleMessage, setBubbleMessage] = useState("");
+
+  // 말풍선 메시지 풀과 해당하는 고양이 상태
+  const speechMessages = [
+    { text: "오늘 운세를 점쳐볼까냥~?🪄", state: "origin" as const },
+    { text: "마법이 느껴지는 하루가 될지도 몰라!🦄", state: "wink" as const },
+    { text: "고민이 있다면, 내가 들어줄게냥.", state: "concern" as const },
+    {
+      text: "💫 오늘은 뭔가 특별해보인다냥~",
+      state: "origin" as const,
+    },
+    { text: "별들이 속삭이고 있어, 열어보자!", state: "wink" as const },
+  ];
+
+  // 랜덤 메시지 선택 함수
+  const getRandomMessage = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * speechMessages.length);
+    return speechMessages[randomIndex];
+  }, [speechMessages]);
+
+  // 고양이 애니메이션 시퀀스
+  useEffect(() => {
+    if (hasViewedFortune) return; // 운세를 이미 봤으면 애니메이션 중지
+
+    let animationTimer: NodeJS.Timeout;
+
+    const runAnimation = () => {
+      // 랜덤 메시지 선택
+      const message = getRandomMessage();
+
+      // 선택된 메시지에 맞는 상태 설정
+      setCatState(message.state);
+      setBubbleMessage(message.text);
+      setShowSpeechBubble(true);
+
+      // 6초 후 말풍선 숨기기
+      animationTimer = setTimeout(() => {
+        setShowSpeechBubble(false);
+
+        // 1초 후 기본 상태로 돌아가기
+        animationTimer = setTimeout(() => {
+          setCatState("origin");
+
+          // 4초 후 애니메이션 반복
+          animationTimer = setTimeout(runAnimation, 4000);
+        }, 1000);
+      }, 6000);
+    };
+
+    // 애니메이션 시작 (처음 로드 시 2초 후 시작)
+    const initialDelay = setTimeout(() => {
+      const firstMessage = getRandomMessage();
+      setCatState(firstMessage.state);
+      setBubbleMessage(firstMessage.text);
+      setShowSpeechBubble(true);
+
+      // 첫 번째 말풍선 7초 후 시작
+      animationTimer = setTimeout(() => {
+        setShowSpeechBubble(false);
+        setCatState("origin");
+
+        // 3초 후 애니메이션 실행
+        animationTimer = setTimeout(runAnimation, 3000);
+      }, 7000);
+    }, 2000);
+
+    // 컴포넌트 unmount 시 타이머 정리
+    return () => {
+      clearTimeout(animationTimer);
+      clearTimeout(initialDelay);
+    };
+  }, [hasViewedFortune, getRandomMessage]);
+
   // 오늘의 운세 데이터 가져오기
   const fetchDailyFortune = useCallback(async () => {
-    if (isApiCallInProgress || !userProfile) {
+    if (isApiCallInProgress || !userProfile || loading) {
       return;
     }
 
-    try {
-      setLoading(true);
-      setIsApiCallInProgress(true);
-      console.log("API call started: /api/fortune/daily");
+    // 클릭 시 말풍선 숨기기 및 윙크 상태로 변경
+    setShowSpeechBubble(false);
+    setCatState("wink");
 
-      const response = await fetch("/api/fortune/daily", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userName: userProfile.name,
-          userProfile: userProfile,
-        }),
-      });
+    // 0.5초 후 말풍선 다시 표시
+    setTimeout(() => {
+      setBubbleMessage("운세를 읽고 있어요...");
+      setShowSpeechBubble(true);
 
-      const responseData = await response.json();
+      // 1초 후에 API 호출 시작
+      setTimeout(async () => {
+        try {
+          setLoading(true);
+          setIsApiCallInProgress(true);
+          console.log("API call started: /api/fortune/daily");
 
-      if (!response.ok || responseData.error) {
-        throw new Error(responseData.message || "Failed to get fortune data.");
-      }
+          const response = await fetch("/api/fortune/daily", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userName: userProfile.name,
+              userProfile: userProfile,
+            }),
+          });
 
-      const dailyFortune = responseData.data;
-      console.log("API response success: Received fortune data.");
+          const responseData = await response.json();
 
-      // 로컬 스토리지에 운세 데이터 저장
-      storeFortune(userProfile.id, dailyFortune);
+          if (!response.ok || responseData.error) {
+            throw new Error(
+              responseData.message || "Failed to get fortune data."
+            );
+          }
 
-      setFortune(dailyFortune);
-      setHasViewedFortune(true);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching today's fortune:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "An error occurred while loading today's fortune."
-      );
-    } finally {
-      setLoading(false);
-      setIsApiCallInProgress(false);
-      console.log("API call ended");
-    }
-  }, [userProfile, isApiCallInProgress]);
+          const dailyFortune = responseData.data;
+          console.log("API response success: Received fortune data.");
+
+          // 로컬 스토리지에 운세 데이터 저장
+          storeFortune(userProfile.id, dailyFortune);
+
+          // 페이드 아웃 효과를 위한 지연
+          setTimeout(() => {
+            setFortune(dailyFortune);
+            setHasViewedFortune(true);
+            setError(null);
+          }, 500);
+        } catch (error) {
+          console.error("Error fetching today's fortune:", error);
+          setError(
+            error instanceof Error
+              ? error.message
+              : "An error occurred while loading today's fortune."
+          );
+          // 에러 시 기본 상태로 복귀
+          setCatState("origin");
+          setShowSpeechBubble(false);
+        } finally {
+          setLoading(false);
+          setIsApiCallInProgress(false);
+          console.log("API call ended");
+        }
+      }, 1000);
+    }, 500);
+  }, [userProfile, isApiCallInProgress, loading]);
 
   // 초기 로딩 시 저장된 운세 데이터 확인
   useEffect(() => {
@@ -247,11 +346,23 @@ export default function HomePage() {
     return null;
   }
 
+  // 고양이 이미지 선택
+  const getCatImage = () => {
+    switch (catState) {
+      case "concern":
+        return "/cat_concern.png";
+      case "wink":
+        return "/cat_wink.png";
+      default:
+        return "/cat_origin.png";
+    }
+  };
+
   // 운세 보기 전 초기 화면
   if (!hasViewedFortune) {
     return (
       <motion.div
-        className="container max-w-screen-md mx-auto px-4 py-6 relative z-1 min-h-screen flex flex-col items-center justify-end"
+        className="container max-w-screen-md mx-auto px-4 py-6 relative z-1 min-h-screen flex flex-col items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -269,31 +380,44 @@ export default function HomePage() {
           </h1>
         </div>
 
-        <div className="relative mb-20">
+        <div className="relative mb-24">
           {/* 말풍선 */}
-          <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl px-6 py-3 shadow-lg">
-            <p className="text-[#3B2E7E] text-lg whitespace-nowrap">
-              운세볼꺼냥? 🔮
-            </p>
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
-          </div>
+          <AnimatePresence>
+            {showSpeechBubble && (
+              <motion.div
+                className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl px-6 py-3 shadow-lg z-10"
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p className="text-[#3B2E7E] text-lg whitespace-nowrap">
+                  {bubbleMessage}
+                </p>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* 캐릭터 */}
           <motion.div
             className="w-60 h-60 relative"
-            animate={{ y: [0, -5, 0] }}
+            animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           >
-            <img
-              src="/cat_origin.png"
-              alt="마법사 고양이"
-              className="w-full h-full object-contain"
-            />
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={catState}
+                src={getCatImage()}
+                alt="마법사 고양이"
+                className="w-full h-full object-contain"
+              />
+            </AnimatePresence>
           </motion.div>
         </div>
 
         <motion.button
-          className="btn-magic w-full max-w-md py-4 text-lg font-medium"
+          className="btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1"
           onClick={fetchDailyFortune}
           disabled={loading}
           whileHover={{ scale: 1.02 }}
@@ -419,7 +543,7 @@ export default function HomePage() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
           <img
-            src="/cat_3.png"
+            src="/cat_origin.png"
             alt="마법사 고양이"
             className="w-full h-full object-contain"
           />
