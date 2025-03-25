@@ -184,9 +184,22 @@ export default function HomePage() {
   const [catState, setCatState] = useState<"origin" | "concern" | "wink">(
     "origin"
   );
+  const catStates: ("origin" | "concern" | "wink")[] = [
+    "origin",
+    "concern",
+    "wink",
+  ];
+  const getRandomCatState = () => {
+    const randomIndex = Math.floor(Math.random() * catStates.length);
+    return catStates[randomIndex];
+  };
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [bubbleMessage, setBubbleMessage] = useState("");
-
+  const handleCatClick = () => {
+    const newState = getRandomCatState();
+    setCatState(newState);
+    setShowSpeechBubble(false); // 말풍선은 숨겨줘
+  };
   // 말풍선 메시지 풀과 해당하는 고양이 상태
   const speechMessages = [
     { text: "오늘 운세를 점쳐볼까냥~?🪄", state: "origin" as const },
@@ -401,15 +414,20 @@ export default function HomePage() {
 
           {/* 캐릭터 */}
           <motion.div
-            className="w-60 h-60 relative"
+            className="w-60 h-60 relative cursor-pointer"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            onClick={handleCatClick} // 여기!
           >
             <AnimatePresence mode="wait">
               <motion.img
                 key={catState}
                 src={getCatImage()}
                 alt="마법사 고양이"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 className="w-full h-full object-contain"
               />
             </AnimatePresence>
