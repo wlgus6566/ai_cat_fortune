@@ -207,7 +207,7 @@ export default function TalismanPopup({
                 darkMode ? "text-white" : "text-amber-800"
               }`}
             >
-              님의 행운의 부적
+              행운의 부적
             </h2>
           </div>
 

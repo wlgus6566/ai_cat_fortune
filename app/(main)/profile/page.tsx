@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
 import TalismanPopup from "@/app/components/TalismanPopup";
+import { Talisman } from "@/app/type/types";
 
 export default function ProfilePage() {
   const { userProfile, isAuthenticated } = useUser();
@@ -16,7 +17,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [talismans, setTalismans] = useState<string[]>([]);
+  const [talismans, setTalismans] = useState<Talisman[]>([]);
 
   // 로그인 되어있지 않으면 로그인 페이지로 리디렉션
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function ProfilePage() {
           "/images/talisman2.png",
           "/images/talisman3.png",
         ];
-        setTalismans(sampleTalismans);
+        setTalismans(sampleTalismans.map((url) => ({ publicUrl: url })));
       }
     };
 
@@ -112,39 +113,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] pb-16">
-      {/* 배경 장식 요소 */}
-      <div className="absolute top-20 left-5 w-24 h-24 opacity-10 z-0">
-        <motion.div
-          className="absolute w-full h-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
-        >
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-[#990dfa] rounded-full"
-              style={{
-                left: "50%",
-                top: "50%",
-                transform: `rotate(${i * 45}deg) translate(40px) rotate(${
-                  i * 45
-                }deg)`,
-              }}
-            />
-          ))}
-        </motion.div>
-      </div>
-
-      <div className="absolute top-40 right-10 text-[#FFD966] opacity-70">
-        {/* <motion.div
-          animate={{ scale: [1, 1.2, 1], rotate: 90 }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="text-base"
-        >
-          ✨
-        </motion.div> */}
-      </div>
-
       {/* 헤더 */}
       <PageHeader
         title={t("settings.pageTitle")}
@@ -192,13 +160,13 @@ export default function ProfilePage() {
                   <div className="relative mb-3">
                     {userProfile.profileImageUrl ? (
                       <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-md">
-                        {/* <Image
+                        <Image
                           src={userProfile.profileImageUrl}
                           alt={userProfile.name || t("profile.nameUnknown")}
                           width={80}
                           height={80}
                           className="w-full h-full object-cover"
-                        /> */}
+                        />
                       </div>
                     ) : (
                       <div className="w-20 h-20 bg-[#EAE1F4] rounded-full flex items-center justify-center border-2 border-white shadow-md">
@@ -341,15 +309,15 @@ export default function ProfilePage() {
 
               {talismans.length > 0 ? (
                 <div className="grid grid-cols-3 gap-3">
-                  {talismans.map((talismanUrl, index) => (
+                  {talismans.map((talisman, index) => (
                     <div
                       key={index}
                       className="border border-[#990dfa]/10 rounded-xl overflow-hidden cursor-pointer relative shadow-sm hover:shadow-md transition-all"
-                      onClick={() => handleTalismanClick(talismanUrl)}
+                      onClick={() => handleTalismanClick(talisman.publicUrl)}
                     >
                       <div className="w-full" style={{ aspectRatio: "9/16" }}>
                         <Image
-                          src={talismanUrl}
+                          src={talisman.publicUrl}
                           alt={`${t("talisman.talismanNumber", {
                             number: index + 1,
                           })}`}
