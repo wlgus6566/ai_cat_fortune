@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import Link from "next/link";
 import { DailyFortune } from "@/app/lib/openai";
@@ -179,6 +179,7 @@ export default function HomePage() {
   const [fetchAttempted, setFetchAttempted] = useState(false);
   const [isApiCallInProgress, setIsApiCallInProgress] = useState(false);
   const t = useTranslations("fortune");
+  const initialFetchRef = useRef(false);
 
   // 오늘의 운세 데이터 가져오기
   const fetchDailyFortune = useCallback(
@@ -264,6 +265,9 @@ export default function HomePage() {
 
   // 초기 데이터 로딩 로직
   useEffect(() => {
+    // strict 모드에서 중복 실행 방지
+    if (initialFetchRef.current) return;
+
     if (isProfileComplete && userProfile && !isApiCallInProgress) {
       // 이미 fortune 데이터가 있으면 API 호출하지 않음
       if (fortune) {
@@ -286,6 +290,7 @@ export default function HomePage() {
       console.log(
         "useEffect: No fortune data for today in local storage. Calling API."
       );
+      initialFetchRef.current = true;
       fetchDailyFortune(false);
     }
   }, [
