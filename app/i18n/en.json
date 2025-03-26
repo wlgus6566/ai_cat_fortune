@@ -159,7 +159,7 @@
     "saveNewTab": "Image opened in new tab. Long press to save.",
     "bringLuck": "Carrying this talisman will bring you luck.",
     "collectionTitle": "My Lucky Talisman Collection",
-    "collectionDescription": "View all your lucky talismans created through AI fortune consultations. Click on a talisman to see it enlarged.",
+    "collectionDescription": "View all your lucky talismans created through AI fortune consultations.",
     "emptyState": "No talisman images have been created yet.",
     "emptyStateDescription": "Create lucky talismans through chat consultations!",
     "talismanNumber": "Lucky Talisman #{number}",

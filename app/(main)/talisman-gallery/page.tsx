@@ -185,32 +185,14 @@ export default function TalismanGalleryPage() {
           transition={{ duration: 0.5 }}
         >
           {/* 설명 섹션 - 왼쪽 정렬로 변경 */}
-          <motion.section variants={itemVariants} className={`mb-6`}>
-            <div className="flex items-start">
-              <span
-                className={`text-xl mr-3 ${
-                  darkMode ? "text-purple-400" : "text-purple-600"
-                }`}
-              >
-                ✨
-              </span>
-              <div>
-                <h3
-                  className={`text-lg font-semibold ${
-                    darkMode ? "text-white" : "text-gray-800"
-                  } mb-2 text-left`}
-                >
-                  {t("talisman.collectionTitle")}
-                </h3>
-                <p
-                  className={`text-sm ${
-                    darkMode ? "text-gray-300" : "text-gray-600"
-                  } text-left`}
-                >
-                  {t("talisman.collectionDescription")}
-                </p>
-              </div>
-            </div>
+          <motion.section variants={itemVariants} className={`mb-2`}>
+            <p
+              className={`text-xs ${
+                darkMode ? "text-gray-300" : "text-gray-600"
+              } text-center`}
+            >
+              {t("talisman.collectionDescription")}
+            </p>
           </motion.section>
 
           {/* 본문 섹션 */}

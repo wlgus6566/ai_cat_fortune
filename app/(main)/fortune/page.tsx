@@ -613,7 +613,7 @@ export default function HomePage() {
           </p>
         </div>
         <motion.div
-          className="w-30 h-30 relative"
+          className=" relative"
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >

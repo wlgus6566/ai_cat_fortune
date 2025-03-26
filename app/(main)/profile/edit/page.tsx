@@ -332,7 +332,7 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] pb-16">
+    <div className="min-h-screen pb-16">
       {/* 헤더 */}
       <PageHeader
         title={t("pageTitle")}
@@ -340,7 +340,7 @@ export default function ProfileEditPage() {
         className="bg-white shadow-md relative z-10"
       />
 
-      <div className="container mx-auto max-w-screen-md">
+      <div className="container mx-auto max-w-screen-md bg-white">
         <div className="p-4">
           {message && (
             <div className="mb-6 p-4 bg-green-50 text-green-800 rounded-lg border-l-4 border-green-500 flex items-center">

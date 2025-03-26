@@ -148,7 +148,7 @@
     "headerTitle": "나의 부적 갤러리",
     "description": "행운을 담은 부적 모음",
     "collectionTitle": "나의 행운 부적 컬렉션",
-    "collectionDescription": "AI 운세 상담을 통해 생성된 행운의 부적들을 모아볼 수 있습니다. 부적을 클릭하면 확대하여 볼 수 있어요.",
+    "collectionDescription": "AI 운세 상담을 통해 생성된 행운의 부적들을 모아볼 수 있습니다.",
     "emptyState": "아직 생성된 부적 이미지가 없습니다.",
     "emptyStateDescription": "채팅 상담을 통해 행운의 부적을 생성해보세요!",
     "talismanNumber": "행운의 부적 #{number}",

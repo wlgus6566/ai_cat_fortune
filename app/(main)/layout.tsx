@@ -70,7 +70,8 @@ export default function MainLayout({
 
   return (
     <TalismanProvider>
-      <div className="flex flex-col h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] pb-16">
+      <div className="flex flex-col h-screen pb-16">
+        <div className="absolute top-0 left-0 h-50 w-full bg-gradient-to-b from-[#e6d0ff] to-[#F9F9F9] "></div>
         <main className="flex-grow relative z-1">{children}</main>
 
         {isProfileComplete && (
