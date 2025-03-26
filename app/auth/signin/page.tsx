@@ -43,7 +43,7 @@ export default function SignInPage() {
       {/* 배경 이미지 */}
       <div className="absolute inset-0 w-full h-full">
         <Image
-          src="/login_bg_1.jpeg"
+          src="/bg_login.webp"
           alt={t("bgAlt")}
           fill
           className="object-cover"

@@ -10,130 +10,79 @@ const replicate = new Replicate({
 
 // 다양한 부적 프롬프트 템플릿
 const talismanTemplates = {
-  // 기본 템플릿
-  default: (concern: string) =>
-    `A modern pastel illustration of a Japanese-style lucky charm (omamori) with a cute, chubby cat character, expressing encouragement related to: "${concern}". The charm includes Japanese aesthetic elements, decorative knots, and spiritual symbols. The talisman displays relevant encouraging words in English. Style: Kawaii, pastel colors, soft edges, warm and magical feeling. Aspect ratio 9:16.`,
+  default: (phrase: string) =>
+    `A modern pastel illustration of a Japanese-style lucky charm (omamori) with a cute, chubby cat character. Includes encouraging words: "${phrase}". The charm includes Japanese aesthetic elements, decorative knots, and spiritual symbols. Style: Kawaii, pastel colors, soft edges, warm and magical feeling. Aspect ratio 9:16.`,
 
-  // 연애 관련 템플릿
-  romance: (concern: string) =>
-    `A beautifully designed Japanese love charm (omamori) with heart motifs and soft pink/red colors. Features a cute cat character and romantic symbols. The talisman includes an encouraging message about love: "${concern}". Style: Romantic, dreamy, kawaii, with soft pastel colors. Aspect ratio 9:16.`,
+  romance: (phrase: string) =>
+    `A beautifully designed Japanese love charm (omamori) with heart motifs and soft pink/red colors. Features a cute cat character and romantic symbols. Includes a loving message: "${phrase}". Style: Romantic, dreamy, kawaii, with soft pastel colors. Aspect ratio 9:16.`,
 
-  // 직장/커리어 관련 템플릿
-  career: (concern: string) =>
-    `A professional-looking Japanese success charm (omamori) with elements symbolizing career growth and achievement. Features a determined-looking cat character in business attire. Includes an encouraging message about career: "${concern}". Style: Professional with playful elements, blue and gold color scheme. Aspect ratio 9:16.`,
+  career: (phrase: string) =>
+    `A professional-looking Japanese success charm (omamori) with elements symbolizing career growth and achievement. Features a determined-looking cat character in business attire. Includes a motivational message: "${phrase}". Style: Professional with playful elements, blue and gold color scheme. Aspect ratio 9:16.`,
 
-  // 금전 관련 템플릿
-  money: (concern: string) =>
-    `A prosperity-focused Japanese wealth charm (omamori) with gold coins, money symbols and lucky elements. Features a happy cat character with a coin. Includes an encouraging message about finances: "${concern}". Style: Abundant, prosperous, with green and gold colors. Aspect ratio 9:16.`,
+  money: (phrase: string) =>
+    `A prosperity-focused Japanese wealth charm (omamori) with gold coins, money symbols and lucky elements. Features a happy cat character with a coin. Includes a wealth-affirming message: "${phrase}". Style: Abundant, prosperous, with green and gold colors. Aspect ratio 9:16.`,
 
-  // 심리 관련 템플릿
-  psychology: (concern: string) =>
-    `A calming Japanese healing charm (omamori) with elements symbolizing mental peace and balance. Features a meditating cat character with serene expression. Includes a comforting message about mental well-being: "${concern}". Style: Serene, soothing, with purples and blues. Aspect ratio 9:16.`,
+  psychology: (phrase: string) =>
+    `A calming Japanese healing charm (omamori) with elements symbolizing mental peace and balance. Features a meditating cat character with serene expression. Includes a comforting message: "${phrase}". Style: Serene, soothing, with purples and blues. Aspect ratio 9:16.`,
 
-  // 인간관계 관련 템플릿
-  relationships: (concern: string) =>
-    `A harmonious Japanese friendship charm (omamori) with elements symbolizing connection and social bonds. Features multiple cute cat characters together. Includes an encouraging message about relationships: "${concern}". Style: Warm, connected, with yellows and oranges. Aspect ratio 9:16.`,
+  relationships: (phrase: string) =>
+    `A harmonious Japanese friendship charm (omamori) with elements symbolizing connection and social bonds. Features multiple cute cat characters together. Includes a warm message: "${phrase}". Style: Warm, connected, with yellows and oranges. Aspect ratio 9:16.`,
 
-  // 라이프스타일 관련 템플릿
-  lifestyle: (concern: string) =>
-    `A balanced Japanese lifestyle charm (omamori) with elements symbolizing harmony and life enjoyment. Features a content cat character engaged in various activities. Includes an encouraging message about life balance: "${concern}". Style: Harmonious, diverse, with balanced color palette. Aspect ratio 9:16.`,
+  lifestyle: (phrase: string) =>
+    `A balanced Japanese lifestyle charm (omamori) with elements symbolizing harmony and life enjoyment. Features a content cat character engaged in various activities. Includes a positive message: "${phrase}". Style: Harmonious, diverse, with balanced color palette. Aspect ratio 9:16.`,
 };
 
 // 응원 메시지 (영어)
-const encouragingPhrases = {
+const encouragingPhrases: Record<string, string[]> = {
   romance: [
-    "Love will find its way",
-    "Your heart knows the answer",
-    "Romantic joy awaits you",
-    "Trust in love's timing",
-    "Your heart deserves happiness",
+    "Love is blooming for you 🌸",
+    "Trust your heart 💖",
+    "Romance is in the air 💌",
+    "Your love story unfolds 💕",
+    "Someone special is thinking of you ✨",
   ],
   career: [
-    "Success is your journey",
-    "Your talents will shine",
-    "Each challenge builds strength",
-    "Your work matters",
-    "Progress, not perfection",
+    "Your growth is unstoppable 💼",
+    "New opportunities await 🚀",
+    "Your talents shine bright 🌟",
+    "Step forward with confidence 💪",
+    "Success is calling 📈",
   ],
   money: [
-    "Prosperity flows to you",
-    "Financial wisdom guides you",
-    "Abundance is your birthright",
-    "Money serves your dreams",
-    "You create lasting wealth",
+    "Abundance flows to you 💰",
+    "Your wealth is growing 🍀",
+    "Every coin counts ✨",
+    "Smart moves bring fortune 🧠",
+    "You attract prosperity 🌈",
   ],
   psychology: [
-    "Inner peace is your strength",
-    "Your mind grows stronger each day",
-    "Healing happens in its time",
-    "You are enough, just as you are",
-    "Each step forward matters",
+    "Peace begins with you 🧘‍♀️",
+    "You are enough 🌿",
+    "Let your mind rest ☁️",
+    "Breathe. You're doing well 🍃",
+    "Healing is happening 🌸",
   ],
   relationships: [
-    "Connections bring joy",
-    "You're worthy of understanding",
-    "Healthy boundaries bring peace",
-    "True friends see your light",
-    "Your voice deserves to be heard",
+    "You're surrounded by love 💞",
+    "True friends see your light 🌟",
+    "Your connections are precious 🤝",
+    "Kindness comes back to you 💫",
+    "Warmth is all around you 🧣",
   ],
   lifestyle: [
-    "Balance creates harmony",
-    "Your choices shape your joy",
-    "Small changes, big impact",
-    "Your path is uniquely yours",
-    "Today's choices shape tomorrow",
+    "Live your rhythm 🎵",
+    "Balance brings joy ⚖️",
+    "Little joys matter 🧸",
+    "Slow down and smile 😊",
+    "Your path is beautiful 🌈",
   ],
-};
-
-// 상세 고민 매핑 (한글->영어)
-const concernDetailsKoToEn = {
-  // 심리
-  자기계발: "Self-improvement",
-  "인생의 의미": "Life Purpose",
-  "내가 가는 길이 맞을까": "Am I on the Right Path?",
-  "꿈이 없는 것 같아": "Feeling Like I Have No Dreams",
-  "목표 없는 불안감": "Anxiety Without Goals",
-  "내가 뭘 원하는지 모르겠어": "Not Knowing What I Want",
-  불안: "Anxiety",
-  우울: "Depression",
-  자존감: "Self-esteem",
-
-  // 연애
-  짝사랑: "Crush",
-  고백: "When to Confess",
-  "친구에서 연인으로": "Friends to Lovers?",
-  밀당: "Playing Hard to Get",
-  "상대방 마음": "How They Feel About Me",
-  "초반 연애": "Early Dating",
-  "발전 가능성": "Will This Develop into a Real Relationship?",
-  "연락 빈도": "Optimal Contact Frequency",
-
-  // 직장/커리어
-  퇴사: "Resignation Thoughts",
-  이직: "Job Change Preparation",
-  "직장 내 인간관계": "Workplace Relationships",
-  번아웃: "Burnout",
-  연봉협상: "Salary Negotiation",
-
-  // 금전
-  "월급 관리": "Salary Management",
-  저축: "Savings",
-  부업: "Side Jobs",
-  "투자 실패": "Investment Failures",
-  빚: "Debt Concerns",
-
-  // 인간관계
-  "가족 갈등": "Family Conflicts",
-  "친구 문제": "Friend Issues",
-  "의사소통 문제": "Communication Problems",
-  "모임 스트레스": "Social Gathering Stress",
-  "SNS 피로감": "Social Media Fatigue",
-
-  // 라이프스타일
-  워라밸: "Work-life Balance",
-  "취미 찾기": "Finding Hobbies",
-  "미래 걱정": "Future Concerns",
-  "독립 생활": "Independent Living",
+  default: [
+    "Magic is all around ✨",
+    "Believe in your story 📖",
+    "Today holds surprises 🌟",
+    "You’ve got this 💫",
+    "Shine your light 🌞",
+  ],
 };
 
 // 카테고리에 맞는 랜덤 응원 메시지 가져오기
@@ -173,7 +122,7 @@ function getRandomPhrase(category: string): string {
 }
 
 // 카테고리에 맞는 프롬프트 템플릿 선택
-function getTemplateByCategory(category: string, concern: string): string {
+function getTemplateByCategory(category: string): string {
   // 카테고리 매핑 (영어 및 한글 카테고리 지원)
   const mappedCategory =
     category.toLowerCase().includes("romance") ||
@@ -199,51 +148,14 @@ function getTemplateByCategory(category: string, concern: string): string {
       ? "lifestyle"
       : "default";
 
-  // 영어로 카테고리 변환 (한글인 경우)
-  const categoryMapping = {
-    연애: "Romance",
-    직장: "Career",
-    커리어: "Career",
-    금전: "Money",
-    돈: "Money",
-    심리: "Psychology",
-    인간관계: "Relationships",
-    라이프스타일: "Lifestyle",
-    생활: "Lifestyle",
-  };
+  const phrase = getRandomPhrase(mappedCategory);
 
-  // 한글 카테고리 및 세부 고민을 영어로 변환
-  let translatedConcern = concern;
-
-  // 카테고리 변환
-  Object.entries(categoryMapping).forEach(([korean, english]) => {
-    const regex = new RegExp(korean, "g");
-    translatedConcern = translatedConcern.replace(regex, english);
-  });
-
-  // 세부 고민 변환
-  Object.entries(concernDetailsKoToEn).forEach(([korean, english]) => {
-    if (translatedConcern.includes(korean)) {
-      // 한글 세부 고민을 영어로 변환 (정확한 매칭을 위해 전체 문자열 체크)
-      const regex = new RegExp(korean, "g");
-      translatedConcern = translatedConcern.replace(regex, english);
-    }
-  });
-
-  // 응원 메시지 생성
-  const encouragingPhrase = getRandomPhrase(mappedCategory);
-  console.log("응원 메시지:", encouragingPhrase);
-
-  // 상세 고민과 응원 메시지 조합
-  const combinedMessage = `${translatedConcern}. ${encouragingPhrase}!`;
-
-  // 템플릿 함수 가져오기
   const templateFn =
     talismanTemplates[mappedCategory as keyof typeof talismanTemplates] ||
     talismanTemplates.default;
 
   // 템플릿 적용
-  return templateFn(combinedMessage);
+  return templateFn(phrase);
 }
 
 export async function POST(request: Request) {
@@ -276,7 +188,7 @@ export async function POST(request: Request) {
     const mainCategory = concern.split(",")[0].trim();
 
     // 카테고리에 맞는 프롬프트 생성
-    const prompt = getTemplateByCategory(mainCategory, concern);
+    const prompt = getTemplateByCategory(mainCategory);
     console.log("이미지 생성 프롬프트:", prompt);
 
     // Replicate API 호출 시 추가 매개변수 설정
