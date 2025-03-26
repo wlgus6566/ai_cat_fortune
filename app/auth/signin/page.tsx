@@ -17,7 +17,7 @@ export default function SignInPage() {
     console.log("SignIn Page Params:", {
       callbackUrl,
       error,
-      allParams: Object.fromEntries(searchParams.entries())
+      allParams: Object.fromEntries(searchParams.entries()),
     });
   }, [searchParams, callbackUrl, error]);
 
@@ -25,7 +25,7 @@ export default function SignInPage() {
     try {
       setIsLoading(true);
       console.log(`로그인 시도: ${provider}, 콜백 URL: ${callbackUrl}`);
-      
+
       // 소셜 로그인 시도
       await signIn(provider, {
         callbackUrl: callbackUrl || "/",
@@ -52,37 +52,48 @@ export default function SignInPage() {
       </div>
       {/* 로그인 버튼 */}
       <div className="mb-20 relative w-full max-w-md z-100 flex flex-col items-center gap-4 px-8">
-            <button 
-              onClick={() => handleOAuthSignIn("google")}
-              disabled={isLoading}
-              className="w-full py-3 bg-white rounded-full text-center text-gray-800 font-medium shadow-md"
-            >
-              {t("signInWith", { provider: "Google" })}
-            </button>
-            
-            <button 
-              onClick={() => handleOAuthSignIn("kakao")}
-              disabled={isLoading}
-              className="w-full py-3 bg-[#FEE500] rounded-full text-center text-gray-800 font-medium shadow-md"
-            >
-              {t("signInWith", { provider: "Kakao" })}
-            </button>
-          
-          {error && (
-            <div className="w-full mt-2 p-2 bg-red-100 text-red-800 text-sm rounded-md text-center">
-              {error}: {t("errors.default")}
-            </div>
+        <button
+          onClick={() => handleOAuthSignIn("google")}
+          disabled={isLoading}
+          className="w-full py-3 bg-white rounded-full text-center text-gray-800 font-medium shadow-md flex items-center justify-center"
+        >
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-purple-600 rounded-full animate-spin mr-2"></div>
+          ) : (
+            t("signInWith", { provider: "Google" })
           )}
+        </button>
+
+        <button
+          onClick={() => handleOAuthSignIn("kakao")}
+          disabled={isLoading}
+          className="w-full py-3 bg-[#FEE500] rounded-full text-center text-gray-800 font-medium shadow-md flex items-center justify-center"
+        >
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-purple-600 rounded-full animate-spin mr-2"></div>
+          ) : (
+            t("signInWith", { provider: "Kakao" })
+          )}
+        </button>
+
+        {error && (
+          <div className="w-full mt-2 p-2 bg-red-100 text-red-800 text-sm rounded-md text-center">
+            {error}: {t("errors.default")}
+          </div>
+        )}
       </div>
-      
+
       {/* 디버깅 정보 (개발용, 화면에 표시되지 않음) */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NODE_ENV === "development" && (
         <div className="hidden">
           <p>콜백 URL: {callbackUrl || "없음"}</p>
           <p>환경: {process.env.NODE_ENV}</p>
-          <p>NextAuth URL: {process.env.NEXT_PUBLIC_NEXTAUTH_URL || "설정되지 않음"}</p>
+          <p>
+            NextAuth URL:{" "}
+            {process.env.NEXT_PUBLIC_NEXTAUTH_URL || "설정되지 않음"}
+          </p>
         </div>
       )}
     </div>
   );
-} 
+}

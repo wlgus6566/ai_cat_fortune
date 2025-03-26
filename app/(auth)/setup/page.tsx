@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@/app/contexts/UserContext";
 import { Gender, CalendarType, BirthTime } from "@/app/type/types";
@@ -46,6 +46,9 @@ const validateName = (
 export default function SetupPage() {
   const { isProfileComplete, createUserProfile } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // callbackUrl이 있으면 사용하고 없으면 fortune 페이지로 설정
+  const callbackUrl = searchParams.get("callbackUrl") || "/fortune";
 
   const [name, setName] = useState("");
   const [gender, setGender] = useState<Gender>("남성");
@@ -62,9 +65,9 @@ export default function SetupPage() {
   // 프로필이 이미 완성된 경우 메인 페이지로 리다이렉트
   useEffect(() => {
     if (isProfileComplete) {
-      router.push("/");
+      router.push(callbackUrl);
     }
-  }, [isProfileComplete, router]);
+  }, [isProfileComplete, router, callbackUrl]);
 
   // 연도 옵션 생성 (1930년부터 현재까지)
   const currentYear = new Date().getFullYear();
@@ -169,7 +172,7 @@ export default function SetupPage() {
   const handleImageSelection = () => {
     // 실제 구현에서는 파일 업로드 로직이 필요하지만,
     // 이 예제에서는 간단히 기본 이미지 URL을 사용합니다.
-    setProfileImage("/profile_placeholder.png");
+    setProfileImage("/profile_placeholder.webp");
   };
 
   // 프로필 저장
@@ -209,8 +212,14 @@ export default function SetupPage() {
       profileImageUrl: profileImage || undefined,
     });
 
-    // 메인 페이지로 이동
-    router.push("/");
+    // 콜백 URL로 이동 (showFortune=true 파라미터 추가)
+    // callbackUrl이 /fortune이면 showFortune 파라미터 추가
+    const destinationUrl =
+      callbackUrl === "/fortune"
+        ? `${callbackUrl}?showFortune=true`
+        : callbackUrl;
+
+    router.push(destinationUrl);
   };
 
   // 단계별 컴포넌트 렌더링

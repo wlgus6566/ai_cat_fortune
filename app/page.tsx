@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useUser } from '@/app/contexts/UserContext';
-import { useSession } from 'next-auth/react';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/app/contexts/UserContext";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
   const { isProfileComplete, isAuthenticated, isLoaded } = useUser();
@@ -17,18 +17,14 @@ export default function Home() {
 
     // 로그인 상태 확인
     if (isAuthenticated) {
-      console.log('사용자 인증됨, 프로필 완성 여부:', isProfileComplete);
-      
-      // 프로필 완성 여부에 따라 리디렉션
-      if (isProfileComplete) {
-        router.push('/fortune');
-      } else {
-        router.push('/setup');
-      }
-    } else if (status === 'unauthenticated') {
+      console.log("사용자 인증됨, 프로필 완성 여부:", isProfileComplete);
+
+      // 수정: 프로필 완성 여부와 상관없이 fortune 페이지로 리디렉션
+      router.push("/fortune");
+    } else if (status === "unauthenticated") {
       // 인증되지 않은 경우 로그인 페이지로 이동
-      console.log('인증되지 않은 사용자, 로그인 페이지로 이동');
-      router.push('/auth/signin');
+      console.log("인증되지 않은 사용자, 로그인 페이지로 이동");
+      router.push("/auth/signin");
     }
   }, [isProfileComplete, isAuthenticated, isLoaded, router, status]);
 

@@ -30,11 +30,6 @@ export default function MainLayout({
     if (isLoaded) {
       // 초기 로드 상태를 false로 변경
       setIsInitialLoad(false);
-
-      // 프로필 수정 페이지가 아니고, 프로필이 완성되지 않은 경우에만 리다이렉트
-      if (!isProfileComplete && !pathname.includes("/profile/edit")) {
-        router.push("/profile/edit");
-      }
     }
   }, [isProfileComplete, router, isLoaded, pathname]);
 
@@ -63,91 +58,93 @@ export default function MainLayout({
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] pb-16">
       <main className="flex-grow relative z-1">{children}</main>
-
-      {/* 하단 네비게이션 바 */}
-      <nav className="fixed bottom-0 w-full bg-white shadow-lg z-10 rounded-t-xl overflow-hidden">
-        <div className="max-w-screen-md mx-auto flex justify-around">
-          {/* 홈 버튼 */}
-          <Link
-            href="/"
-            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-              pathname === "/"
-                ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
-                : "text-gray-600 hover:bg-[#990dfa]/5"
-            }`}
-          >
-            <HomeIcon
-              className={`h-6 w-6 ${
-                pathname === "/" ? "text-[#990dfa]" : "text-gray-600"
+      {isProfileComplete && (
+        <nav className="fixed bottom-0 w-full bg-white shadow-lg z-10 rounded-t-xl overflow-hidden">
+          <div className="max-w-screen-md mx-auto flex justify-around">
+            {/* 홈 버튼 */}
+            <Link
+              href="/"
+              className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
+                pathname === "/"
+                  ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
+                  : "text-gray-600 hover:bg-[#990dfa]/5"
               }`}
-            />
-            <span className="text-xs mt-1 font-medium">
-              {t("navigation.home")}
-            </span>
-          </Link>
+            >
+              <HomeIcon
+                className={`h-6 w-6 ${
+                  pathname === "/" ? "text-[#990dfa]" : "text-gray-600"
+                }`}
+              />
+              <span className="text-xs mt-1 font-medium">
+                {t("navigation.home")}
+              </span>
+            </Link>
 
-          {/* 채팅 버튼 */}
-          <Link
-            href="/chat"
-            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-              pathname.includes("/chat")
-                ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
-                : "text-gray-600 hover:bg-[#990dfa]/5"
-            }`}
-          >
-            <ChatBubbleOvalLeftIcon
-              className={`h-6 w-6 ${
-                pathname.includes("/chat") ? "text-[#990dfa]" : "text-gray-600"
+            {/* 채팅 버튼 */}
+            <Link
+              href="/chat"
+              className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
+                pathname.includes("/chat")
+                  ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
+                  : "text-gray-600 hover:bg-[#990dfa]/5"
               }`}
-            />
-            <span className="text-xs mt-1 font-medium">
-              {t("navigation.chat")}
-            </span>
-          </Link>
+            >
+              <ChatBubbleOvalLeftIcon
+                className={`h-6 w-6 ${
+                  pathname.includes("/chat")
+                    ? "text-[#990dfa]"
+                    : "text-gray-600"
+                }`}
+              />
+              <span className="text-xs mt-1 font-medium">
+                {t("navigation.chat")}
+              </span>
+            </Link>
 
-          {/* 부적 갤러리 버튼 */}
-          <Link
-            href="/talisman-gallery"
-            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-              pathname.includes("/talisman-gallery")
-                ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
-                : "text-gray-600 hover:bg-[#990dfa]/5"
-            }`}
-          >
-            <SparklesIcon
-              className={`h-6 w-6 ${
+            {/* 부적 갤러리 버튼 */}
+            <Link
+              href="/talisman-gallery"
+              className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
                 pathname.includes("/talisman-gallery")
-                  ? "text-[#990dfa]"
-                  : "text-gray-600"
+                  ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
+                  : "text-gray-600 hover:bg-[#990dfa]/5"
               }`}
-            />
-            <span className="text-xs mt-1 font-medium">
-              {t("navigation.talisman")}
-            </span>
-          </Link>
+            >
+              <SparklesIcon
+                className={`h-6 w-6 ${
+                  pathname.includes("/talisman-gallery")
+                    ? "text-[#990dfa]"
+                    : "text-gray-600"
+                }`}
+              />
+              <span className="text-xs mt-1 font-medium">
+                {t("navigation.talisman")}
+              </span>
+            </Link>
 
-          {/* 프로필 버튼 */}
-          <Link
-            href="/profile"
-            className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-              pathname.includes("/profile")
-                ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
-                : "text-gray-600 hover:bg-[#990dfa]/5"
-            }`}
-          >
-            <UserIcon
-              className={`h-6 w-6 ${
+            {/* 프로필 버튼 */}
+            <Link
+              href="/profile"
+              className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
                 pathname.includes("/profile")
-                  ? "text-[#990dfa]"
-                  : "text-gray-600"
+                  ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
+                  : "text-gray-600 hover:bg-[#990dfa]/5"
               }`}
-            />
-            <span className="text-xs mt-1 font-medium">
-              {t("navigation.profile")}
-            </span>
-          </Link>
-        </div>
-      </nav>
+            >
+              <UserIcon
+                className={`h-6 w-6 ${
+                  pathname.includes("/profile")
+                    ? "text-[#990dfa]"
+                    : "text-gray-600"
+                }`}
+              />
+              <span className="text-xs mt-1 font-medium">
+                {t("navigation.profile")}
+              </span>
+            </Link>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }

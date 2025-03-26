@@ -12,7 +12,7 @@ import TalismanPopup from "@/app/components/TalismanPopup";
 import { Talisman } from "@/app/type/types";
 
 export default function ProfilePage() {
-  const { userProfile, isAuthenticated } = useUser();
+  const { userProfile, isAuthenticated, isProfileComplete } = useUser();
   const t = useTranslations();
   const router = useRouter();
   const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
@@ -70,6 +70,11 @@ export default function ProfilePage() {
   // 설정 페이지로 이동
   const handleGoToSettings = () => {
     router.push("/settings");
+  };
+
+  // setup 페이지로 이동
+  const handleCreateProfile = () => {
+    router.push("/setup");
   };
 
   // 부적 클릭 처리
@@ -153,9 +158,9 @@ export default function ProfilePage() {
           animate="visible"
         >
           {/* 프로필 정보 섹션 */}
-          <motion.div className="mb-6" variants={itemVariants}>
+          <div className="mb-6">
             <div className="bg-white rounded-3xl overflow-hidden transition-all flex flex-col items-center py-6 px-4 mt-4 shadow-md">
-              {userProfile && (
+              {isProfileComplete && userProfile ? (
                 <>
                   <div className="relative mb-3">
                     {userProfile.profileImageUrl ? (
@@ -190,220 +195,259 @@ export default function ProfilePage() {
                   <h3 className="font-bold text-lg text-[#3B2E7E] mb-1 font-heading">
                     {userProfile.name || t("profile.nameUnknown")}
                   </h3>
-                </>
-              )}
 
-              {/* 프로필 정보 */}
-              <div className="flex justify-center mt-4 w-full max-w-sm">
-                <div className="w-full bg-[#F9F9F9] rounded-xl p-4 shadow-sm">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <p className="text-sm text-[#3B2E7E]/70">
-                        {t("profile.gender")}
-                      </p>
-                      <p className="text-sm font-medium text-[#3B2E7E]">
-                        {userProfile?.gender
-                          ? t(
-                              `profile.genderOptions.${
-                                userProfile.gender === "여성"
-                                  ? "female"
-                                  : "male"
-                              }`
-                            )
-                          : "-"}
-                      </p>
-                    </div>
-                    <div className="flex justify-between">
-                      <p className="text-sm text-[#3B2E7E]/70">
-                        {t("profile.birthDate")}
-                      </p>
-                      <p className="text-sm font-medium text-[#3B2E7E]">
-                        {userProfile?.birthDate ? userProfile.birthDate : "-"}
-                      </p>
-                    </div>
-                    <div className="flex justify-between">
-                      <p className="text-sm text-[#3B2E7E]/70">
-                        {t("profile.calendarType")}
-                      </p>
-                      <p className="text-sm font-medium text-[#3B2E7E]">
-                        {userProfile?.calendarType
-                          ? t(
-                              `profile.calendarOptions.${
-                                userProfile.calendarType === "양력"
-                                  ? "solar"
-                                  : "lunar"
-                              }`
-                            )
-                          : "-"}
-                      </p>
-                    </div>
-                    <div className="flex justify-between">
-                      <p className="text-sm text-[#3B2E7E]/70">
-                        {t("profile.birthTime")}
-                      </p>
-                      <p className="text-sm font-medium text-[#3B2E7E]">
-                        {userProfile?.birthTime ||
-                          t("profile.birthTimeUnknown")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* 구독 섹션 */}
-          <motion.div className="mb-6" variants={itemVariants}>
-            <div className="bg-purple-500 rounded-3xl shadow-md overflow-hidden p-4 text-white">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
-                    />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg">
-                    {t("settings.subscription.title")}
-                  </h3>
-                  <p className="text-sm text-white/90 mb-3">
-                    {t("settings.subscription.description")}
-                  </p>
-                  <button className="px-5 py-2 bg-white text-[#990dfa] rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-all">
-                    {t("settings.subscription.benefits")}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* 부적 갤러리 미리보기 */}
-          <motion.div className="mb-6" variants={itemVariants}>
-            <div className="bg-white rounded-3xl shadow-md overflow-hidden p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <span className="w-8 h-8 mr-3 flex items-center justify-center">
-                    ✨
-                  </span>
-                  <span className="font-medium text-[#3B2E7E]">
-                    {t("settings.menu.talismanGallery")}
-                  </span>
-                </div>
-                <Link
-                  href="/talisman-gallery"
-                  className="text-sm text-[#990dfa] font-medium hover:underline"
-                >
-                  {t("settings.viewMore")}
-                </Link>
-              </div>
-
-              {talismans.length > 0 ? (
-                <div className="grid grid-cols-3 gap-3">
-                  {talismans.map((talisman, index) => (
-                    <div
-                      key={index}
-                      className="border border-[#990dfa]/10 rounded-xl overflow-hidden cursor-pointer relative shadow-sm hover:shadow-md transition-all"
-                      onClick={() => handleTalismanClick(talisman.publicUrl)}
-                    >
-                      <div className="w-full" style={{ aspectRatio: "9/16" }}>
-                        <Image
-                          src={talisman.publicUrl}
-                          alt={`${t("talisman.talismanNumber", {
-                            number: index + 1,
-                          })}`}
-                          width={150}
-                          height={260}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                          className="hover:scale-105 transition-transform duration-300"
-                        />
+                  {/* 프로필 정보 */}
+                  <div className="flex justify-center mt-4 w-full max-w-sm">
+                    <div className="w-full bg-[#F9F9F9] rounded-xl p-4 shadow-sm">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <p className="text-sm text-[#3B2E7E]/70">
+                            {t("profile.gender")}
+                          </p>
+                          <p className="text-sm font-medium text-[#3B2E7E]">
+                            {userProfile?.gender
+                              ? t(
+                                  `profile.genderOptions.${
+                                    userProfile.gender === "여성"
+                                      ? "female"
+                                      : "male"
+                                  }`
+                                )
+                              : "-"}
+                          </p>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm text-[#3B2E7E]/70">
+                            {t("profile.birthDate")}
+                          </p>
+                          <p className="text-sm font-medium text-[#3B2E7E]">
+                            {userProfile?.birthDate
+                              ? userProfile.birthDate
+                              : "-"}
+                          </p>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm text-[#3B2E7E]/70">
+                            {t("profile.calendarType")}
+                          </p>
+                          <p className="text-sm font-medium text-[#3B2E7E]">
+                            {userProfile?.calendarType
+                              ? t(
+                                  `profile.calendarOptions.${
+                                    userProfile.calendarType === "양력"
+                                      ? "solar"
+                                      : "lunar"
+                                  }`
+                                )
+                              : "-"}
+                          </p>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm text-[#3B2E7E]/70">
+                            {t("profile.birthTime")}
+                          </p>
+                          <p className="text-sm font-medium text-[#3B2E7E]">
+                            {userProfile?.birthTime ||
+                              t("profile.birthTimeUnknown")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </>
               ) : (
-                <div className="text-center py-6 text-[#3B2E7E]/60">
-                  <p>{t("settings.noTalismans")}</p>
-                  <button className="text-sm font-medium underline mt-2">
-                    상담받고 부적 만들기
+                <div className="flex flex-col items-center py-6 px-4">
+                  <div className="w-20 h-20 bg-[#EAE1F4] rounded-full flex items-center justify-center mb-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-[#990dfa]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-lg text-[#3B2E7E] mb-3">
+                    {t("profile.createProfileTitle")}
+                  </h3>
+                  <p className="text-center text-[#3B2E7E]/70 mb-5 max-w-xs">
+                    {t("profile.createProfileMessage")}
+                  </p>
+                  <button
+                    className="btn-magic py-3 px-8 rounded-xl"
+                    onClick={handleCreateProfile}
+                  >
+                    {t("profile.createProfileButton")}
                   </button>
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
+
+          {/* 구독 섹션 */}
+          {isProfileComplete && (
+            <motion.div className="mb-6" variants={itemVariants}>
+              <div className="bg-purple-500 rounded-3xl shadow-md overflow-hidden p-4 text-white">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">
+                      {t("settings.subscription.title")}
+                    </h3>
+                    <p className="text-sm text-white/90 mb-3">
+                      {t("settings.subscription.description")}
+                    </p>
+                    <button className="px-5 py-2 bg-white text-[#990dfa] rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-all">
+                      {t("settings.subscription.benefits")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* 부적 갤러리 미리보기 */}
+          {isProfileComplete && (
+            <motion.div className="mb-6" variants={itemVariants}>
+              <div className="bg-white rounded-3xl shadow-md overflow-hidden p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <span className="w-8 h-8 mr-3 flex items-center justify-center">
+                      ✨
+                    </span>
+                    <span className="font-medium text-[#3B2E7E]">
+                      {t("settings.menu.talismanGallery")}
+                    </span>
+                  </div>
+                  <Link
+                    href="/talisman-gallery"
+                    className="text-sm text-[#990dfa] font-medium hover:underline"
+                  >
+                    {t("settings.viewMore")}
+                  </Link>
+                </div>
+
+                {talismans.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-3">
+                    {talismans.map((talisman, index) => (
+                      <div
+                        key={index}
+                        className="border border-[#990dfa]/10 rounded-xl overflow-hidden cursor-pointer relative shadow-sm hover:shadow-md transition-all"
+                        onClick={() => handleTalismanClick(talisman.publicUrl)}
+                      >
+                        <div className="w-full" style={{ aspectRatio: "9/16" }}>
+                          <Image
+                            src={talisman.publicUrl}
+                            alt={`${t("talisman.talismanNumber", {
+                              number: index + 1,
+                            })}`}
+                            width={150}
+                            height={260}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                            className="hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-[#3B2E7E]/60">
+                    <p>{t("settings.noTalismans")}</p>
+                    <button className="text-sm font-medium underline mt-2">
+                      상담받고 부적 만들기
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
 
           {/* 메뉴 항목들 */}
-          <motion.div className="mb-6" variants={itemVariants}>
-            <div className="bg-white rounded-3xl shadow-md overflow-hidden">
-              <div>
-                <Link
-                  href="/chat-archive"
-                  className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-8 h-8 mr-3 flex items-center justify-center">
-                      💬
-                    </span>
-                    <span className="text-[#3B2E7E]">
-                      {t("settings.menu.chatArchive")}
-                    </span>
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-[#3B2E7E]/60"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+          {isProfileComplete && (
+            <motion.div className="mb-6" variants={itemVariants}>
+              <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+                <div>
+                  <Link
+                    href="/chat-archive"
+                    className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </Link>
-              </div>
-              <div className="border-t border-[#990dfa]/10">
-                <Link
-                  href="/ai-profile"
-                  className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-8 h-8 mr-3 flex items-center justify-center">
-                      🤖
-                    </span>
-                    <span className="text-[#3B2E7E]">
-                      {t("settings.menu.aiProfile")}
-                    </span>
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-[#3B2E7E]/60"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                    <div className="flex items-center">
+                      <span className="w-8 h-8 mr-3 flex items-center justify-center">
+                        💬
+                      </span>
+                      <span className="text-[#3B2E7E]">
+                        {t("settings.menu.chatArchive")}
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-[#3B2E7E]/60"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Link>
+                </div>
+                <div className="border-t border-[#990dfa]/10">
+                  <Link
+                    href="/ai-profile"
+                    className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </Link>
+                    <div className="flex items-center">
+                      <span className="w-8 h-8 mr-3 flex items-center justify-center">
+                        🤖
+                      </span>
+                      <span className="text-[#3B2E7E]">
+                        {t("settings.menu.aiProfile")}
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-[#3B2E7E]/60"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Link>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 

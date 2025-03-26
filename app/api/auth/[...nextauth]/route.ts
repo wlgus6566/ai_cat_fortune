@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, token }) {
-      console.log('[Session Callback]', { session, token });
+      console.log("[Session Callback]", { session, token });
       // 세션에 사용자 ID 추가
       if (session.user && token.sub) {
         session.user.id = token.sub;
@@ -52,7 +52,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user, account }) {
-      console.log('[JWT Callback]', { token, user, account });
+      console.log("[JWT Callback]", { token, user, account });
       // 초기 로그인 시 사용자 정보를 토큰에 추가
       if (user) {
         token.id = user.id;
@@ -61,61 +61,68 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async redirect({ url, baseUrl }) {
-      console.log('[Redirect Callback]', { url, baseUrl });
-      
-      // 로그인 성공 후 기본 리다이렉트를 setup 페이지로 변경
+      console.log("[Redirect Callback]", { url, baseUrl });
+
+      // 로그인 성공 후 기본 리다이렉트를 fortune 페이지로 변경
       if (url === baseUrl || url === `${baseUrl}/`) {
-        return `${baseUrl}/setup`;
+        return `${baseUrl}/fortune`;
       }
-      
+
       // 안전한 URL로 리다이렉션
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
       } else if (url.startsWith(baseUrl)) {
         return url;
       }
-      
-      return `${baseUrl}/setup`;
+
+      return `${baseUrl}/fortune`;
     },
     async signIn({ user, account, profile }) {
-      console.log('[SignIn Callback] 시작', { 
-        user: user ? { 
-          id: user.id, 
-          name: user.name, 
-          email: user.email, 
-          image: user.image 
-        } : 'user 없음', 
-        account: account ? { 
-          provider: account.provider, 
-          type: account.type 
-        } : 'account 없음', 
-        profileExists: !!profile 
+      console.log("[SignIn Callback] 시작", {
+        user: user
+          ? {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+            }
+          : "user 없음",
+        account: account
+          ? {
+              provider: account.provider,
+              type: account.type,
+            }
+          : "account 없음",
+        profileExists: !!profile,
       });
-      
+
       // 유효한 사용자 데이터가 아예 없는 경우만 실패 처리
       if (!user) {
-        console.error('[SignIn Callback] 사용자 정보 없음');
+        console.error("[SignIn Callback] 사용자 정보 없음");
         return false;
       }
-      
+
       // 이메일이 없어도 로그인 성공 처리
       if (!user.email) {
-        console.warn('[SignIn Callback] 이메일 없음, 그래도 로그인 허용:', user.name || 'unknown');
+        console.warn(
+          "[SignIn Callback] 이메일 없음, 그래도 로그인 허용:",
+          user.name || "unknown"
+        );
       }
-      
+
       // 항상 성공으로 처리
-      console.log('[SignIn Callback] 성공 처리');
+      console.log("[SignIn Callback] 성공 처리");
       return true;
-    }
+    },
   },
   pages: {
-    signIn: '/auth/signin',
-    signOut: '/auth/signout',
-    error: '/auth/error',
+    signIn: "/auth/signin",
+    signOut: "/auth/signout",
+    error: "/auth/error",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST }; 
+export { handler as GET, handler as POST };

@@ -7,6 +7,7 @@ import { DailyFortune } from "@/app/lib/openai";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
   score: number;
@@ -179,6 +180,11 @@ export default function HomePage() {
   const [isApiCallInProgress, setIsApiCallInProgress] = useState(false);
   const [hasViewedFortune, setHasViewedFortune] = useState(false);
   const t = useTranslations("fortune");
+  const router = useRouter();
+
+  // URL 파라미터 확인을 위한 훅 추가
+  const searchParams = useSearchParams();
+  const shouldShowFortune = searchParams.get("showFortune") === "true";
 
   // 고양이 상태 관리
   const [catState, setCatState] = useState<
@@ -274,6 +280,13 @@ export default function HomePage() {
       return;
     }
 
+    // 프로필 완성 여부 확인 - 완성되지 않은 경우 setup 페이지로 리디렉션
+    if (!isProfileComplete) {
+      console.log("프로필이 완성되지 않아 setup 페이지로 이동합니다.");
+      router.push("/setup");
+      return;
+    }
+
     // 클릭 시 말풍선 숨기기 및 윙크 상태로 변경
     setShowSpeechBubble(false);
     setCatState("wink");
@@ -338,7 +351,7 @@ export default function HomePage() {
         }
       }, 1000);
     }, 500);
-  }, [userProfile, isApiCallInProgress, loading]);
+  }, [userProfile, isApiCallInProgress, loading, isProfileComplete, router]);
 
   // 초기 로딩 시 저장된 운세 데이터 확인
   useEffect(() => {
@@ -352,9 +365,28 @@ export default function HomePage() {
     }
   }, [userProfile]);
 
-  if (!isProfileComplete) {
-    return null;
-  }
+  // setup 페이지에서 돌아온 경우 자동으로 운세 불러오기
+  useEffect(() => {
+    if (
+      shouldShowFortune &&
+      isProfileComplete &&
+      userProfile &&
+      !fortune &&
+      !loading &&
+      !isApiCallInProgress
+    ) {
+      console.log("setup 페이지에서 돌아와 자동으로 운세를 불러옵니다.");
+      fetchDailyFortune();
+    }
+  }, [
+    shouldShowFortune,
+    isProfileComplete,
+    userProfile,
+    fortune,
+    loading,
+    isApiCallInProgress,
+    fetchDailyFortune,
+  ]);
 
   // 고양이 이미지 선택
   const getCatImage = () => {
@@ -607,15 +639,6 @@ export default function HomePage() {
                 <p className="mt-4 text-[#3B2E7E] font-medium">
                   {t("loading")}
                 </p>
-                <div className="mt-2 flex space-x-1">
-                  {[...Array(3)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-1 w-1 rounded-full bg-[#990dfa] animate-bounce"
-                      style={{ animationDelay: `${i * 0.15}s` }}
-                    ></div>
-                  ))}
-                </div>
               </div>
             ) : error ? (
               <div className="text-center py-8">
@@ -649,7 +672,7 @@ export default function HomePage() {
                         ))}
                       </div>
                     </div>
-                    <p className="text-gray-700 font-handwriting text-xl leading-relaxed">
+                    <p className="text-gray-700 text-md mt-2">
                       {fortune.overall.description}
                     </p>
                   </div>

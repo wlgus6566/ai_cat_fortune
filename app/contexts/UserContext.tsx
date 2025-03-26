@@ -63,21 +63,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
                   error
                 );
               }
-
-              // 기본 프로필 생성
-              const now = new Date().toISOString();
-              setUserProfile({
-                id: session.user.id as string,
-                userId: session.user.id as string,
-                name: session.user.name || "",
-                gender: null as Gender,
-                birthDate: "",
-                calendarType: null as CalendarType,
-                birthTime: "모름" as BirthTime,
-                profileImageUrl: session.user.image || "",
-                createdAt: now,
-                updatedAt: now,
-              });
               return;
             }
 
@@ -90,43 +75,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 birthDate: data.birth_date || "",
                 calendarType: (data.calendar_type as CalendarType) || null,
                 birthTime: (data.birth_time as BirthTime) || "모름",
-                profileImageUrl:
-                  data.profile_image_url || session.user.image || "",
+                profileImageUrl: data.profile_image_url || "",
                 createdAt: data.created_at,
                 updatedAt: data.updated_at,
-              });
-            } else {
-              // 프로필이 없으면 세션 정보로 기본 프로필 생성
-              const now = new Date().toISOString();
-              setUserProfile({
-                id: session.user.id as string,
-                userId: session.user.id as string,
-                name: session.user.name || "",
-                gender: null as Gender,
-                birthDate: "",
-                calendarType: null as CalendarType,
-                birthTime: "모름" as BirthTime,
-                profileImageUrl: session.user.image || "",
-                createdAt: now,
-                updatedAt: now,
               });
             }
           } catch (error) {
             // Supabase 연결 오류 발생 시 기본 프로필로 진행
             console.error("Supabase 연결 중 오류가 발생했습니다:", error);
-            const now = new Date().toISOString();
-            setUserProfile({
-              id: session.user.id as string,
-              userId: session.user.id as string,
-              name: session.user.name || "",
-              gender: null as Gender,
-              birthDate: "",
-              calendarType: null as CalendarType,
-              birthTime: "모름" as BirthTime,
-              profileImageUrl: session.user.image || "",
-              createdAt: now,
-              updatedAt: now,
-            });
+            // const now = new Date().toISOString();
+            // setUserProfile({
+            //   id: session.user.id as string,
+            //   userId: session.user.id as string,
+            //   name: session.user.name || "",
+            //   gender: null as Gender,
+            //   birthDate: "",
+            //   calendarType: null as CalendarType,
+            //   birthTime: "모름" as BirthTime,
+            //   profileImageUrl: session.user.image || "",
+            //   createdAt: now,
+            //   updatedAt: now,
+            // });
           }
         } else {
           // 세션이 없으면 로컬 스토리지에서 프로필 확인
@@ -384,10 +353,48 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // 사용자 프로필 삭제
   const clearUserProfile = async () => {
     try {
+      console.log("프로필 삭제 시작:", { userId: session?.user?.id });
+
+      // 로컬 상태 초기화
       setUserProfile(null);
+
+      // 로컬 스토리지에서 삭제
       if (typeof window !== "undefined") {
         localStorage.removeItem(USER_PROFILE_KEY);
+        console.log("로컬 스토리지에서 프로필 삭제 완료");
       }
+
+      // Supabase에서 프로필 삭제 (인증된 사용자인 경우)
+      if (session?.user?.id) {
+        try {
+          const supabase = createSupabaseClient();
+
+          // 데이터베이스에서 프로필 삭제
+          const { error } = await supabase
+            .from("user_profiles")
+            .delete()
+            .eq("id", session.user.id);
+
+          if (error) {
+            console.warn("Supabase에서 프로필 삭제 실패:", error);
+          } else {
+            console.log("Supabase에서 프로필 삭제 성공");
+          }
+        } catch (error) {
+          console.warn(
+            "Supabase 연결 실패, 로컬에서만 프로필이 삭제됩니다:",
+            error
+          );
+        }
+      } else {
+        console.log("인증된 사용자가 아니므로 Supabase 삭제 과정 건너뜀");
+      }
+
+      // 추가 확인: 상태가 정확히 초기화되었는지 확인
+      console.log("프로필 삭제 완료, 최종 상태:", {
+        userProfile: null,
+        isAuthenticated: isAuthenticated,
+      });
     } catch (error) {
       console.error("사용자 프로필을 삭제하는 중 오류가 발생했습니다:", error);
       throw error;
