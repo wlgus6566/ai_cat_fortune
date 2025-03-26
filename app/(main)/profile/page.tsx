@@ -8,15 +8,14 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
-import TalismanPopup from "@/app/components/TalismanPopup";
+import { useTalisman } from "@/app/contexts/TalismanContext";
 import { Talisman } from "@/app/type/types";
 
 export default function ProfilePage() {
   const { userProfile, isAuthenticated, isProfileComplete } = useUser();
   const t = useTranslations();
   const router = useRouter();
-  const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
-  const [showPopup, setShowPopup] = useState(false);
+  const { openTalisman } = useTalisman();
   const [talismans, setTalismans] = useState<Talisman[]>([]);
 
   // 로그인 되어있지 않으면 로그인 페이지로 리디렉션
@@ -77,10 +76,14 @@ export default function ProfilePage() {
     router.push("/setup");
   };
 
-  // 부적 클릭 처리
+  // 부적 클릭 처리 - Context API 사용
   const handleTalismanClick = (imageUrl: string) => {
-    setSelectedTalisman(imageUrl);
-    setShowPopup(true);
+    openTalisman({
+      imageUrl,
+      userName: userProfile?.name,
+      title: t("talisman.popup.title"),
+      darkMode: false,
+    });
   };
 
   // 애니메이션 변수
@@ -450,16 +453,6 @@ export default function ProfilePage() {
           )}
         </motion.div>
       </div>
-
-      {/* 부적 팝업 */}
-      {showPopup && selectedTalisman && (
-        <TalismanPopup
-          imageUrl={selectedTalisman}
-          onClose={() => setShowPopup(false)}
-          darkMode={false}
-          title={t("talisman.popup.title")}
-        />
-      )}
     </div>
   );
 }

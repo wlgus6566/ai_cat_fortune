@@ -5,7 +5,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import TalismanPopup from "@/app/components/TalismanPopup";
+import { useTalisman } from "@/app/contexts/TalismanContext";
 import PageHeader from "@/app/components/PageHeader";
 import { Talisman } from "@/app/type/types";
 
@@ -15,9 +15,8 @@ export default function TalismanGalleryPage() {
   const [talismans, setTalismans] = useState<Talisman[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
-  const [showPopup, setShowPopup] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  const { openTalisman } = useTalisman();
 
   // 다크모드 상태 가져오기
   useEffect(() => {
@@ -65,14 +64,14 @@ export default function TalismanGalleryPage() {
     fetchTalismans();
   }, [userProfile?.id]);
 
+  // 부적 클릭 핸들러 수정 - 이제 Context API를 사용
   const handleTalismanClick = (imageUrl: string) => {
-    setSelectedTalisman(imageUrl);
-    setShowPopup(true);
-  };
-
-  const handleClosePopup = () => {
-    setShowPopup(false);
-    setSelectedTalisman(null);
+    openTalisman({
+      imageUrl,
+      userName: userProfile?.name,
+      title: t("talisman.popup.title"),
+      darkMode,
+    });
   };
 
   // 애니메이션 변수
@@ -99,7 +98,9 @@ export default function TalismanGalleryPage() {
   return (
     <div
       className={`min-h-screen ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-800"
+        darkMode
+          ? "bg-gray-900"
+          : "bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9]"
       }`}
     >
       {/* PageHeader 컴포넌트 추가 */}
@@ -265,17 +266,6 @@ export default function TalismanGalleryPage() {
           </motion.footer>
         </motion.div>
       </div>
-
-      {/* 부적 팝업 */}
-      {showPopup && selectedTalisman && (
-        <TalismanPopup
-          imageUrl={selectedTalisman}
-          onClose={handleClosePopup}
-          title={t("talisman.popup.title")}
-          userName={userProfile?.name}
-          darkMode={darkMode}
-        />
-      )}
     </div>
   );
 }

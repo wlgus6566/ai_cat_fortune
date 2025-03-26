@@ -126,9 +126,8 @@ export default function TalismanPopup({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300
+      className={`transition-opacity duration-300
         ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
     >
       <div
         className={`relative overflow-hidden transition-all duration-500 ease-in-out transform
@@ -138,7 +137,7 @@ export default function TalismanPopup({
           maxWidth: "90vw",
           maxHeight: "90vh",
           perspective: "1000px",
-          width: "90%",
+          width: "100%",
         }}
       >
         {/* 닫기 버튼 */}
@@ -207,7 +206,7 @@ export default function TalismanPopup({
                 darkMode ? "text-white" : "text-amber-800"
               }`}
             >
-              행운의 부적
+              {getTalismanTitle()}
             </h2>
           </div>
 

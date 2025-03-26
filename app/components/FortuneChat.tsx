@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ChatMessage from "./ChatMessage";
-import TalismanPopup from "./TalismanPopup";
 import {
   ChatMessage as ChatMessageType,
   ChatStep,
@@ -10,7 +9,10 @@ import {
   UserProfile,
 } from "../type/types";
 import { CONCERN_TYPES, DETAILED_CONCERNS } from "../data";
-import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from "../data.en"; // ✅ 영어 데이터 불러오기
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from "../data.en"; // 영어 데이터 필요 시 사용
+import { useTalisman } from "../contexts/TalismanContext";
+
 // 직접 입력창 컴포넌트
 const ChatInput = ({
   onSend,
@@ -52,6 +54,7 @@ const ChatInput = ({
   );
 };
 
+// FortuneChat 인터페이스 정의
 interface FortuneChatProps {
   userName: string;
   userProfile: UserProfile;
@@ -73,6 +76,7 @@ export default function FortuneChat({
   const [initialMessagesComplete, setInitialMessagesComplete] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
+  const { openTalisman } = useTalisman();
 
   // 4단계 세부 고민 선택을 위한 상태
   // inputMode는 JSX 조건부 렌더링에 사용 (linter 경고 수정)
@@ -89,8 +93,10 @@ export default function FortuneChat({
   const [isGeneratingTalisman, setIsGeneratingTalisman] = useState(false);
   const [talismanError, setTalismanError] = useState<string | null>(null);
 
-  // 부적 팝업 관련 상태
+  // 부적 생성 후 Context API로 처리하므로 상태만 유지하고 렌더링에는 사용하지 않음
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showTalismanPopup, setShowTalismanPopup] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [talismanImageUrl, setTalismanImageUrl] = useState<string | null>(null);
 
   // 채팅창 자동 스크롤
@@ -191,7 +197,7 @@ export default function FortuneChat({
     };
   }, [addMessageWithTypingEffect, welcomeMessages]);
 
-  // 부적 이미지 생성 함수
+  // 부적 이미지 생성 함수 수정
   const handleGenerateTalisman = async () => {
     if (!currentConcernText || isGeneratingTalisman) return;
 
@@ -229,28 +235,35 @@ export default function FortuneChat({
         throw new Error(data.error?.message || "이미지 생성에 실패했습니다");
       }
 
-      // 이미지 URL 저장 (팝업용)
-      // 저장된 이미지 URL이 있으면 그것을 우선 사용, 없으면 원본 URL 사용
-      setTalismanImageUrl(data.storedImageUrl || data.imageUrl);
+      // 이미지 URL 저장
+      const imageUrl = data.storedImageUrl || data.imageUrl;
+      setTalismanImageUrl(imageUrl);
 
       // 부적 생성 완료 메시지
       const successMessage = "행운의 부적이 만들어졌어요! 지금 확인해보세요 ✨";
       await addMessageWithTypingEffect(successMessage, 500, 800);
 
-      // 팝업 표시
+      // 팝업 표시 (Context API 사용)
       setShowTalismanPopup(true);
+      openTalisman({
+        imageUrl: imageUrl,
+        userName: userName,
+        title: "행운의 부적",
+        darkMode: false,
+      });
 
       // 부적 생성 버튼 숨기기 (한 번만 생성 가능하도록)
       setShowTalismanButton(false);
-    } catch (err) {
-      console.error("부적 이미지 생성 오류:", err);
+    } catch (error) {
+      console.error("부적 생성 오류:", error);
       setTalismanError(
-        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다"
+        error instanceof Error
+          ? error.message
+          : "부적 생성 중 오류가 발생했습니다."
       );
 
-      // 오류 메시지 표시
-      const errorMessage =
-        "부적 생성에 실패했어요. 잠시 후 다시 시도해주세요. 😿";
+      // 에러 메시지 추가
+      const errorMessage = "부적 생성에 실패했어요. 다시 시도해주세요.";
       await addMessageWithTypingEffect(errorMessage, 500, 800);
     } finally {
       setIsGeneratingTalisman(false);
@@ -594,7 +607,7 @@ export default function FortuneChat({
   };
 
   return (
-    <div className="flex flex-col h-[500px]">
+    <div className="flex flex-col flex-1">
       {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto mb-4 p-2">
         {messages.map((message) => (
@@ -692,15 +705,6 @@ export default function FortuneChat({
             </div>
           </div>
         )}
-
-      {/* 부적 이미지 팝업 */}
-      {showTalismanPopup && talismanImageUrl && (
-        <TalismanPopup
-          imageUrl={talismanImageUrl}
-          userName={userName}
-          onClose={() => setShowTalismanPopup(false)}
-        />
-      )}
     </div>
   );
 }
