@@ -327,3 +327,33 @@ body {
   );
   z-index: -1;
 }
+
+/* 커스텀 Swiper 스타일 */
+.swiper-container {
+  padding-bottom: 40px;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #6366f1 !important;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+
+.swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+}
+
+.swiper-pagination-bullet-active {
+  background: #6366f1;
+}

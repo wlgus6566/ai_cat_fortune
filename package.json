@@ -24,6 +24,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "replicate": "^1.0.1",
+    "swiper": "^11.2.6",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

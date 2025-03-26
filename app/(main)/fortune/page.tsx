@@ -9,6 +9,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import CategoryPopup from "@/app/components/CategoryPopup";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
+import CategoryCard from "./CategoryCard";
+import { categories } from "@/app/data/categories";
+import { useUser as useUserHook } from "@/app/hooks/useUser";
+import { StarIcon } from "@/app/components/icons/StarIcon";
+import { getStoredFortune, clearAllPreviousFortuneData } from "./fortuneUtils";
+
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
   score: number;
@@ -566,29 +578,6 @@ export default function HomePage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* 배경 장식 요소들 */}
-      <div className="absolute top-10 right-5 w-24 h-24 opacity-10 z-0">
-        <motion.div
-          className="absolute w-full h-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
-        >
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-[#990dfa] rounded-full"
-              style={{
-                left: "50%",
-                top: "50%",
-                transform: `rotate(${i * 45}deg) translate(40px) rotate(${
-                  i * 45
-                }deg)`,
-              }}
-            />
-          ))}
-        </motion.div>
-      </div>
-
       {/* 헤더 배너 영역 */}
       <motion.div
         className="flex flex-row items-center justify-between mb-6"
@@ -611,9 +600,30 @@ export default function HomePage() {
                 })
               : t("headerTitle")}
           </p>
+
+          {/* 사주 정보 표시 */}
+          {fortune?.saju && (
+            <div className="mt-2">
+              <p className="text-gray-600 text-sm">
+                {userProfile?.birthDate
+                  ? `${new Date(userProfile.birthDate).getFullYear()}년 ${
+                      new Date(userProfile.birthDate).getMonth() + 1
+                    }월 ${new Date(userProfile.birthDate).getDate()}일 ${
+                      userProfile?.birthTime?.includes("시")
+                        ? userProfile?.birthTime?.substring(0, 2)
+                        : ""
+                    } 0분생`
+                  : ""}
+              </p>
+              <p className="text-sm mt-1 text-gray-600">
+                {fortune.saju.ilju}{" "}
+                {userProfile?.gender === "여성" ? "여자" : "남자"}
+              </p>
+            </div>
+          )}
         </div>
         <motion.div
-          className=" relative"
+          className="w-35 h-35 relative "
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -718,7 +728,7 @@ export default function HomePage() {
                     {t("categoryTitle")}
                   </h4>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
                     {categories.map((category, index) => (
                       <motion.div
                         key={category.key}
@@ -735,7 +745,7 @@ export default function HomePage() {
                           description={
                             fortune?.categories?.[
                               category.key as keyof typeof fortune.categories
-                            ]?.description || ""
+                            ]?.talisman || ""
                           }
                           icon={category.icon}
                           color={category.color}
@@ -747,40 +757,118 @@ export default function HomePage() {
                 </motion.div>
                 {/* 행운의 요소 */}
                 <motion.div
-                  className="flex flex-wrap gap-2 justify-between p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl"
+                  className="p-4 bg-white rounded-xl shadow-sm border border-[#e6e6e6]"
                   variants={itemVariants}
                 >
-                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
-                    <p className="text-xs text-gray-500 mb-1">
-                      {t("luckyColor")}
-                    </p>
-                    <p className="font-medium text-[#3B2E7E] flex justify-center">
-                      <span className="mr-1">🎨</span> {fortune.luckyColor}
-                    </p>
-                  </div>
-                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
-                    <p className="text-xs text-gray-500 mb-1">
-                      {t("luckyNumber")}
-                    </p>
-                    <p className="font-medium text-[#3B2E7E] flex justify-center">
-                      <span className="mr-1">🔢</span> {fortune.luckyNumber}
-                    </p>
-                  </div>
-                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
-                    <p className="text-xs text-gray-500 mb-1">
-                      {t("luckyItem")}
-                    </p>
-                    <p className="font-medium text-[#3B2E7E] flex justify-center">
-                      <span className="mr-1">🎁</span> {fortune.luckyItem}
-                    </p>
-                  </div>
-                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
-                    <p className="text-xs text-gray-500 mb-1">
-                      {t("luckySong")}
-                    </p>
-                    <p className="font-medium text-[#3B2E7E] flex justify-center">
-                      <span className="mr-1">🎵</span> {fortune.luckySong}
-                    </p>
+                  <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
+                    {t("luckyElements")}
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="text-[#6366f1] mr-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 100-12 6 6 0 000 12z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-500 text-sm">
+                          {t("luckyColor")}
+                        </span>
+                      </div>
+                      <span className="font-medium text-gray-800">
+                        {fortune.luckyColor}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="text-[#6366f1] mr-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M9.38 10.564a1 1 0 011.24 0l3 2.5a1 1 0 01-1.24 1.572l-2.38-1.985-2.38 1.985a1 1 0 01-1.24-1.572l3-2.5z"
+                              clipRule="evenodd"
+                            />
+                            <path
+                              fillRule="evenodd"
+                              d="M9.38 6.436a1 1 0 011.24 0l3 2.5a1 1 0 11-1.24 1.572L10 8.523l-2.38 1.985a1 1 0 01-1.24-1.572l3-2.5z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-500 text-sm">
+                          {t("luckyNumber")}
+                        </span>
+                      </div>
+                      <span className="font-medium text-gray-800">
+                        {fortune.luckyNumber}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="text-[#6366f1] mr-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17A3 3 0 015 5z"
+                              clipRule="evenodd"
+                            />
+                            <path
+                              fillRule="evenodd"
+                              d="M9 5a1 1 0 102 0 1 1 0 00-2 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-500 text-sm">
+                          {t("luckyItem")}
+                        </span>
+                      </div>
+                      <span className="font-medium text-gray-800">
+                        {fortune.luckyItem}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="text-[#6366f1] mr-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-500 text-sm">
+                          {t("luckySong")}
+                        </span>
+                      </div>
+                      <span className="font-medium text-gray-800">
+                        {fortune.luckySong}
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
                 {/* 오늘의 조언 */}
@@ -832,6 +920,137 @@ export default function HomePage() {
             )}
           </div>
         </motion.div>
+      </motion.section>
+
+      {/* 슬라이드 섹션 */}
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
+      >
+        <Swiper
+          spaceBetween={10}
+          slidesPerView={2.2}
+          className="swiper-container relative"
+        >
+          {/* 첫 번째 슬라이드 */}
+          <SwiperSlide>
+            {/* 첫 번째 카드 */}
+            <div className="bg-[#F0EAFF] rounded-2xl p-6 relative overflow-hidden">
+              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-[#6366f1]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">
+                사주로 보는
+                <br />
+                궁합
+              </h3>
+              <p className="text-[#6366f1] text-sm font-medium">
+                내 짝은 어디에?
+              </p>
+            </div>
+          </SwiperSlide>
+
+          {/* 두 번째 슬라이드 */}
+          <SwiperSlide>
+            {/* 두 번째 카드 */}
+            <div className="bg-[#E6F7ED] rounded-2xl p-6 relative overflow-hidden">
+              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-[#10B981]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">
+                나를 좋아하는 그 사람
+              </h3>
+              <p className="text-[#10B981] text-sm font-medium">
+                무슨 마음이지?
+              </p>
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="bg-[#FEF3C7] rounded-2xl p-6 relative overflow-hidden">
+              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-[#F59E0B]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">
+                2025
+                <br />
+                친구조합
+              </h3>
+              <p className="text-[#F59E0B] text-sm font-medium">
+                내 친구조합은?
+              </p>
+            </div>
+          </SwiperSlide>
+          <SwiperSlide>
+            {/* 네 번째 카드 */}
+            <div className="bg-[#FEE2E2] rounded-2xl p-6 relative overflow-hidden">
+              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-[#EF4444]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">
+                Yes or
+                <br />
+                No
+              </h3>
+              <p className="text-[#EF4444] text-sm font-medium">
+                딱 골라드려요
+              </p>
+            </div>
+          </SwiperSlide>
+        </Swiper>
       </motion.section>
 
       {/* 빠른 메뉴 섹션 */}
