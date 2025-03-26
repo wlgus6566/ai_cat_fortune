@@ -471,7 +471,7 @@ export default function HomePage() {
 
           {/* 캐릭터 */}
           <motion.div
-            className="w-50 h-50 mt-5 mr-15 relative cursor-pointer"
+            className="w-50 h-50 mr-15 relative cursor-pointer"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             onClick={handleCatClick}
@@ -712,12 +712,12 @@ export default function HomePage() {
                     </p>
                   </div>
                 </motion.div>
-
                 {/* 카테고리별 운세 */}
                 <motion.div variants={itemVariants}>
                   <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
                     {t("categoryTitle")}
                   </h4>
+
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {categories.map((category, index) => (
                       <motion.div
@@ -745,7 +745,6 @@ export default function HomePage() {
                     ))}
                   </div>
                 </motion.div>
-
                 {/* 행운의 요소 */}
                 <motion.div
                   className="flex flex-wrap gap-2 justify-between p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl"
@@ -784,7 +783,6 @@ export default function HomePage() {
                     </p>
                   </div>
                 </motion.div>
-
                 {/* 오늘의 조언 */}
                 <motion.div
                   className="pt-3 mt-3 relative"
@@ -814,7 +812,6 @@ export default function HomePage() {
                     </motion.div>
                   </div>
                 </motion.div>
-
                 {/* 마지막 업데이트 시간 표시 */}
                 <motion.div className="text-right mt-3" variants={itemVariants}>
                   <p className="text-xs text-gray-500">{t("updateInfo")}</p>
