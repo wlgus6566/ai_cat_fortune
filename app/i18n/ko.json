@@ -12,8 +12,10 @@
     "lucky": "행운의 부적",
     "luckyColor": "행운의 색상",
     "luckyNumber": "행운의 숫자",
+    "luckySong": "행운의 노래",
+    "luckyItem": "행운의 아이템",
     "advice": "오늘의 조언",
-    "updateInfo": "매일 자정에 업데이트됩니다",
+    "updateInfo": "* 매일 자정에 업데이트됩니다",
     "categories": {
       "love": {
         "title": "애정운"
@@ -64,7 +66,6 @@
     "notifications": "알림 설정",
     "notificationsDescription": "매일 운세 정보 알림 받기",
     "talismanGallery": "행운의 부적 모음",
-    "viewMore": "더 보기",
     "noTalismans": "아직 생성된 부적 이미지가 없다냥.",
     "createTalismans": "상담받고 부적 만들기",
     "viewFortune": "운세 보기",

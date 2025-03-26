@@ -11,8 +11,10 @@
     "categoryTitle": "Categories",
     "luckyColor": "Lucky Color",
     "luckyNumber": "Lucky Number",
+    "luckySong": "Lucky Song",
+    "luckyItem": "Lucky Item",
     "advice": "Today's Advice",
-    "updateInfo": "Updated daily at midnight",
+    "updateInfo": "* Updated daily at midnight",
     "categories": {
       "love": {
         "title": "Love"
@@ -63,7 +65,6 @@
     "notifications": "Notifications",
     "notificationsDescription": "Receive daily fortune notifications",
     "talismanGallery": "Lucky Talisman Collection",
-    "viewMore": "View More",
     "noTalismans": "No talismans have been created yet.",
     "createTalismans": "Create Talisman",
     "viewFortune": "View Fortune",

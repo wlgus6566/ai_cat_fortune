@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import CategoryPopup from "@/app/components/CategoryPopup";
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
   score: number;
@@ -28,12 +29,12 @@ const FortuneScore: React.FC<FortuneScoreProps> = ({
   return (
     <div className="mb-4">
       <div className="flex justify-between items-center mb-1.5">
-        <span className="text-sm font-medium text-gray-700 font-subheading">
+        {/* <span className="text-sm font-medium text-gray-700 font-subheading">
           {label}
-        </span>
-        <span className="text-sm font-bold" style={{ color }}>
+        </span> */}
+        {/* <span className="text-sm font-bold" style={{ color }}>
           {score}/{maxScore}
-        </span>
+        </span> */}
       </div>
       <div className="w-full bg-gray-200 rounded-full h-3">
         <div
@@ -55,6 +56,7 @@ interface CategoryCardProps {
   description: string;
   icon: React.ReactNode;
   color: string;
+  onClick?: () => void;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -63,14 +65,32 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   description,
   icon,
   color,
+  onClick,
 }) => {
   return (
-    <div className="card-magic p-4 flex flex-col h-full">
-      <div className="flex items-center mb-2">
-        <div className="text-2xl mr-2" style={{ color }}>
-          {icon}
+    <div
+      className="card-magic p-4 flex flex-col h-full cursor-pointer transition-transform hover:scale-105"
+      onClick={onClick}
+    >
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center">
+          <span className="text-2xl mr-2" style={{ color }}>
+            {icon}
+          </span>
+          <h4 className="font-medium text-[#3B2E7E]">{title}</h4>
         </div>
-        <h4 className="font-medium text-[#3B2E7E]">{title}</h4>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-[#3B2E7E]/60"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
       </div>
       <div className="mb-2">
         <FortuneScore score={score} label={`${title} Score`} color={color} />
@@ -402,6 +422,19 @@ export default function HomePage() {
     }
   };
 
+  // 선택된 카테고리 상태 관리
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // 카테고리 선택 핸들러
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  // 팝업 닫기 핸들러
+  const handleClosePopup = () => {
+    setSelectedCategory(null);
+  };
+
   // 운세 보기 전 초기 화면
   if (!hasViewedFortune) {
     return (
@@ -700,10 +733,11 @@ export default function HomePage() {
                           description={
                             fortune.categories[
                               category.key as keyof typeof fortune.categories
-                            ].description
+                            ].trend || ""
                           }
                           icon={category.icon}
                           color={category.color}
+                          onClick={() => handleCategorySelect(category.key)}
                         />
                       </motion.div>
                     ))}
@@ -712,23 +746,39 @@ export default function HomePage() {
 
                 {/* 행운의 요소 */}
                 <motion.div
-                  className="flex justify-between p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl"
+                  className="flex flex-wrap gap-2 justify-between p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl"
                   variants={itemVariants}
                 >
-                  <div className="text-center bg-white px-4 py-3 rounded-lg shadow-sm flex-1 mx-1">
+                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
                     <p className="text-xs text-gray-500 mb-1">
                       {t("luckyColor")}
                     </p>
-                    <p className="font-medium text-[#3B2E7E] flex items-center justify-center">
+                    <p className="font-medium text-[#3B2E7E] flex justify-center">
                       <span className="mr-1">🎨</span> {fortune.luckyColor}
                     </p>
                   </div>
-                  <div className="text-center bg-white px-4 py-3 rounded-lg shadow-sm flex-1 mx-1">
+                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
                     <p className="text-xs text-gray-500 mb-1">
                       {t("luckyNumber")}
                     </p>
-                    <p className="font-medium text-[#3B2E7E] flex items-center justify-center">
+                    <p className="font-medium text-[#3B2E7E] flex justify-center">
                       <span className="mr-1">🔢</span> {fortune.luckyNumber}
+                    </p>
+                  </div>
+                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
+                    <p className="text-xs text-gray-500 mb-1">
+                      {t("luckyItem")}
+                    </p>
+                    <p className="font-medium text-[#3B2E7E] flex justify-center">
+                      <span className="mr-1">🎁</span> {fortune.luckyItem}
+                    </p>
+                  </div>
+                  <div className="w-[calc(50%-0.5rem)] text-center bg-white px-4 py-3 rounded-lg shadow-sm">
+                    <p className="text-xs text-gray-500 mb-1">
+                      {t("luckySong")}
+                    </p>
+                    <p className="font-medium text-[#3B2E7E] flex justify-center">
+                      <span className="mr-1">🎵</span> {fortune.luckySong}
                     </p>
                   </div>
                 </motion.div>
@@ -910,6 +960,25 @@ export default function HomePage() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* 카테고리 팝업 */}
+      {selectedCategory && fortune && (
+        <CategoryPopup
+          isOpen={!!selectedCategory}
+          onClose={handleClosePopup}
+          title={
+            categories.find((cat) => cat.key === selectedCategory)?.title || ""
+          }
+          emoji={
+            categories.find((cat) => cat.key === selectedCategory)?.icon || ""
+          }
+          category={
+            fortune.categories[
+              selectedCategory as keyof typeof fortune.categories
+            ]
+          }
+        />
+      )}
     </motion.div>
   );
 }
