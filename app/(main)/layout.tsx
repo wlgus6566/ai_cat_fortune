@@ -64,16 +64,6 @@ export default function MainLayout({
           <div className="animate-spin h-12 w-12 border-4 border-[#990dfa] rounded-full border-t-transparent"></div>
           <div className="absolute top-0 left-0 h-12 w-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
         </div>
-        <p className="mt-4 text-[#3B2E7E] font-medium">프로필 확인 중...</p>
-        <div className="mt-2 flex space-x-1">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-1 w-1 rounded-full bg-[#990dfa] animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            ></div>
-          ))}
-        </div>
       </div>
     );
   }

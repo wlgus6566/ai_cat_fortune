@@ -234,23 +234,6 @@ export default function TalismanPopup({
                   }}
                 ></div>
 
-                {/* 스크롤 상단과 하단 그림자 효과 */}
-                <div
-                  className={`absolute inset-x-0 top-0 h-10 bg-gradient-to-b ${
-                    darkMode ? "from-gray-800" : "from-amber-50"
-                  } to-transparent z-10 transition-opacity duration-700 ${
-                    isFullyVisible ? "opacity-60" : "opacity-0"
-                  }`}
-                ></div>
-
-                <div
-                  className={`absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t ${
-                    darkMode ? "from-gray-800" : "from-amber-50"
-                  } to-transparent z-10 transition-opacity duration-700 ${
-                    isFullyVisible ? "opacity-60" : "opacity-0"
-                  }`}
-                ></div>
-
                 <Image
                   src={imageUrl}
                   alt={"행운의 부적"}

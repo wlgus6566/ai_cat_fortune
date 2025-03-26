@@ -607,7 +607,7 @@ export default function FortuneChat({
   };
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 min-h-[calc(100vh-200px)]">
       {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto mb-4 p-2">
         {messages.map((message) => (
