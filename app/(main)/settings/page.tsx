@@ -7,6 +7,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
+import { ChevronRight } from "lucide-react";
 
 // 언어 변경을 위한 로컬 스토리지 키
 const LANGUAGE_PREFERENCE_KEY = "language_preference";
@@ -174,20 +175,7 @@ export default function SettingsPage() {
                 <span className="text-purple-900 dark:text-purple-300">
                   이용약관
                 </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
             </Link>
             <Link
@@ -198,20 +186,7 @@ export default function SettingsPage() {
                 <span className="text-purple-900 dark:text-purple-300">
                   개인정보 처리방침
                 </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
             </Link>
           </motion.div>

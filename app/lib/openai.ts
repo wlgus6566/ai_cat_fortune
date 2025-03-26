@@ -173,7 +173,9 @@ export async function getDailyFortune(
 
 각 카테고리 설명은 200자 내외로 간결하게 작성하세요.
 점수는 1(매우 나쁨)부터 5(매우 좋음)까지의 정수로 표현하세요.
-오늘의 조언과 경향은 귀여운 고양이처럼 "~냥", "~다냥"으로 끝나는 문장으로 작성하세요.
+luckyItem은 오늘 입으면 운 좋은 아이템을 예시로 명사만 작성하세요.
+luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
+advice와 talisman은 귀여운 고양이처럼 "~냥", "~다냥"으로 끝나는 문장으로 작성하세요.
 생년월일과 사주 정보를 바탕으로 분석하되, 실제 사주 분석 방법론을 적용하세요.
 사주팔자 정보는 사용자의 생년월일과 태어난 시간을 바탕으로 실제 사주학 원리에 따라 정확하게 계산하여 제공하세요.`,
         },
@@ -192,7 +194,9 @@ export async function getDailyFortune(
     try {
       // JSON 파싱 시도
       const fortuneData = JSON.parse(content) as DailyFortune;
-      return {
+
+      // 결과 객체 초기화
+      const result: Partial<DailyFortune> = {
         ...fortuneData,
         date: formattedDate,
         saju: {
@@ -212,6 +216,74 @@ export async function getDailyFortune(
           iljuHanja: fortuneData.saju.iljuHanja,
         },
       };
+
+      // overall 객체에서 최상위 속성들 추출
+      if (fortuneData.overall && typeof fortuneData.overall === "object") {
+        const {
+          luckyColor,
+          luckyNumber,
+          luckySong,
+          luckyItem,
+          advice,
+          score,
+          description,
+        } = fortuneData.overall as Record<string, unknown>;
+
+        // overall은 score와 description만 포함하도록 설정
+        result.overall = {
+          score: (score as number) || 3,
+          description:
+            (description as string) || "평범한 하루가 될 것 같습니다.",
+        };
+
+        // 추출한 속성들을 최상위로 이동
+        if (luckyColor !== undefined) result.luckyColor = luckyColor as string;
+        if (luckyNumber !== undefined)
+          result.luckyNumber = luckyNumber as number;
+        if (luckySong !== undefined) result.luckySong = luckySong as string;
+        if (luckyItem !== undefined) result.luckyItem = luckyItem as string;
+        if (advice !== undefined) result.advice = advice as string;
+      }
+
+      // categories 객체 유효성 확인 및 기본값 설정
+      if (
+        !fortuneData.categories ||
+        typeof fortuneData.categories !== "object"
+      ) {
+        // categories가 없거나 유효하지 않은 경우 기본값 제공
+        result.categories = {
+          love: {
+            score: 3,
+            description:
+              "오늘은 특별한 기복 없이 차분한 연애운이 흐르고 있어요. 연인과의 대화가 평소보다 부드럽게 이어지고, 마음이 안정되는 하루가 될 거예요.",
+            trend: "안정적인 하루",
+            talisman: "평화롭게 마음을 유지하세요",
+          },
+          money: {
+            score: 3,
+            description:
+              "지출이 많아질 수 있는 날이에요. 충동구매를 삼가고, 꼭 필요한 것만 구매하는 게 좋아요.",
+            trend: "지출을 관리하세요",
+            talisman: "필요한 것만 구매하세요",
+          },
+          health: {
+            score: 3,
+            description:
+              "몸은 괜찮지만 마음의 피로가 누적되어 있을 수 있어요. 짧은 산책이나 좋아하는 음악을 들으며 여유를 가지는 것이 오늘의 회복 포인트입니다.",
+            trend: "휴식이 필요한 날",
+            talisman: "충분한 수면을 취하세요",
+          },
+          social: {
+            score: 3,
+            description:
+              "대인관계에서 불필요한 오해를 줄이기 위해서는 경청하는 자세가 중요해요. 특히 직장이나 학교에서 누군가의 말을 끝까지 들어주는 태도가 빛을 발할 수 있어요.",
+            trend: "차분한 대화가 필요해요",
+            talisman: "경청하는 태도가 중요합니다",
+          },
+        };
+      }
+
+      return result as DailyFortune;
     } catch (parseError) {
       console.error("JSON 파싱 오류:", parseError);
       throw new Error("운세 데이터 형식이 올바르지 않습니다.");
@@ -314,7 +386,7 @@ export async function getFortuneResponse(
               
         🌟 **응답 방식:**  
         1. **말투:** 귀여운 고양이처럼 "~냥", "~다냥", "~옹" 같은 고양이 말투를 반드시 사용해야 합니다.
-           - 모든 문장을 "~냥", "~다냥", "~옹"으로 끝내야 합니다.(ex) '비결이예요~다냥' 이 아닌 '비결이다냥~' 이렇게 끝내야 합니다.)
+           - 모든 문장을 "~냥", "~다냥", "~옹"으로 끝내야 합니다.(ex) '요~다냥' 이 아닌 '이다냥~' 이렇게 끝내야 합니다.)
            - 예시: "당신의 사주를 봤다냥!" "이번 달에는 행운이 있을 것 같다냥~"
            - 고양이 말투를 사용하지 않은 답변은 잘못된 답변입니다.
         2. **쉽고 친숙한 표현 사용:** 어려운 전문 용어는 쉽게 풀어 설명하고, 이해를 돕기 위해 비유적 표현이나 예시를 활용하세요.  

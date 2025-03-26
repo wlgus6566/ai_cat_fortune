@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { ReactNode } from 'react';
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { ReactNode } from "react";
+import { ChevronLeft } from "lucide-react";
 
 interface PageHeaderProps {
   title: string;
@@ -15,12 +16,12 @@ interface PageHeaderProps {
 /**
  * 왼쪽에 뒤로가기 버튼과 중앙에 타이틀이 있는 페이지 헤더 컴포넌트
  */
-export default function PageHeader({ 
-  title, 
-  showBackButton = true, 
-  onBack, 
-  className = '',
-  rightElement
+export default function PageHeader({
+  title,
+  showBackButton = true,
+  onBack,
+  className = "",
+  rightElement,
 }: PageHeaderProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -58,20 +59,7 @@ export default function PageHeader({
           className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 text-gray-700 hover:text-gray-900"
           aria-label="뒤로가기"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <ChevronLeft className="h-6 w-6" />
         </button>
       )}
       <h1 className="text-xl font-semibold text-center">{title}</h1>
@@ -82,4 +70,4 @@ export default function PageHeader({
       )}
     </div>
   );
-} 
+}

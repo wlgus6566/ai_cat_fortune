@@ -10,17 +10,22 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import CategoryPopup from "@/app/components/CategoryPopup";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+//import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import LoadingSpinner from "@/app/components/LoadingSpinner";
-import CategoryCard from "./CategoryCard";
-import { categories } from "@/app/data/categories";
-import { useUser as useUserHook } from "@/app/hooks/useUser";
-import { StarIcon } from "@/app/components/icons/StarIcon";
-import { getStoredFortune, clearAllPreviousFortuneData } from "./fortuneUtils";
-
+import {
+  Paintbrush,
+  MessageCircleHeart,
+  ScanFace,
+  Zap,
+  Hash,
+  Gift,
+  Music,
+  Star,
+  BookHeart,
+  ChevronRight,
+} from "lucide-react";
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
   score: number;
@@ -90,18 +95,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           </span>
           <h4 className="font-medium text-[#3B2E7E]">{title}</h4>
         </div>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-[#3B2E7E]/60"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <ChevronRight className="h-5 w-5 text-[#3B2E7E]/60" />
       </div>
       <div className="mb-2">
         <FortuneScore score={score} label={`${title} Score`} color={color} />
@@ -110,16 +104,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
     </div>
   );
 };
-
-// 별자리 아이콘 컴포넌트
-const StarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-[#FFD966]">
-    <path
-      d="M12 2l2.4 7.4h7.6l-6 4.6 2.2 7-6.2-4.4-6.2 4.4 2.2-7-6-4.6h7.6z"
-      fill="currentColor"
-    />
-  </svg>
-);
 
 // 로컬 스토리지 관련 함수들
 const getStorageKey = (userId: string, day?: string) => {
@@ -219,10 +203,18 @@ export default function HomePage() {
 
   // 고양이 상태 관리
   const [catState, setCatState] = useState<
-    "origin" | "smile" | "up" | "wink" | "wonder" | "angry"
+    "origin" | "smile" | "up" | "wink" | "wonder" | "angry" | "left" | "back"
   >("origin");
-  const catStates: ("origin" | "smile" | "up" | "wink" | "wonder" | "angry")[] =
-    ["origin", "smile", "up", "wink", "wonder", "angry"];
+  const catStates: (
+    | "origin"
+    | "smile"
+    | "up"
+    | "wink"
+    | "wonder"
+    | "angry"
+    | "left"
+    | "back"
+  )[] = ["origin", "smile", "up", "wink", "wonder", "angry", "left", "back"];
   const getRandomCatState = () => {
     const randomIndex = Math.floor(Math.random() * catStates.length);
     return catStates[randomIndex];
@@ -428,6 +420,10 @@ export default function HomePage() {
         return "/new_cat_wonder.png";
       case "angry":
         return "/new_cat_angry.png";
+      case "left":
+        return "/new_cat_left.png";
+      case "back":
+        return "/new_cat_back.png";
       default:
         return "/new_cat.png";
     }
@@ -456,7 +452,7 @@ export default function HomePage() {
         transition={{ duration: 0.5 }}
       >
         <Image
-          src="/bg_real.png"
+          src="/bg_real_nocat.png"
           alt={"배경이미지"}
           fill
           className="object-cover"
@@ -483,7 +479,7 @@ export default function HomePage() {
 
           {/* 캐릭터 */}
           <motion.div
-            className="w-50 h-50 mr-15 relative cursor-pointer"
+            className="w-50 h-50 mr-15 mb-17 relative cursor-pointer"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             onClick={handleCatClick}
@@ -615,10 +611,10 @@ export default function HomePage() {
                     } 0분생`
                   : ""}
               </p>
-              <p className="text-sm mt-1 text-gray-600">
+              {/* <p className="text-sm mt-1 text-gray-600">
                 {fortune.saju.ilju}{" "}
                 {userProfile?.gender === "여성" ? "여자" : "남자"}
-              </p>
+              </p> */}
             </div>
           )}
         </div>
@@ -668,7 +664,7 @@ export default function HomePage() {
           <div className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] p-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
               <span className="mr-2 flex">
-                <StarIcon />
+                <Star className="h-5 w-5 text-[#FFD966]" />
               </span>
               {t("overall")}
             </h3>
@@ -767,18 +763,7 @@ export default function HomePage() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
                         <div className="text-[#6366f1] mr-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 100-12 6 6 0 000 12z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <Paintbrush className="h-5 w-5" />
                         </div>
                         <span className="text-gray-500 text-sm">
                           {t("luckyColor")}
@@ -792,23 +777,7 @@ export default function HomePage() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
                         <div className="text-[#6366f1] mr-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M9.38 10.564a1 1 0 011.24 0l3 2.5a1 1 0 01-1.24 1.572l-2.38-1.985-2.38 1.985a1 1 0 01-1.24-1.572l3-2.5z"
-                              clipRule="evenodd"
-                            />
-                            <path
-                              fillRule="evenodd"
-                              d="M9.38 6.436a1 1 0 011.24 0l3 2.5a1 1 0 11-1.24 1.572L10 8.523l-2.38 1.985a1 1 0 01-1.24-1.572l3-2.5z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <Hash className="h-5 w-5" />
                         </div>
                         <span className="text-gray-500 text-sm">
                           {t("luckyNumber")}
@@ -822,23 +791,7 @@ export default function HomePage() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
                         <div className="text-[#6366f1] mr-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17A3 3 0 015 5z"
-                              clipRule="evenodd"
-                            />
-                            <path
-                              fillRule="evenodd"
-                              d="M9 5a1 1 0 102 0 1 1 0 00-2 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <Gift className="h-5 w-5" />
                         </div>
                         <span className="text-gray-500 text-sm">
                           {t("luckyItem")}
@@ -852,14 +805,7 @@ export default function HomePage() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
                         <div className="text-[#6366f1] mr-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
-                          </svg>
+                          <Music className="h-5 w-5" />
                         </div>
                         <span className="text-gray-500 text-sm">
                           {t("luckySong")}
@@ -896,7 +842,7 @@ export default function HomePage() {
                         ease: "linear",
                       }}
                     >
-                      <StarIcon />
+                      <Star className="h-5 w-5 text-[#FFD966]" />
                     </motion.div>
                   </div>
                 </motion.div>
@@ -939,20 +885,7 @@ export default function HomePage() {
             {/* 첫 번째 카드 */}
             <div className="bg-[#F0EAFF] rounded-2xl p-6 relative overflow-hidden">
               <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-[#6366f1]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
+                <BookHeart className="h-8 w-8 text-[#6366f1]" />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">
                 사주로 보는
@@ -970,20 +903,7 @@ export default function HomePage() {
             {/* 두 번째 카드 */}
             <div className="bg-[#E6F7ED] rounded-2xl p-6 relative overflow-hidden">
               <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-[#10B981]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
+                <MessageCircleHeart className="h-8 w-8 text-[#10B981]" />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">
                 나를 좋아하는 그 사람
@@ -996,20 +916,7 @@ export default function HomePage() {
           <SwiperSlide>
             <div className="bg-[#FEF3C7] rounded-2xl p-6 relative overflow-hidden">
               <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-[#F59E0B]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <ScanFace className="h-8 w-8 text-[#F59E0B]" />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">
                 2025
@@ -1025,20 +932,7 @@ export default function HomePage() {
             {/* 네 번째 카드 */}
             <div className="bg-[#FEE2E2] rounded-2xl p-6 relative overflow-hidden">
               <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-[#EF4444]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+                <Zap className="h-8 w-8 text-[#EF4444]" />
               </div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">
                 Yes or

@@ -55,7 +55,7 @@ export default function TalismanGalleryPage() {
           return (
             <span
               key={index}
-              className={`text-xs px-2 py-1 rounded-full ${
+              className={`text-xs px-2 py-1 rounded-2xl ${
                 isLast
                   ? darkMode
                     ? "bg-purple-800 text-purple-100"

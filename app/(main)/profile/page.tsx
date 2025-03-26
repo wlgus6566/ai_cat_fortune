@@ -10,6 +10,7 @@ import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
 import { useTalisman } from "@/app/contexts/TalismanContext";
 import { Talisman } from "@/app/type/types";
+import { Settings, Edit } from "lucide-react";
 
 export default function ProfilePage() {
   const { userProfile, isAuthenticated, isProfileComplete } = useUser();
@@ -128,26 +129,7 @@ export default function ProfilePage() {
         rightElement={
           <div className="flex space-x-2">
             <button onClick={handleGoToSettings} className="p-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-[#3B2E7E]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <Settings className="h-6 w-6 text-[#3B2E7E]" />
             </button>
           </div>
         }
@@ -185,14 +167,7 @@ export default function ProfilePage() {
                       onClick={handleEditProfile}
                       className="absolute bottom-0 right-0 w-7 h-7 bg-[#990dfa] rounded-full flex items-center justify-center shadow-md"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-white"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
+                      <Edit className="h-4 w-4 text-white" />
                     </button>
                   </div>
                   <h3 className="font-bold text-lg text-[#3B2E7E] mb-1 font-heading">

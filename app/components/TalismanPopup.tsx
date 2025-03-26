@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { X, Download } from "lucide-react";
 
 interface TalismanPopupProps {
   imageUrl: string;
@@ -156,20 +157,7 @@ export default function TalismanPopup({
             shadow-lg transition-all`}
           aria-label="Close"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <X className="w-6 h-6" />
         </button>
 
         {/* 두루마기 배경 효과 */}
@@ -296,28 +284,23 @@ export default function TalismanPopup({
               </p>
 
               {/* 저장 버튼 */}
-              <button
-                onClick={handleSaveImage}
-                className={`mt-4 px-4 py-2 rounded-md ${
-                  darkMode
-                    ? "bg-amber-600 hover:bg-amber-700 text-white"
-                    : "bg-amber-500 hover:bg-amber-600 text-white"
-                } transition-colors duration-200 flex items-center mx-auto`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+              <div className="w-full flex justify-center pb-6">
+                <button
+                  onClick={handleSaveImage}
+                  className={`
+                    flex items-center justify-center space-x-2 px-4 py-2 rounded-full
+                    ${
+                      darkMode
+                        ? "bg-gray-700 text-white hover:bg-gray-600"
+                        : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                    }
+                    transition-all shadow-md
+                  `}
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {t("saveButton", { defaultValue: "저장하기" })}
-              </button>
+                  <Download className="w-5 h-5" />
+                  <span>{t("saveImage", { defaultValue: "이미지 저장" })}</span>
+                </button>
+              </div>
 
               {/* 저장 메시지 */}
               {saveMessage && (
