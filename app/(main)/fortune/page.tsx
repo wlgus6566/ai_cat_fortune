@@ -20,7 +20,6 @@ interface FortuneScoreProps {
 const FortuneScore: React.FC<FortuneScoreProps> = ({
   score,
   maxScore = 5,
-  label,
   color,
 }) => {
   // 점수 비율 계산
@@ -69,7 +68,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 }) => {
   return (
     <div
-      className="card-magic p-4 flex flex-col h-full cursor-pointer transition-transform hover:scale-105"
+      className="card-magic p-4 flex flex-col h-full cursor-pointer"
       onClick={onClick}
     >
       <div className="flex justify-between items-center mb-2">
@@ -208,14 +207,10 @@ export default function HomePage() {
 
   // 고양이 상태 관리
   const [catState, setCatState] = useState<
-    "origin" | "concern" | "wink" | "hi"
+    "origin" | "smile" | "up" | "wink" | "wonder" | "angry"
   >("origin");
-  const catStates: ("origin" | "concern" | "wink" | "hi")[] = [
-    "origin",
-    "concern",
-    "wink",
-    "hi",
-  ];
+  const catStates: ("origin" | "smile" | "up" | "wink" | "wonder" | "angry")[] =
+    ["origin", "smile", "up", "wink", "wonder", "angry"];
   const getRandomCatState = () => {
     const randomIndex = Math.floor(Math.random() * catStates.length);
     return catStates[randomIndex];
@@ -231,12 +226,12 @@ export default function HomePage() {
   const speechMessages = [
     { text: "오늘 운세를 점쳐볼까냥~?", state: "origin" as const },
     { text: "마법이 느껴지는 하루가 될지도 몰라!🦄", state: "wink" as const },
-    { text: "고민이 있다면, 내가 들어줄게냥.", state: "concern" as const },
+    { text: "고민이 있다면, 내가 들어줄게냥.", state: "smile" as const },
     {
       text: "💫 오늘은 뭔가 특별해보인다냥~",
-      state: "origin" as const,
+      state: "wonder" as const,
     },
-    { text: "별들이 속삭이고 있어, 열어보자!", state: "hi" as const },
+    { text: "별들이 속삭이고 있어, 열어보자!", state: "up" as const },
   ];
 
   // 랜덤 메시지 선택 함수
@@ -411,14 +406,18 @@ export default function HomePage() {
   // 고양이 이미지 선택
   const getCatImage = () => {
     switch (catState) {
-      case "concern":
-        return "/cat_concern.png";
+      case "smile":
+        return "/new_cat_smile.png";
+      case "up":
+        return "/new_cat_up.png";
       case "wink":
-        return "/cat_wink.png";
-      case "hi":
-        return "/cat_hi.png";
+        return "/new_cat_wink.png";
+      case "wonder":
+        return "/new_cat_wonder.png";
+      case "angry":
+        return "/new_cat_angry.png";
       default:
-        return "/cat_origin.png";
+        return "/new_cat.png";
     }
   };
 
@@ -445,7 +444,7 @@ export default function HomePage() {
         transition={{ duration: 0.5 }}
       >
         <Image
-          src="/bg_0.png"
+          src="/bg_real.png"
           alt={"배경이미지"}
           fill
           className="object-cover"
@@ -472,7 +471,7 @@ export default function HomePage() {
 
           {/* 캐릭터 */}
           <motion.div
-            className="w-60 h-60 mt-5 relative cursor-pointer"
+            className="w-50 h-50 mt-5 mr-15 relative cursor-pointer"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             onClick={handleCatClick}
@@ -480,6 +479,10 @@ export default function HomePage() {
             <AnimatePresence mode="wait">
               <motion.img
                 key={catState}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
                 src={getCatImage()}
                 alt="마법사 고양이"
                 className="w-full h-full object-contain"
@@ -507,7 +510,6 @@ export default function HomePage() {
       </motion.div>
     );
   }
-
   // 각 카테고리별 색상 및 아이콘
   const categories = [
     {
@@ -616,7 +618,7 @@ export default function HomePage() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
           <Image
-            src="/cat_origin.png"
+            src="/new_cat.png"
             alt="마법사 고양이"
             fill
             className="w-full h-full object-contain"
@@ -726,14 +728,14 @@ export default function HomePage() {
                         <CategoryCard
                           title={category.title}
                           score={
-                            fortune.categories[
+                            fortune?.categories?.[
                               category.key as keyof typeof fortune.categories
-                            ].score
+                            ]?.score || 3
                           }
                           description={
-                            fortune.categories[
+                            fortune?.categories?.[
                               category.key as keyof typeof fortune.categories
-                            ].trend || ""
+                            ]?.description || ""
                           }
                           icon={category.icon}
                           color={category.color}
@@ -794,9 +796,7 @@ export default function HomePage() {
                   <div className="p-4 bg-white rounded-xl shadow-sm border border-[#990dfa]/20 magic-bg">
                     <div className="flex">
                       <span className="text-2xl mr-3 flex-shrink-0">😺</span>
-                      <p className="text-gray-700 font-handwriting text-xl leading-relaxed">
-                        {fortune.advice}
-                      </p>
+                      <p className="text-gray-700 text-md">{fortune.advice}</p>
                     </div>
                   </div>
 
@@ -973,9 +973,14 @@ export default function HomePage() {
             categories.find((cat) => cat.key === selectedCategory)?.icon || ""
           }
           category={
-            fortune.categories[
+            fortune.categories?.[
               selectedCategory as keyof typeof fortune.categories
-            ]
+            ] || {
+              score: 3,
+              description: "",
+              trend: "",
+              talisman: "",
+            }
           }
         />
       )}

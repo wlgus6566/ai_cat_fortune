@@ -17,6 +17,61 @@ export default function TalismanGalleryPage() {
   const [error, setError] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const { openTalisman } = useTalisman();
+  // createdAt을 YYYY-MM-DD 형식으로 변환
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return (
+      date.getFullYear() +
+      "-" +
+      String(date.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(date.getDate()).padStart(2, "0")
+    );
+  };
+  // concern을 해시태그 형태로 변환
+  const formatConcernTags = (concernText?: string): React.ReactNode => {
+    if (!concernText) return null;
+
+    const uniqueTags = Array.from(
+      new Set(
+        concernText
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag !== "")
+      )
+    );
+
+    // 첫 번째와 마지막 태그만 추출
+    const tagsToShow =
+      uniqueTags.length > 1
+        ? [uniqueTags[0], uniqueTags[uniqueTags.length - 1]]
+        : uniqueTags;
+
+    return (
+      <div className="flex flex-wrap gap-2 mt-2">
+        {tagsToShow.map((tag, index) => {
+          const isLast = index === tagsToShow.length - 1;
+          return (
+            <span
+              key={index}
+              className={`text-xs px-2 py-1 rounded-full ${
+                isLast
+                  ? darkMode
+                    ? "bg-purple-800 text-purple-100"
+                    : "bg-purple-100 text-purple-800"
+                  : darkMode
+                  ? "bg-amber-800 text-amber-100"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              #{tag}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   // 다크모드 상태 가져오기
   useEffect(() => {
@@ -64,13 +119,23 @@ export default function TalismanGalleryPage() {
     fetchTalismans();
   }, [userProfile?.id]);
 
-  // 부적 클릭 핸들러 수정 - 이제 Context API를 사용
-  const handleTalismanClick = (imageUrl: string) => {
-    openTalisman({
-      imageUrl,
+  // 부적 클릭 핸들러 수정 - 이제 Context API를 사용하면서 추가 정보 전달
+  const handleTalismanClick = (talisman: Talisman) => {
+    console.log(1111, {
+      imageUrl: talisman.publicUrl,
       userName: userProfile?.name,
       title: t("talisman.popup.title"),
       darkMode,
+      createdAt: formatDate(talisman.createdAt),
+      concern: talisman.concern,
+    });
+    openTalisman({
+      imageUrl: talisman.publicUrl,
+      userName: userProfile?.name,
+      title: t("talisman.popup.title"),
+      darkMode,
+      createdAt: formatDate(talisman.createdAt),
+      concern: talisman.concern,
     });
   };
 
@@ -130,7 +195,13 @@ export default function TalismanGalleryPage() {
                 ✨
               </span>
               <div>
-                {/* <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2 text-left`}>{t('talisman.collectionTitle')}</h3> */}
+                <h3
+                  className={`text-lg font-semibold ${
+                    darkMode ? "text-white" : "text-gray-800"
+                  } mb-2 text-left`}
+                >
+                  {t("talisman.collectionTitle")}
+                </h3>
                 <p
                   className={`text-sm ${
                     darkMode ? "text-gray-300" : "text-gray-600"
@@ -221,14 +292,14 @@ export default function TalismanGalleryPage() {
                           ? "border-gray-700 bg-gray-800"
                           : "border-gray-200 bg-white"
                       } rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
-                      onClick={() => handleTalismanClick(talisman.publicUrl)}
+                      onClick={() => handleTalismanClick(talisman)}
                       variants={itemVariants}
                       whileHover={{ y: -5, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <div
                         className="relative w-full overflow-hidden rounded-md"
-                        style={{ aspectRatio: "9/16" }}
+                        style={{ aspectRatio: "4/5" }}
                       >
                         <Image
                           src={talisman.publicUrl}
@@ -246,6 +317,12 @@ export default function TalismanGalleryPage() {
                         <p className="text-sm font-medium">
                           {t("talisman.talismanNumber", { number: index + 1 })}
                         </p>
+                        <span className="text-xs text-gray-500">
+                          {formatDate(talisman.createdAt)}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatConcernTags(talisman.concern)}
+                        </span>
                       </div>
                     </motion.div>
                   ))}

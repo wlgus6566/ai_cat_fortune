@@ -8,11 +8,15 @@ interface TalismanContextType {
   userName?: string;
   title?: string;
   darkMode?: boolean;
+  createdAt?: string;
+  concern?: string;
   openTalisman: (params: {
     imageUrl: string;
     userName?: string;
     title?: string;
     darkMode?: boolean;
+    createdAt?: string;
+    concern?: string;
   }) => void;
   closeTalisman: () => void;
 }
@@ -27,22 +31,30 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
   const [userName, setUserName] = useState<string | undefined>();
   const [title, setTitle] = useState<string | undefined>();
   const [darkMode, setDarkMode] = useState<boolean | undefined>(false);
+  const [createdAt, setCreatedAt] = useState<string | undefined>();
+  const [concern, setConcern] = useState<string | undefined>();
 
   const openTalisman = ({
     imageUrl,
     userName,
     title,
     darkMode,
+    createdAt,
+    concern,
   }: {
     imageUrl: string;
     userName?: string;
     title?: string;
     darkMode?: boolean;
+    createdAt?: string;
+    concern?: string;
   }) => {
     setImageUrl(imageUrl);
     setUserName(userName);
     setTitle(title);
     setDarkMode(darkMode);
+    setCreatedAt(createdAt);
+    setConcern(concern);
     setIsOpen(true);
   };
 
@@ -58,6 +70,8 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
         userName,
         title,
         darkMode,
+        createdAt,
+        concern,
         openTalisman,
         closeTalisman,
       }}

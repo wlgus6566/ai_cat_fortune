@@ -158,5 +158,15 @@ export interface IErrorResponse {
   };
 }
 export interface Talisman {
+  id: string;
+  userId: string;
   publicUrl: string;
+  storagePath: string;
+  fileName: string;
+  fileSize?: string;
+  fileType?: string;
+  concern?: string;
+  concernType?: string;
+  generatedBy: string;
+  createdAt: string;
 }

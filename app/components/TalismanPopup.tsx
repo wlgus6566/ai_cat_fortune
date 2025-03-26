@@ -10,6 +10,8 @@ interface TalismanPopupProps {
   title?: string;
   darkMode?: boolean;
   userName?: string;
+  createdAt?: string;
+  concern?: string;
 }
 
 export default function TalismanPopup({
@@ -18,6 +20,8 @@ export default function TalismanPopup({
   userName,
   title,
   darkMode = false,
+  createdAt,
+  concern,
 }: TalismanPopupProps) {
   const t = useTranslations("talisman");
   const [isOpen, setIsOpen] = useState(false);
@@ -208,6 +212,17 @@ export default function TalismanPopup({
             >
               {getTalismanTitle()}
             </h2>
+
+            {/* 부적 생성일 표시 */}
+            {createdAt && (
+              <p
+                className={`text-sm mt-1 ${
+                  darkMode ? "text-gray-400" : "text-amber-700"
+                }`}
+              >
+                {createdAt}
+              </p>
+            )}
           </div>
 
           {/* 스크롤 내용 */}
@@ -253,6 +268,20 @@ export default function TalismanPopup({
                 />
               </div>
             </div>
+
+            {/* 고민 키워드 (해시태그) */}
+            {concern && (
+              <div
+                className={`mt-4 ${
+                  darkMode ? "text-gray-300" : "text-amber-800"
+                }`}
+              >
+                <p className="text-sm font-medium">
+                  {t("concernTags", { defaultValue: "고민 키워드" })}:
+                </p>
+                {concern}
+              </div>
+            )}
 
             {/* 부적 설명 */}
             <div
