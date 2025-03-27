@@ -169,4 +169,5 @@ export interface Talisman {
   concernType?: string;
   generatedBy: string;
   createdAt: string;
+  translatedPhrase?: string;
 }

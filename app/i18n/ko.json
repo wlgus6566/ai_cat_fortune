@@ -9,12 +9,12 @@
     "overall": "종합 운세",
     "fortuneScore": "운세 점수",
     "categoryTitle": "카테고리별 운세",
-    "luckyElements": "행운의 요소",
+    "luckyElements": "🍀 행운의 요소",
     "luckyColor": "행운의 색상",
     "luckyNumber": "행운의 숫자",
     "luckySong": "행운의 노래",
     "luckyItem": "행운의 아이템",
-    "advice": "오늘의 조언",
+    "advice": "💡 오늘의 조언",
     "updateInfo": "* 매일 자정에 업데이트됩니다",
     "categories": {
       "love": {
@@ -34,7 +34,7 @@
       "title": "빠른 메뉴",
       "chat": {
         "title": "운세 상담",
-        "description": "AI와 운세에 대해 대화하기"
+        "description": "포춘냥이와 운세 기반 고민 상담"
       },
       "profile": {
         "title": "내 프로필",

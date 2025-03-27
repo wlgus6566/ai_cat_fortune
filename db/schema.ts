@@ -53,6 +53,7 @@ export const talismansTable = pgTable("talismans", {
   fileType: text("file_type"),
   concern: text("concern"),
   concernType: text("concern_type"),
+  translatedPhrase: text("translated_phrase"),
   generatedBy: text("generated_by").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

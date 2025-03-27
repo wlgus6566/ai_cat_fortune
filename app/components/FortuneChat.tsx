@@ -98,7 +98,7 @@ export default function FortuneChat({
   const [showTalismanPopup, setShowTalismanPopup] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [talismanImageUrl, setTalismanImageUrl] = useState<string | null>(null);
-
+  const [translatedPhrase, setTranslatedPhrase] = useState<string | null>(null);
   // 채팅창 자동 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -206,7 +206,7 @@ export default function FortuneChat({
 
     try {
       // 부적 생성 진행 중 메시지 추가
-      const processingMessage = "행운의 부적을 만들고 있어요...";
+      const processingMessage = "행운의 부적을 만들고 있다냥..🧧";
       await addMessageWithTypingEffect(processingMessage, 500, 800);
 
       console.log("부적 생성 요청 전송:", {
@@ -239,8 +239,11 @@ export default function FortuneChat({
       const imageUrl = data.storedImageUrl || data.imageUrl;
       setTalismanImageUrl(imageUrl);
 
+      const translatedPhrase = data.translatedPhrase;
+      setTranslatedPhrase(translatedPhrase);
+
       // 부적 생성 완료 메시지
-      const successMessage = "행운의 부적이 만들어졌어요! 지금 확인해보세요 ✨";
+      const successMessage = "행운의 부적이 만들어다냥! 지금 확인보라옹~🐾";
       await addMessageWithTypingEffect(successMessage, 500, 800);
 
       // 팝업 표시 (Context API 사용)
@@ -248,8 +251,9 @@ export default function FortuneChat({
       openTalisman({
         imageUrl: imageUrl,
         userName: userName,
-        title: "행운의 부적",
+        title: "행운의 부적🧧",
         darkMode: false,
+        translatedPhrase: translatedPhrase,
       });
 
       // 부적 생성 버튼 숨기기 (한 번만 생성 가능하도록)
@@ -581,7 +585,7 @@ export default function FortuneChat({
     setCurrentConcernText("");
     setTalismanError(null);
     setTalismanImageUrl(null);
-
+    setTranslatedPhrase(null);
     // 다시 초기화 플래그 설정 (이중 실행 방지)
     initializedRef.current = true;
 

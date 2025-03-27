@@ -17,8 +17,15 @@ import Modal from "@/app/components/Modal";
 
 // TalismanPopupContainer 컴포넌트 - 레이아웃 내부에서 사용
 function TalismanPopupContainer() {
-  const { isOpen, imageUrl, userName, title, darkMode, closeTalisman } =
-    useTalisman();
+  const {
+    isOpen,
+    imageUrl,
+    userName,
+    title,
+    darkMode,
+    closeTalisman,
+    translatedPhrase,
+  } = useTalisman();
 
   if (!isOpen || !imageUrl) return null;
 
@@ -29,6 +36,7 @@ function TalismanPopupContainer() {
         onClose={closeTalisman}
         userName={userName}
         title={title}
+        translatedPhrase={translatedPhrase}
         darkMode={darkMode}
       />
     </Modal>
@@ -81,14 +89,14 @@ export default function MainLayout({
               <Link
                 href="/"
                 className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-                  pathname === "/"
+                  pathname === "/fortune"
                     ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
                     : "text-gray-600 hover:bg-[#990dfa]/5"
                 }`}
               >
                 <HomeIcon
                   className={`h-6 w-6 ${
-                    pathname === "/" ? "text-[#990dfa]" : "text-gray-600"
+                    pathname === "/fortune" ? "text-[#990dfa]" : "text-gray-600"
                   }`}
                 />
                 <span className="text-xs mt-1 font-medium">

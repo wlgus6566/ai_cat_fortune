@@ -13,6 +13,7 @@ interface TalismanPopupProps {
   userName?: string;
   createdAt?: string;
   concern?: string;
+  translatedPhrase?: string;
 }
 
 export default function TalismanPopup({
@@ -23,6 +24,7 @@ export default function TalismanPopup({
   darkMode = false,
   createdAt,
   concern,
+  translatedPhrase,
 }: TalismanPopupProps) {
   const t = useTranslations("talisman");
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +32,9 @@ export default function TalismanPopup({
   const [isFullyVisible, setIsFullyVisible] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-
+  useEffect(() => {
+    console.log("translatedPhrase7777", translatedPhrase);
+  }, [translatedPhrase]);
   useEffect(() => {
     // Animation sequence starts when popup is mounted
     const timer1 = setTimeout(() => {
@@ -236,7 +240,6 @@ export default function TalismanPopup({
                     transitionTimingFunction: "cubic-bezier(0.33, 1, 0.68, 1)",
                   }}
                 ></div>
-
                 <Image
                   src={imageUrl}
                   alt={"행운의 부적"}
@@ -277,6 +280,17 @@ export default function TalismanPopup({
                 darkMode ? "text-gray-300" : "text-amber-800"
               }`}
             >
+              {translatedPhrase && (
+                <p
+                  className={`text-sm mt-4 px-2 py-1 text-center rounded-lg ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-amber-100 text-amber-800"
+                  } font-medium`}
+                >
+                  {translatedPhrase}
+                </p>
+              )}
               <p className="text-sm">
                 {t("bringLuck", {
                   defaultValue: "이 부적을 소지하면 행운이 찾아옵니다.",
@@ -298,7 +312,7 @@ export default function TalismanPopup({
                   `}
                 >
                   <Download className="w-5 h-5" />
-                  <span>{t("saveImage", { defaultValue: "이미지 저장" })}</span>
+                  <span>이미지 저장</span>
                 </button>
               </div>
 

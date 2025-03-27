@@ -342,48 +342,10 @@ export default function HomePage() {
           priority
         />
         <div className="relative">
-          {/* 말풍선 */}
           <WisardCat
             hasViewedFortune={hasViewedFortune}
             forcedMessage="운세를 읽고 있다냥..."
           />
-          {/* <AnimatePresence>
-            {showSpeechBubble && (
-              <motion.div
-                className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl px-6 py-3 shadow-lg z-10"
-                initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                transition={{ duration: 0.3 }}
-              >
-                <p className="text-[#3B2E7E] text-lg whitespace-nowrap">
-                  {bubbleMessage}
-                </p>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
-
-          {/* 캐릭터 */}
-          {/* <motion.div
-            className="w-50 h-50 mr-15 mb-17 relative cursor-pointer"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            onClick={handleCatClick}
-          >
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={catState}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.1 }}
-                src={getCatImage()}
-                alt="마법사 고양이"
-                className="w-full h-full object-contain"
-              />
-            </AnimatePresence>
-          </motion.div> */}
         </div>
         <motion.button
           className={`btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1 ${
@@ -394,7 +356,9 @@ export default function HomePage() {
           whileTap={{ scale: 0.98 }}
           whileHover={{ scale: 1.02 }}
         >
-          <span>{loading ? "운세를 확인하는 중..." : "오늘의 운세 보기"}</span>
+          <span>
+            {loading ? "운세를 확인하는 중이다냥...🐾" : "오늘의 운세 보기😽"}
+          </span>
         </motion.button>
 
         {error && (

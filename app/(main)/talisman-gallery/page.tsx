@@ -105,6 +105,7 @@ export default function TalismanGalleryPage() {
         }
 
         const data = await response.json();
+        console.log("data33333", data);
         setTalismans(data.talismans || []);
       } catch (err) {
         console.error("부적 이미지 로딩 오류:", err);
@@ -128,6 +129,7 @@ export default function TalismanGalleryPage() {
       darkMode,
       createdAt: formatDate(talisman.createdAt),
       concern: talisman.concern,
+      translatedPhrase: talisman.translatedPhrase,
     });
     openTalisman({
       imageUrl: talisman.publicUrl,
@@ -136,6 +138,7 @@ export default function TalismanGalleryPage() {
       darkMode,
       createdAt: formatDate(talisman.createdAt),
       concern: talisman.concern,
+      translatedPhrase: talisman.translatedPhrase,
     });
   };
 

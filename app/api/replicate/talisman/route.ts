@@ -10,80 +10,170 @@ const replicate = new Replicate({
 
 // 다양한 부적 프롬프트 템플릿
 const talismanTemplates = {
-  default: (phrase: string) =>
-    `A modern pastel illustration of a Japanese-style lucky charm (omamori) with a cute, chubby cat character. Includes encouraging words: "${phrase}". The charm includes Japanese aesthetic elements, decorative knots, and spiritual symbols. Style: Kawaii, pastel colors, soft edges, warm and magical feeling. Aspect ratio 9:16.`,
+  default: () =>
+    `A modern pastel illustration of a Japanese-style lucky charm (omamori) with a cute, chubby cat character. The charm includes Japanese aesthetic elements, decorative knots, and spiritual symbols. Style: Kawaii, pastel colors, soft edges, warm and magical feeling. Aspect ratio 9:16. No text in image.`,
 
-  romance: (phrase: string) =>
-    `A beautifully designed Japanese love charm (omamori) with heart motifs and soft pink/red colors. Features a cute cat character and romantic symbols. Includes a loving message: "${phrase}". Style: Romantic, dreamy, kawaii, with soft pastel colors. Aspect ratio 9:16.`,
+  romance: () =>
+    `A beautifully designed Japanese love charm (omamori) with heart motifs and soft pink/red colors. Features a cute cat character and romantic symbols. Style: Romantic, dreamy, kawaii, with soft pastel colors. Aspect ratio 9:16. No text in image.`,
 
-  career: (phrase: string) =>
-    `A professional-looking Japanese success charm (omamori) with elements symbolizing career growth and achievement. Features a determined-looking cat character in business attire. Includes a motivational message: "${phrase}". Style: Professional with playful elements, blue and gold color scheme. Aspect ratio 9:16.`,
+  career: () =>
+    `A professional-looking Japanese success charm (omamori) with elements symbolizing career growth and achievement. Features a determined-looking cat character in business attire. Style: Professional with playful elements, blue and gold color scheme. Aspect ratio 9:16. No text in image.`,
 
-  money: (phrase: string) =>
-    `A prosperity-focused Japanese wealth charm (omamori) with gold coins, money symbols and lucky elements. Features a happy cat character with a coin. Includes a wealth-affirming message: "${phrase}". Style: Abundant, prosperous, with green and gold colors. Aspect ratio 9:16.`,
+  money: () =>
+    `A prosperity-focused Japanese wealth charm (omamori) with gold coins, money symbols and lucky elements. Features a happy cat character with a coin. Style: Abundant, prosperous, with green and gold colors. Aspect ratio 9:16. No text in image.`,
 
-  psychology: (phrase: string) =>
-    `A calming Japanese healing charm (omamori) with elements symbolizing mental peace and balance. Features a meditating cat character with serene expression. Includes a comforting message: "${phrase}". Style: Serene, soothing, with purples and blues. Aspect ratio 9:16.`,
+  psychology: () =>
+    `A calming Japanese healing charm (omamori) with elements symbolizing mental peace and balance. Features a meditating cat character with serene expression. Style: Serene, soothing, with purples and blues. Aspect ratio 9:16. No text in image.`,
 
-  relationships: (phrase: string) =>
-    `A harmonious Japanese friendship charm (omamori) with elements symbolizing connection and social bonds. Features multiple cute cat characters together. Includes a warm message: "${phrase}". Style: Warm, connected, with yellows and oranges. Aspect ratio 9:16.`,
+  relationships: () =>
+    `A harmonious Japanese friendship charm (omamori) with elements symbolizing connection and social bonds. Features multiple cute cat characters together. Style: Warm, connected, with yellows and oranges. Aspect ratio 9:16. No text in image.`,
 
-  lifestyle: (phrase: string) =>
-    `A balanced Japanese lifestyle charm (omamori) with elements symbolizing harmony and life enjoyment. Features a content cat character engaged in various activities. Includes a positive message: "${phrase}". Style: Harmonious, diverse, with balanced color palette. Aspect ratio 9:16.`,
+  lifestyle: () =>
+    `A balanced Japanese lifestyle charm (omamori) with elements symbolizing harmony and life enjoyment. Features a content cat character engaged in various activities. Style: Harmonious, diverse, with balanced color palette. Aspect ratio 9:16. No text in image.`,
 };
+// const encouragingPhrases: Record<string, string[]> = {
+//   romance: [
+//     "Love is blooming for you 🌸",
+//     "Trust your heart 💖",
+//     "Romance is in the air 💌",
+//     "Your love story unfolds 💕",
+//     "Someone special is thinking of you ✨",
+//   ],
+//   career: [
+//     "Your growth is unstoppable 💼",
+//     "New opportunities await 🚀",
+//     "Your talents shine bright 🌟",
+//     "Step forward with confidence 💪",
+//     "Success is calling 📈",
+//   ],
+//   money: [
+//     "Abundance flows to you 💰",
+//     "Your wealth is growing 🍀",
+//     "Every coin counts ✨",
+//     "Smart moves bring fortune 🧠",
+//     "You attract prosperity 🌈",
+//   ],
+//   psychology: [
+//     "Peace begins with you 🧘‍♀️",
+//     "You are enough 🌿",
+//     "Let your mind rest ☁️",
+//     "Breathe. You're doing well 🍃",
+//     "Healing is happening 🌸",
+//   ],
+//   relationships: [
+//     "You're surrounded by love 💞",
+//     "True friends see your light 🌟",
+//     "Your connections are precious 🤝",
+//     "Kindness comes back to you 💫",
+//     "Warmth is all around you 🧣",
+//   ],
+//   lifestyle: [
+//     "Live your rhythm 🎵",
+//     "Balance brings joy ⚖️",
+//     "Little joys matter 🧸",
+//     "Slow down and smile 😊",
+//     "Your path is beautiful 🌈",
+//   ],
+//   default: [
+//     "Magic is all around ✨",
+//     "Believe in your story 📖",
+//     "Today holds surprises 🌟",
+//     "You've got this 💫",
+//     "Shine your light 🌞",
+//   ],
+// };
 
-// 응원 메시지 (영어)
 const encouragingPhrases: Record<string, string[]> = {
   romance: [
-    "Love is blooming for you 🌸",
-    "Trust your heart 💖",
-    "Romance is in the air 💌",
-    "Your love story unfolds 💕",
-    "Someone special is thinking of you ✨",
+    "사랑이 피어나는 중이에요 🌸",
+    "당신의 마음을 믿어보세요 💖",
+    "연애의 기운이 감돌아요 💌",
+    "당신의 러브스토리가 펼쳐져요 💕",
+    "누군가 당신을 생각하고 있어요 ✨",
   ],
   career: [
-    "Your growth is unstoppable 💼",
-    "New opportunities await 🚀",
-    "Your talents shine bright 🌟",
-    "Step forward with confidence 💪",
-    "Success is calling 📈",
+    "당신의 성장은 멈추지 않아요 💼",
+    "새로운 기회가 기다리고 있어요 🚀",
+    "당신의 재능이 빛나고 있어요 🌟",
+    "자신감을 가지고 나아가세요 💪",
+    "성공이 당신을 부르고 있어요 📈",
   ],
   money: [
-    "Abundance flows to you 💰",
-    "Your wealth is growing 🍀",
-    "Every coin counts ✨",
-    "Smart moves bring fortune 🧠",
-    "You attract prosperity 🌈",
+    "풍요가 당신에게 흘러들고 있어요 💰",
+    "당신의 재산이 자라고 있어요 🍀",
+    "작은 돈도 소중해요 ✨",
+    "현명한 선택이 행운을 가져다줘요 🧠",
+    "당신은 부를 끌어들이고 있어요 🌈",
   ],
   psychology: [
-    "Peace begins with you 🧘‍♀️",
-    "You are enough 🌿",
-    "Let your mind rest ☁️",
-    "Breathe. You're doing well 🍃",
-    "Healing is happening 🌸",
+    "마음의 평화는 당신 안에서 시작돼요 🧘‍♀️",
+    "당신은 이미 충분해요 🌿",
+    "생각을 잠시 쉬게 해도 괜찮아요 ☁️",
+    "숨을 쉬세요. 잘하고 있어요 🍃",
+    "회복은 지금도 이루어지고 있어요 🌸",
   ],
   relationships: [
-    "You're surrounded by love 💞",
-    "True friends see your light 🌟",
-    "Your connections are precious 🤝",
-    "Kindness comes back to you 💫",
-    "Warmth is all around you 🧣",
+    "당신은 사랑으로 둘러싸여 있어요 💞",
+    "진정한 친구는 당신의 빛을 알아봐요 🌟",
+    "소중한 인연들이 함께해요 🤝",
+    "친절은 반드시 돌아와요 💫",
+    "따뜻함이 곁에 있어요 🧣",
   ],
   lifestyle: [
-    "Live your rhythm 🎵",
-    "Balance brings joy ⚖️",
-    "Little joys matter 🧸",
-    "Slow down and smile 😊",
-    "Your path is beautiful 🌈",
+    "당신만의 리듬으로 살아가세요 🎵",
+    "균형은 행복의 열쇠예요 ⚖️",
+    "작은 기쁨이 큰 행복이에요 🧸",
+    "잠시 멈추고 미소 지어보세요 😊",
+    "당신의 길은 아름다워요 🌈",
   ],
   default: [
-    "Magic is all around ✨",
-    "Believe in your story 📖",
-    "Today holds surprises 🌟",
-    "You’ve got this 💫",
-    "Shine your light 🌞",
+    "세상은 마법으로 가득해요 ✨",
+    "당신의 이야기를 믿으세요 📖",
+    "오늘은 놀라움이 가득할 거예요 🌟",
+    "당신은 무엇이든 해낼 수 있어요 💫",
+    "당신의 빛을 세상에 보여주세요 🌞",
   ],
 };
+
+function getTemplateByCategory(category: string): {
+  prompt: string;
+  phrase: string;
+} {
+  const mappedCategory =
+    category.toLowerCase().includes("romance") ||
+    category.toLowerCase().includes("연애")
+      ? "romance"
+      : category.toLowerCase().includes("career") ||
+        category.toLowerCase().includes("직장") ||
+        category.toLowerCase().includes("커리어")
+      ? "career"
+      : category.toLowerCase().includes("money") ||
+        category.toLowerCase().includes("금전") ||
+        category.toLowerCase().includes("돈")
+      ? "money"
+      : category.toLowerCase().includes("psychology") ||
+        category.toLowerCase().includes("심리")
+      ? "psychology"
+      : category.toLowerCase().includes("relationships") ||
+        category.toLowerCase().includes("인간관계")
+      ? "relationships"
+      : category.toLowerCase().includes("lifestyle") ||
+        category.toLowerCase().includes("라이프") ||
+        category.toLowerCase().includes("생활")
+      ? "lifestyle"
+      : "default";
+  console.log("mappedCategory", mappedCategory);
+  const phrase = getRandomPhrase(mappedCategory);
+  console.log("phrase", phrase);
+  const templateFn =
+    talismanTemplates[mappedCategory as keyof typeof talismanTemplates] ||
+    talismanTemplates.default;
+
+  return {
+    prompt: templateFn(),
+    phrase,
+  };
+}
 
 // 카테고리에 맞는 랜덤 응원 메시지 가져오기
 function getRandomPhrase(category: string): string {
@@ -121,43 +211,6 @@ function getRandomPhrase(category: string): string {
   return phrases[Math.floor(Math.random() * phrases.length)];
 }
 
-// 카테고리에 맞는 프롬프트 템플릿 선택
-function getTemplateByCategory(category: string): string {
-  // 카테고리 매핑 (영어 및 한글 카테고리 지원)
-  const mappedCategory =
-    category.toLowerCase().includes("romance") ||
-    category.toLowerCase().includes("연애")
-      ? "romance"
-      : category.toLowerCase().includes("career") ||
-        category.toLowerCase().includes("직장") ||
-        category.toLowerCase().includes("커리어")
-      ? "career"
-      : category.toLowerCase().includes("money") ||
-        category.toLowerCase().includes("금전") ||
-        category.toLowerCase().includes("돈")
-      ? "money"
-      : category.toLowerCase().includes("psychology") ||
-        category.toLowerCase().includes("심리")
-      ? "psychology"
-      : category.toLowerCase().includes("relationships") ||
-        category.toLowerCase().includes("인간관계")
-      ? "relationships"
-      : category.toLowerCase().includes("lifestyle") ||
-        category.toLowerCase().includes("라이프") ||
-        category.toLowerCase().includes("생활")
-      ? "lifestyle"
-      : "default";
-
-  const phrase = getRandomPhrase(mappedCategory);
-
-  const templateFn =
-    talismanTemplates[mappedCategory as keyof typeof talismanTemplates] ||
-    talismanTemplates.default;
-
-  // 템플릿 적용
-  return templateFn(phrase);
-}
-
 export async function POST(request: Request) {
   try {
     // 요청 데이터 파싱
@@ -188,7 +241,7 @@ export async function POST(request: Request) {
     const mainCategory = concern.split(",")[0].trim();
 
     // 카테고리에 맞는 프롬프트 생성
-    const prompt = getTemplateByCategory(mainCategory);
+    const { prompt, phrase } = getTemplateByCategory(mainCategory);
     console.log("이미지 생성 프롬프트:", prompt);
 
     // Replicate API 호출 시 추가 매개변수 설정
@@ -254,6 +307,7 @@ export async function POST(request: Request) {
       concern,
       userName,
       createdAt: new Date().toISOString(),
+      translatedPhrase: phrase,
     };
 
     // Supabase Storage에 이미지 저장
@@ -276,6 +330,7 @@ export async function POST(request: Request) {
       success: true,
       imageUrl: replicateImageUrl,
       storedImageUrl: storedImageUrl,
+      translatedPhrase: phrase,
     });
   } catch (error) {
     console.error("Image generation error:", error);

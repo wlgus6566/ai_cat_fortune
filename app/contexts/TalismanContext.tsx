@@ -10,6 +10,7 @@ interface TalismanContextType {
   darkMode?: boolean;
   createdAt?: string;
   concern?: string;
+  translatedPhrase?: string;
   openTalisman: (params: {
     imageUrl: string;
     userName?: string;
@@ -17,6 +18,7 @@ interface TalismanContextType {
     darkMode?: boolean;
     createdAt?: string;
     concern?: string;
+    translatedPhrase?: string;
   }) => void;
   closeTalisman: () => void;
 }
@@ -33,6 +35,9 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useState<boolean | undefined>(false);
   const [createdAt, setCreatedAt] = useState<string | undefined>();
   const [concern, setConcern] = useState<string | undefined>();
+  const [translatedPhrase, setTranslatedPhrase] = useState<
+    string | undefined
+  >();
 
   const openTalisman = ({
     imageUrl,
@@ -41,6 +46,7 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     darkMode,
     createdAt,
     concern,
+    translatedPhrase,
   }: {
     imageUrl: string;
     userName?: string;
@@ -48,13 +54,16 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     darkMode?: boolean;
     createdAt?: string;
     concern?: string;
+    translatedPhrase?: string;
   }) => {
+    console.log("translatedPhrase1111", translatedPhrase);
     setImageUrl(imageUrl);
     setUserName(userName);
     setTitle(title);
     setDarkMode(darkMode);
     setCreatedAt(createdAt);
     setConcern(concern);
+    setTranslatedPhrase(translatedPhrase);
     setIsOpen(true);
   };
 
@@ -72,6 +81,7 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
         darkMode,
         createdAt,
         concern,
+        translatedPhrase,
         openTalisman,
         closeTalisman,
       }}

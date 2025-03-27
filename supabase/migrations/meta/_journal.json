@@ -29,6 +29,13 @@
       "when": 1742867386848,
       "tag": "0003_grey_katie_power",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1743052208896,
+      "tag": "0004_previous_shaman",
+      "breakpoints": true
     }
   ]
 }

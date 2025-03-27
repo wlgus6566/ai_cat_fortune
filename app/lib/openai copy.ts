@@ -33,6 +33,22 @@ function formatUserProfile(userProfile?: UserProfile | null): string {
  */
 export interface DailyFortune {
   date: string; // 날짜
+  saju: {
+    cheongan: {
+      year: string; // 연주(년柱) 천간
+      month: string; // 월주(월柱) 천간
+      day: string; // 일주(일柱) 천간
+      time: string; // 시주(시柱) 천간
+    };
+    jiji: {
+      year: string; // 연주(년柱) 지지
+      month: string; // 월주(월柱) 지지
+      day: string; // 일주(일柱) 지지
+      time: string; // 시주(시柱) 지지
+    };
+    ilju: string; // 일주 정보
+    iljuHanja: string; // 일주 한자 표기
+  };
   overall: {
     score: number; // 1-5 사이의 점수
     description: string; // 전체 운세 설명
@@ -102,6 +118,22 @@ export async function getDailyFortune(
 
 {
   "date": "YYYY-MM-DD", // 오늘 날짜
+  "saju": {
+    "cheongan": {
+      "year": "갑/을/병/정/무/기/경/신/임/계 중 하나", // 연주(년柱) 천간
+      "month": "갑/을/병/정/무/기/경/신/임/계 중 하나", // 월주(월柱) 천간
+      "day": "갑/을/병/정/무/기/경/신/임/계 중 하나", // 일주(일柱) 천간
+      "time": "갑/을/병/정/무/기/경/신/임/계 중 하나" // 시주(시柱) 천간
+    },
+    "jiji": {
+      "year": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나", // 연주(년柱) 지지
+      "month": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나", // 월주(월柱) 지지
+      "day": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나", // 일주(일柱) 지지
+      "time": "자/축/인/묘/진/사/오/미/신/유/술/해 중 하나" // 시주(시柱) 지지
+    },
+    "ilju": "사용자의 일주 (예: '임술일주')", // 일주 정보
+    "iljuHanja": "사용자의 일주 한자 표기 (예: '壬戌日柱')" // 일주 한자 표기
+  },
   "overall": {
     "score": 숫자(1-5), // 전체 운세 점수
     "description": "오늘의 전반적인 운세 설명"
@@ -110,25 +142,25 @@ export async function getDailyFortune(
     "love": {
       "score": 3,
       "description": "오늘은 특별한 기복 없이 차분한 연애운이 흐르고 있어요. 연인과의 대화가 평소보다 부드럽게 이어지고, 마음이 안정되는 하루가 될 거예요. 혼자인 사람도 조용한 일상 속에서 스스로를 돌아보며 마음의 평화를 느낄 수 있어요.",
-      "trend": "안정적인 하루다냥!",
-      "talisman": "따뜻한 말 한마디는 사랑을 부르는 주문이냥~🐾"
+      "trend": "안정적인 하루",
+      "talisman": "따뜻한 말 한마디는 사랑을 부르는 주문이냥~"
     },
     "money": {
       "score": 3,
       "description": "지출이 예상보다 많아질 수 있어요. 계획에 없던 소비는 잠시 미루고 꼭 필요한 것만 사는 것이 좋아요. 오늘은 금전적으로 신중함이 필요한 날이에요. 자산 관리 앱을 켜고 예산을 다시 점검해보는 것도 좋은 방법이에요.",
-      "trend": "지출을 관리하라냥~🐾",
+      "trend": "지출을 관리하세요",
       "talisman": "지갑이 울기 전에 냥이가 말린다옹~"
     },
     "health": {
       "score": 3,
       "description": "큰 병은 없지만 피로가 은근히 누적된 상태예요. 너무 무리하지 말고, 틈틈이 스트레칭이나 휴식을 챙기는 게 좋아요. 오늘은 체력보다 회복이 더 중요한 날! 일찍 잠자리에 들어 충분한 수면을 취해보세요.",
-      "trend": "휴식이 필요한 날!",
+      "trend": "휴식이 필요한 날",
       "talisman": "잘 자야 예뻐진다옹~ 꿈속에서도 스트레칭 잊지 마라옹!"
     },
     "social": {
       "score": 3,
       "description": "대인관계에서는 경청의 자세가 복을 부르는 날이에요. 감정을 앞세우기보다는 상대의 이야기를 천천히 들어보세요. 생각보다 큰 공감대를 발견할 수 있고, 오해를 줄이며 관계가 더 깊어질 수 있어요.",
-      "trend": "차분한 대화가 필요하다냥🐾",
+      "trend": "차분한 대화가 필요해요",
       "talisman": "먼저 말하는 것보다 먼저 들어주는 게 멋진 거다옹~"
     }
   },
@@ -139,18 +171,13 @@ export async function getDailyFortune(
   "advice": "오늘의 조언" // 전반적인 조언
 }
 
-각 카테고리 설명은 200자 내외로 간결하게 작성하세요.  
-점수는 1(매우 나쁨)부터 5(매우 좋음)까지의 정수로 표현하세요.  
-luckyItem은 오늘 입으면 운 좋은 아이템을 예시로 명사만 작성하세요.  
+각 카테고리 설명은 200자 내외로 간결하게 작성하세요.
+점수는 1(매우 나쁨)부터 5(매우 좋음)까지의 정수로 표현하세요.
+luckyItem은 오늘 입으면 운 좋은 아이템을 예시로 명사만 작성하세요.
 luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
-
-**talisman과 advice는 억지스럽지 않고 자연스러운 고양이 말투로 작성하세요.**  
-말끝마다 무조건 "~냥"을 붙이는 방식은 피하고, 고양이 특유의 새침하고 귀여운 톤을 살려주세요.  
-예를 들어, "~하라냥", "~다냥" 등의 말투는 적절할 때만 사용하고,  
-"뭐든 너무 무리하지 마, 오늘은 낮잠이 최고다옹." 같은 자연스러운 말투를 사용해주세요.
-
-실제 사주 분석 방법론을 적용해 운세를 구성하세요.
-사용자의 생년월일과 태어난 시간을 바탕으로 사주팔자를 분석하고, 오늘 하루의 흐름을 판단하여 운세를 작성해주세요.`,
+advice와 talisman은 귀여운 고양이처럼 "~냥", "~다냥"으로 끝나는 문장으로 작성하세요.
+생년월일과 사주 정보를 바탕으로 분석하되, 실제 사주 분석 방법론을 적용하세요.
+사주팔자 정보는 사용자의 생년월일과 태어난 시간을 바탕으로 실제 사주학 원리에 따라 정확하게 계산하여 제공하세요.`,
         },
         {
           role: "user",
@@ -172,6 +199,22 @@ luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
       const result: Partial<DailyFortune> = {
         ...fortuneData,
         date: formattedDate,
+        saju: {
+          cheongan: {
+            year: fortuneData.saju.cheongan.year,
+            month: fortuneData.saju.cheongan.month,
+            day: fortuneData.saju.cheongan.day,
+            time: fortuneData.saju.cheongan.time,
+          },
+          jiji: {
+            year: fortuneData.saju.jiji.year,
+            month: fortuneData.saju.jiji.month,
+            day: fortuneData.saju.jiji.day,
+            time: fortuneData.saju.jiji.time,
+          },
+          ilju: fortuneData.saju.ilju,
+          iljuHanja: fortuneData.saju.iljuHanja,
+        },
       };
 
       // overall 객체에서 최상위 속성들 추출
@@ -214,28 +257,28 @@ luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
             description:
               "오늘은 특별한 기복 없이 차분한 연애운이 흐르고 있어요. 연인과의 대화가 평소보다 부드럽게 이어지고, 마음이 안정되는 하루가 될 거예요.",
             trend: "안정적인 하루",
-            talisman: "평화롭게 마음을 유지하라냥🔮",
+            talisman: "평화롭게 마음을 유지하세요",
           },
           money: {
             score: 3,
             description:
               "지출이 많아질 수 있는 날이에요. 충동구매를 삼가고, 꼭 필요한 것만 구매하는 게 좋아요.",
             trend: "지출을 관리하세요",
-            talisman: "필요한 것만 구매하라냥✨",
+            talisman: "필요한 것만 구매하세요",
           },
           health: {
             score: 3,
             description:
               "몸은 괜찮지만 마음의 피로가 누적되어 있을 수 있어요. 짧은 산책이나 좋아하는 음악을 들으며 여유를 가지는 것이 오늘의 회복 포인트입니다.",
             trend: "휴식이 필요한 날",
-            talisman: "충분한 수면을 취하라냥🐱",
+            talisman: "충분한 수면을 취하세요",
           },
           social: {
             score: 3,
             description:
               "대인관계에서 불필요한 오해를 줄이기 위해서는 경청하는 자세가 중요해요. 특히 직장이나 학교에서 누군가의 말을 끝까지 들어주는 태도가 빛을 발할 수 있어요.",
             trend: "차분한 대화가 필요해요",
-            talisman: "경청하는 태도가 중요!🐾",
+            talisman: "경청하는 태도가 중요합니다",
           },
         };
       }
@@ -256,6 +299,22 @@ luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
 
     return {
       date: formattedDate,
+      saju: {
+        cheongan: {
+          year: "갑",
+          month: "무",
+          day: "임",
+          time: "을",
+        },
+        jiji: {
+          year: "진",
+          month: "술",
+          day: "묘",
+          time: "해",
+        },
+        ilju: "임묘일주",
+        iljuHanja: "壬卯日柱",
+      },
       overall: {
         score: 3,
         description: "오늘은 평범한 하루가 될 것 같습니다.",

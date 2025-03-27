@@ -77,6 +77,7 @@ export async function GET() {
 
     // 부적 목록 조회
     const talismans = await getTalismansByUserId(userId);
+    console.log("talismans44444", talismans);
 
     return NextResponse.json({ talismans });
   } catch (error) {

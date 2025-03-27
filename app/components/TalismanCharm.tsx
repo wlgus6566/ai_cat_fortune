@@ -1,5 +1,5 @@
-import Image from 'next/image';
-import { useState } from 'react';
+import Image from "next/image";
+import { useState } from "react";
 
 interface TalismanCharmProps {
   imageUrl: string;
@@ -8,7 +8,7 @@ interface TalismanCharmProps {
 
 export default function TalismanCharm({ imageUrl, alt }: TalismanCharmProps) {
   const [isLoading, setIsLoading] = useState(true);
-  
+
   return (
     <div className="mt-4 overflow-hidden rounded-lg bg-red-50 shadow-md">
       <div className="relative h-64 w-full">
@@ -17,7 +17,7 @@ export default function TalismanCharm({ imageUrl, alt }: TalismanCharmProps) {
             src={imageUrl}
             alt={alt}
             fill
-            style={{ objectFit: 'contain' }}
+            style={{ objectFit: "contain" }}
             className="rounded-lg transition-opacity duration-300"
             onLoadingComplete={() => setIsLoading(false)}
           />
@@ -30,4 +30,4 @@ export default function TalismanCharm({ imageUrl, alt }: TalismanCharmProps) {
       </div>
     </div>
   );
-} 
+}

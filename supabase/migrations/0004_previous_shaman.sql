@@ -1,0 +1,1 @@
+ALTER TABLE "talismans" ADD COLUMN "translated_phrase" text;

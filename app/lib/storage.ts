@@ -112,6 +112,7 @@ export async function saveTalismanImage(
           fileSize: imageBuffer.byteLength.toString(),
           fileType: "image/jpeg",
           concern: metadata?.concern || "",
+          translatedPhrase: metadata?.translatedPhrase || "",
           generatedBy: "AI",
         })
         .returning();
@@ -132,7 +133,9 @@ export async function saveTalismanImage(
 /**
  * 사용자의 부적 이미지 목록 조회
  */
-export async function getUserTalismans(userId: string): Promise<string[]> {
+export async function getUserTalismans(
+  userId: string
+): Promise<Array<{ url: string; translatedPhrase?: string | null }>> {
   try {
     // Drizzle ORM을 사용하여 데이터베이스에서 사용자의 부적 목록 조회
     const talismans = await db.query.talismansTable.findMany({
@@ -140,13 +143,16 @@ export async function getUserTalismans(userId: string): Promise<string[]> {
       orderBy: [desc(talismansTable.createdAt)],
     });
 
-    // 공개 URL 목록 반환
+    // 공개 URL과 추가 정보 목록 반환
     return talismans.map((talisman) => {
       const { data: publicUrl } = supabaseAdmin.storage
         .from(TALISMAN_BUCKET)
         .getPublicUrl(talisman.storagePath);
 
-      return publicUrl.publicUrl;
+      return {
+        url: publicUrl.publicUrl,
+        translatedPhrase: talisman.translatedPhrase,
+      };
     });
   } catch (error) {
     console.error("사용자 부적 이미지 조회 오류:", error);
@@ -159,13 +165,13 @@ export async function getUserTalismans(userId: string): Promise<string[]> {
 
       if (storageError) throw storageError;
 
-      // 공개 URL 목록 반환
+      // 공개 URL 목록 반환 (메타데이터 정보 없음)
       return data.map((item) => {
         const { data: publicUrl } = supabaseAdmin.storage
           .from(TALISMAN_BUCKET)
           .getPublicUrl(`${userId}/${item.name}`);
 
-        return publicUrl.publicUrl;
+        return { url: publicUrl.publicUrl };
       });
     } catch (fallbackError) {
       console.error("대체 부적 이미지 조회 오류:", fallbackError);
