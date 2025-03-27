@@ -56,7 +56,6 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     concern?: string;
     translatedPhrase?: string;
   }) => {
-    console.log("translatedPhrase1111", translatedPhrase);
     setImageUrl(imageUrl);
     setUserName(userName);
     setTitle(title);

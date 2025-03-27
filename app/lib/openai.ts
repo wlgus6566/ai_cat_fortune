@@ -88,10 +88,83 @@ export async function getDailyFortune(
       today.getMonth() + 1
     ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
+    // JSON 스키마 정의 (현재 gpt-3.5-turbo에서는 json_schema가 지원되지 않아 사용하지 않음)
+    // 향후 gpt-4 등 json_schema를 지원하는 모델 사용 시 활성화 가능
+    /* 
+    const dailyFortuneSchema = {
+      type: "object",
+      properties: {
+        date: { type: "string" },
+        overall: {
+          type: "object",
+          properties: {
+            score: { type: "integer", minimum: 1, maximum: 5 },
+            description: { type: "string" }
+          },
+          required: ["score", "description"]
+        },
+        categories: {
+          type: "object",
+          properties: {
+            love: {
+              type: "object",
+              properties: {
+                score: { type: "integer", minimum: 1, maximum: 5 },
+                description: { type: "string" },
+                trend: { type: "string" },
+                talisman: { type: "string" }
+              },
+              required: ["score", "description", "trend", "talisman"]
+            },
+            money: {
+              type: "object",
+              properties: {
+                score: { type: "integer", minimum: 1, maximum: 5 },
+                description: { type: "string" },
+                trend: { type: "string" },
+                talisman: { type: "string" }
+              },
+              required: ["score", "description", "trend", "talisman"]
+            },
+            health: {
+              type: "object",
+              properties: {
+                score: { type: "integer", minimum: 1, maximum: 5 },
+                description: { type: "string" },
+                trend: { type: "string" },
+                talisman: { type: "string" }
+              },
+              required: ["score", "description", "trend", "talisman"]
+            },
+            social: {
+              type: "object",
+              properties: {
+                score: { type: "integer", minimum: 1, maximum: 5 },
+                description: { type: "string" },
+                trend: { type: "string" },
+                talisman: { type: "string" }
+              },
+              required: ["score", "description", "trend", "talisman"]
+            }
+          },
+          required: ["love", "money", "health", "social"]
+        },
+        luckyColor: { type: "string" },
+        luckyNumber: { type: "integer" },
+        advice: { type: "string" },
+        luckySong: { type: "string" },
+        luckyItem: { type: "string" }
+      },
+      required: ["date", "overall", "categories", "luckyColor", "luckyNumber", "advice", "luckySong", "luckyItem"]
+    };
+    */
+
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       temperature: 0.7,
-      response_format: { type: "json_object" },
+      response_format: {
+        type: "json_object",
+      },
       messages: [
         {
           role: "system",
@@ -144,10 +217,18 @@ export async function getDailyFortune(
 luckyItem은 오늘 입으면 운 좋은 아이템을 예시로 명사만 작성하세요.  
 luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
 
-**talisman과 advice는 억지스럽지 않고 자연스러운 고양이 말투로 작성하세요.**  
-말끝마다 무조건 "~냥"을 붙이는 방식은 피하고, 고양이 특유의 새침하고 귀여운 톤을 살려주세요.  
-예를 들어, "~하라냥", "~다냥" 등의 말투는 적절할 때만 사용하고,  
-"뭐든 너무 무리하지 마, 오늘은 낮잠이 최고다옹." 같은 자연스러운 말투를 사용해주세요.
+**talisman과 advice는 자연스러운 고양이 말투로 작성해야 합니다.**
+
+- talisman은 반드시 귀엽고 새침한 고양이 말투를 포함해야 합니다.
+- 말끝에는 '~냥', '~다옹', '~하라냥', '~이라옹' 등의 표현 중 하나 이상이 포함되어야 하며, 문장 전체가 억지스럽지 않고 부드럽게 읽혀야 합니다.
+- '냥', '다옹', '하라냥' 등 고양이 특유의 말투 키워드가 반드시 **한 번 이상 포함**되어야 합니다.
+- 마치 고양이가 오늘 하루의 부적을 속삭이듯, 귀엽고 재치 있게 작성해주세요.
+- 예시는 다음과 같습니다:
+  - "따뜻한 목도리는 마음까지 포근하게 감싸준다옹~"
+  - "무리하지 말고 천천히 걷는 것도 멋진 하루라냥."
+  - "조용한 오후엔 따뜻한 차 한잔이 최고다옹~"
+
+advice 역시 같은 톤을 유지하되, talisman보다 조금 더 조언적인 말투를 사용해주세요.
 
 실제 사주 분석 방법론을 적용해 운세를 구성하세요.
 사용자의 생년월일과 태어난 시간을 바탕으로 사주팔자를 분석하고, 오늘 하루의 흐름을 판단하여 운세를 작성해주세요.`,

@@ -33,9 +33,6 @@ export default function TalismanPopup({
   const [isShaking, setIsShaking] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   useEffect(() => {
-    console.log("translatedPhrase7777", translatedPhrase);
-  }, [translatedPhrase]);
-  useEffect(() => {
     // Animation sequence starts when popup is mounted
     const timer1 = setTimeout(() => {
       setIsOpen(true); // Show popup background
@@ -281,24 +278,18 @@ export default function TalismanPopup({
               }`}
             >
               {translatedPhrase && (
-                <p
-                  className={`text-sm mt-4 px-2 py-1 text-center rounded-lg ${
-                    darkMode
-                      ? "bg-gray-700 text-white"
-                      : "bg-amber-100 text-amber-800"
-                  } font-medium`}
-                >
+                <p className={`text-md mt-4 px-2 py-1 text-center font-medium`}>
                   {translatedPhrase}
                 </p>
               )}
-              <p className="text-sm">
+              <p className="mt-4 text-sm">
                 {t("bringLuck", {
-                  defaultValue: "이 부적을 소지하면 행운이 찾아옵니다.",
+                  defaultValue: "이 부적을 소지하면 행운이 찾아온다냥~",
                 })}
               </p>
 
               {/* 저장 버튼 */}
-              <div className="w-full flex justify-center pb-6">
+              <div className="mt-4 w-full flex justify-center pb-6">
                 <button
                   onClick={handleSaveImage}
                   className={`

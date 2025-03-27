@@ -246,7 +246,7 @@ export async function POST(request: Request) {
 
     // Replicate API 호출 시 추가 매개변수 설정
     const prediction = await replicate.predictions.create({
-      model: "black-forest-labs/flux-schnell",
+      model: "black-forest-labs/flux-dev",
       input: {
         prompt: prompt,
         aspect_ratio: "9:16",
