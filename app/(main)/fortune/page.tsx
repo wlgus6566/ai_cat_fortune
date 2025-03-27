@@ -5,7 +5,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import Link from "next/link";
 import { DailyFortune } from "@/app/lib/openai";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import CategoryPopup from "@/app/components/CategoryPopup";
@@ -26,6 +26,7 @@ import {
   BookHeart,
   ChevronRight,
 } from "lucide-react";
+import WisardCat from "@/app/components/WisardCat";
 // 운세 점수 시각화를 위한 컴포넌트
 interface FortuneScoreProps {
   score: number;
@@ -201,98 +202,6 @@ export default function HomePage() {
   const searchParams = useSearchParams();
   const shouldShowFortune = searchParams.get("showFortune") === "true";
 
-  // 고양이 상태 관리
-  const [catState, setCatState] = useState<
-    "origin" | "smile" | "up" | "wink" | "wonder" | "angry" | "left" | "back"
-  >("origin");
-  const catStates: (
-    | "origin"
-    | "smile"
-    | "up"
-    | "wink"
-    | "wonder"
-    | "angry"
-    | "left"
-    | "back"
-  )[] = ["origin", "smile", "up", "wink", "wonder", "angry", "left", "back"];
-  const getRandomCatState = () => {
-    const randomIndex = Math.floor(Math.random() * catStates.length);
-    return catStates[randomIndex];
-  };
-  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
-  const [bubbleMessage, setBubbleMessage] = useState("");
-  const handleCatClick = () => {
-    const newState = getRandomCatState();
-    setCatState(newState);
-    setShowSpeechBubble(false); // 말풍선은 숨겨줘
-  };
-  // 말풍선 메시지 풀과 해당하는 고양이 상태
-  const speechMessages = [
-    { text: "오늘 운세를 점쳐볼까냥~?", state: "origin" as const },
-    { text: "마법이 느껴지는 하루가 될지도 몰라!🦄", state: "wink" as const },
-    { text: "고민이 있다면, 내가 들어줄게냥.", state: "smile" as const },
-    {
-      text: "💫 오늘은 뭔가 특별해보인다냥~",
-      state: "wonder" as const,
-    },
-    { text: "별들이 속삭이고 있어, 열어보자!", state: "up" as const },
-  ];
-
-  // 랜덤 메시지 선택 함수
-  const getRandomMessage = useCallback(() => {
-    const randomIndex = Math.floor(Math.random() * speechMessages.length);
-    return speechMessages[randomIndex];
-  }, [speechMessages]);
-
-  // 고양이 애니메이션 시퀀스
-  useEffect(() => {
-    if (hasViewedFortune) return; // 운세를 이미 봤으면 애니메이션 중지
-
-    let animationTimer: NodeJS.Timeout;
-
-    const runAnimation = () => {
-      const message = getRandomMessage();
-
-      setCatState(message.state);
-      setBubbleMessage(message.text);
-      setShowSpeechBubble(true);
-
-      // 8초 후 말풍선 숨기기
-      animationTimer = setTimeout(() => {
-        setShowSpeechBubble(false);
-
-        // 2초 후 기본 상태로 복귀
-        animationTimer = setTimeout(() => {
-          setCatState("origin");
-
-          // 5초 후 다음 애니메이션 실행
-          animationTimer = setTimeout(runAnimation, 5000);
-        }, 2000);
-      }, 8000);
-    };
-
-    // 처음 시작할 때도 동일하게 반영
-    const initialDelay = setTimeout(() => {
-      const firstMessage = getRandomMessage();
-      setCatState(firstMessage.state);
-      setBubbleMessage(firstMessage.text);
-      setShowSpeechBubble(true);
-
-      animationTimer = setTimeout(() => {
-        setShowSpeechBubble(false);
-        setCatState("origin");
-
-        animationTimer = setTimeout(runAnimation, 5000); // 처음도 5초 기다려서 반복
-      }, 8000);
-    }, 2000); // 첫 시작은 그대로 2초 뒤에 실행
-
-    // 컴포넌트 unmount 시 타이머 정리
-    return () => {
-      clearTimeout(animationTimer);
-      clearTimeout(initialDelay);
-    };
-  }, [hasViewedFortune, getRandomMessage]);
-
   // 오늘의 운세 데이터 가져오기
   const fetchDailyFortune = useCallback(async () => {
     if (isApiCallInProgress || !userProfile || loading) {
@@ -306,14 +215,10 @@ export default function HomePage() {
       return;
     }
 
-    // 클릭 시 말풍선 숨기기 및 윙크 상태로 변경
-    setShowSpeechBubble(false);
-    setCatState("wink");
-
     // 0.5초 후 말풍선 다시 표시
     setTimeout(() => {
-      setBubbleMessage("운세를 읽고 있다냥...");
-      setShowSpeechBubble(true);
+      // setBubbleMessage("운세를 읽고 있다냥...");
+      // setShowSpeechBubble(true);
 
       // 1초 후에 API 호출 시작
       setTimeout(async () => {
@@ -361,8 +266,8 @@ export default function HomePage() {
               : "An error occurred while loading today's fortune."
           );
           // 에러 시 기본 상태로 복귀
-          setCatState("origin");
-          setShowSpeechBubble(false);
+          // setCatState("origin");
+          // setShowSpeechBubble(false);
         } finally {
           setLoading(false);
           setIsApiCallInProgress(false);
@@ -407,28 +312,6 @@ export default function HomePage() {
     fetchDailyFortune,
   ]);
 
-  // 고양이 이미지 선택
-  const getCatImage = () => {
-    switch (catState) {
-      case "smile":
-        return "/new_cat_smile.png";
-      case "up":
-        return "/new_cat_up.png";
-      case "wink":
-        return "/new_cat_wink.png";
-      case "wonder":
-        return "/new_cat_wonder.png";
-      case "angry":
-        return "/new_cat_angry.png";
-      case "left":
-        return "/new_cat_left.png";
-      case "back":
-        return "/new_cat_back.png";
-      default:
-        return "/new_cat.png";
-    }
-  };
-
   // 선택된 카테고리 상태 관리
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -460,7 +343,8 @@ export default function HomePage() {
         />
         <div className="relative">
           {/* 말풍선 */}
-          <AnimatePresence>
+          <WisardCat hasViewedFortune={hasViewedFortune} />
+          {/* <AnimatePresence>
             {showSpeechBubble && (
               <motion.div
                 className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl px-6 py-3 shadow-lg z-10"
@@ -475,10 +359,10 @@ export default function HomePage() {
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
 
           {/* 캐릭터 */}
-          <motion.div
+          {/* <motion.div
             className="w-50 h-50 mr-15 mb-17 relative cursor-pointer"
             animate={{ y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -496,7 +380,7 @@ export default function HomePage() {
                 className="w-full h-full object-contain"
               />
             </AnimatePresence>
-          </motion.div>
+          </motion.div> */}
         </div>
         <motion.button
           className={`btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1 ${
