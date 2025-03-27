@@ -81,7 +81,13 @@ const getCatImage = (state: string) => {
   }
 };
 
-const WizardCat = ({ hasViewedFortune }: { hasViewedFortune: boolean }) => {
+const WizardCat = ({
+  hasViewedFortune,
+  forcedMessage,
+}: {
+  hasViewedFortune: boolean;
+  forcedMessage?: string;
+}) => {
   const [catState, setCatState] =
     useState<keyof typeof speechMessages>("origin");
   const [bubbleMessage, setBubbleMessage] = useState("");
@@ -146,27 +152,31 @@ const WizardCat = ({ hasViewedFortune }: { hasViewedFortune: boolean }) => {
       clearTimeout(initialDelay);
     };
   }, [hasViewedFortune]);
+  useEffect(() => {
+    if (forcedMessage) {
+      setBubbleMessage(forcedMessage);
+      setShowSpeechBubble(true);
 
+      const timer = setTimeout(() => {
+        setShowSpeechBubble(false);
+      }, 4000); // 말풍선 4초 보여주고 자동 숨김
+
+      return () => clearTimeout(timer);
+    }
+  }, [forcedMessage]);
   // 클릭 시 상태 변경
   const handleCatClick = () => {
-    const states = Object.keys(
-      speechMessages
-    ) as (keyof typeof speechMessages)[];
-    const newState = states[Math.floor(Math.random() * states.length)];
-
-    const randomClickText =
+    const randomText =
       clickMessages[Math.floor(Math.random() * clickMessages.length)];
 
-    setCatState(newState);
-    setBubbleMessage(randomClickText);
+    // ✅ 이미지 상태는 변경하지 않음
+    // ✅ 말풍선만 출력
+    setBubbleMessage(randomText);
     setShowSpeechBubble(true);
 
     setTimeout(() => {
       setShowSpeechBubble(false);
-      setTimeout(() => {
-        setCatState("origin");
-      }, 1000);
-    }, 4000); // 클릭 반응은 짧고 간결하게
+    }, 4000);
   };
 
   if (!isReady) {
@@ -178,12 +188,12 @@ const WizardCat = ({ hasViewedFortune }: { hasViewedFortune: boolean }) => {
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-end">
+    <div className="relative w-full h-full flex flex-col items-center justify-end overflow-visible">
       {/* 말풍선 */}
       <AnimatePresence>
         {showSpeechBubble && (
           <motion.div
-            className="absolute min-w-[210px] -top-20 left-1/2 transform -translate-x-1/2 bg-[#FFF7EA] border-[3px] border-[#FFD5A8] rounded-full px-6 py-3 shadow-xl z-10"
+            className="absolute min-w-[200px] -top-20 left-1/2 transform -translate-x-1/2 bg-[#FFF7EA] border-[3px] border-[#FFD5A8] rounded-full px-6 py-3 shadow-xl z-10"
             initial={{ opacity: 0, scale: 0.7, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -195,43 +205,35 @@ const WizardCat = ({ hasViewedFortune }: { hasViewedFortune: boolean }) => {
               </p>
               {/* 🔽 삼각형 꼬리 */}
               <div
-                className="absolute -bottom-5 left-2/3 transform -translate-x-1/2 
-                w-0 h-0 border-l-[10px] border-r-[10px] border-t-[10px] 
-                border-l-transparent border-r-transparent border-t-[#FFF7EA]"
+                className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 
+              w-0 h-0 border-l-[10px] border-r-[10px] border-t-[10px] 
+              border-l-transparent border-r-transparent border-t-[#FFF7EA]"
               ></div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 캐릭터 */}
+      {/* 고양이 */}
       <motion.div
         className="w-50 h-50 mb-16 mr-12 relative cursor-pointer"
         animate={{
-          y: [0, -4, 0],
-          rotate: [-2, 2, -2],
+          rotate: [-2, 2, -2], // 기본 흔들림
         }}
         transition={{
           duration: 3,
           repeat: Infinity,
           ease: "easeInOut",
-          type: "tween", //
+          type: "tween",
         }}
         onClick={handleCatClick}
-        whileTap={{
-          y: -20,
-          scale: 1.05,
-          rotate: 0,
-        }}
       >
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={catState}
-            src={getCatImage(catState)}
-            alt="마법사 고양이"
-            className="w-full h-full object-contain"
-          />
-        </AnimatePresence>
+        <motion.img
+          key="origin"
+          src={getCatImage(catState)}
+          alt="마법사 고양이"
+          className="w-full h-full object-contain"
+        />
       </motion.div>
     </div>
   );

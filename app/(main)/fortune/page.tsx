@@ -343,7 +343,10 @@ export default function HomePage() {
         />
         <div className="relative">
           {/* 말풍선 */}
-          <WisardCat hasViewedFortune={hasViewedFortune} />
+          <WisardCat
+            hasViewedFortune={hasViewedFortune}
+            forcedMessage="운세를 읽고 있다냥..."
+          />
           {/* <AnimatePresence>
             {showSpeechBubble && (
               <motion.div
