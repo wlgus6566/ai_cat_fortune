@@ -193,14 +193,14 @@ const WizardCat = ({
       <AnimatePresence>
         {showSpeechBubble && (
           <motion.div
-            className="absolute min-w-[200px] -top-20 left-1/2 transform -translate-x-1/2 bg-[#FFF7EA] border-[3px] border-[#FFD5A8] rounded-full px-6 py-3 shadow-xl z-10"
+            className="absolute min-w-[250px] -top-20 left-1/2 transform -translate-x-1/2 bg-[#FFF7EA] border-[3px] border-[#FFD5A8] rounded-full px-6 py-3 shadow-xl z-10"
             initial={{ opacity: 0, scale: 0.7, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
             transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
           >
             <div className="relative">
-              <p className="text-[#3B2E7E] text-md text-center font-semibold">
+              <p className="text-[#3B2E7E] text-lg text-center font-semibold">
                 {bubbleMessage}
               </p>
               {/* 🔽 삼각형 꼬리 */}
@@ -216,7 +216,7 @@ const WizardCat = ({
 
       {/* 고양이 */}
       <motion.div
-        className="w-50 h-50 mb-16 mr-12 relative cursor-pointer"
+        className="w-50 h-50 mb-20 mr-20 relative cursor-pointer"
         animate={{
           rotate: [-2, 2, -2], // 기본 흔들림
         }}

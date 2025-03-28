@@ -37,7 +37,7 @@ interface FortuneScoreProps {
 
 const FortuneScore: React.FC<FortuneScoreProps> = ({
   score,
-  maxScore = 5,
+  maxScore = 100,
   color,
 }) => {
   // 점수 비율 계산
@@ -49,18 +49,18 @@ const FortuneScore: React.FC<FortuneScoreProps> = ({
         {/* <span className="text-sm font-medium text-gray-700 font-subheading">
           {label}
         </span> */}
-        {/* <span className="text-sm font-bold" style={{ color }}>
-          {score}/{maxScore}
-        </span> */}
+        <span className="text-sm font-bold" style={{ color }}>
+          {score}%
+        </span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-3">
-        <div
-          className="h-3 rounded-full transition-all duration-1000"
-          style={{
-            width: `${percentage}%`,
-            backgroundColor: color,
-          }}
-        ></div>
+        <motion.div
+          className="h-3 rounded-full"
+          style={{ backgroundColor: color }}
+          initial={{ width: "0%" }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        ></motion.div>
       </div>
     </div>
   );
@@ -334,13 +334,15 @@ export default function HomePage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <Image
-          src="/bg_real_nocat.png"
-          alt={"배경이미지"}
-          fill
-          className="object-cover"
-          priority
-        />
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src="/bg_real_nocat.png"
+            alt="배경이미지"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
         <div className="relative">
           <WisardCat
             hasViewedFortune={hasViewedFortune}
@@ -432,7 +434,7 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
       >
-        <div className="max-w-[70%]">
+        <div className="max-w-[70%] pl-5">
           <h1 className="text-2xl font-bold text-[#3B2E7E] mb-1 font-heading">
             {t("headerTitle")}
           </h1>
@@ -449,7 +451,7 @@ export default function HomePage() {
           </p>
 
           {/* 사주 정보 표시 */}
-          {fortune?.saju && (
+          {/* {fortune?.saju && (
             <div className="mt-2">
               <p className="text-gray-600 text-sm">
                 {userProfile?.birthDate
@@ -462,15 +464,15 @@ export default function HomePage() {
                     } 0분생`
                   : ""}
               </p>
-              {/* <p className="text-sm mt-1 text-gray-600">
+              <p className="text-sm mt-1 text-gray-600">
                 {fortune.saju.ilju}{" "}
                 {userProfile?.gender === "여성" ? "여자" : "남자"}
-              </p> */}
+              </p>
             </div>
-          )}
+          )} */}
         </div>
         <motion.div
-          className="w-35 h-35 relative "
+          className="w-30 h-30 relative "
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -504,14 +506,7 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
       >
-        <motion.div
-          className="card-magic p-0 overflow-hidden"
-          whileHover={{
-            y: -5,
-            boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-          }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="bg-white rounded-xl shadow-md p-0 overflow-hidden">
           <div className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] p-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
               <span className="mr-2 flex">
@@ -520,7 +515,6 @@ export default function HomePage() {
               {t("overall")}
             </h3>
           </div>
-
           <div className="p-5">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-8">
@@ -553,22 +547,59 @@ export default function HomePage() {
                       <h4 className="font-medium text-[#3B2E7E]">
                         {t("fortuneScore")}
                       </h4>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <div
-                            key={i}
-                            className={`w-4 h-4 rounded-full mx-0.5`}
-                          >
-                            🔮
-                          </div>
-                        ))}
-                      </div>
                     </div>
-                    <p className="text-gray-700 text-md mt-2">
+
+                    {/* 점수 바 */}
+                    <div className="w-full bg-gray-200 rounded-full h-5 mb-3 overflow-hidden">
+                      <motion.div
+                        className="h-5 bg-gradient-to-r from-[#990dfa] to-[#7609c1] rounded-full flex items-center justify-center text-white text-xs font-medium"
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${fortune.overall.score}%` }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                      >
+                        {fortune.overall.score}%
+                      </motion.div>
+                    </div>
+
+                    <p className="text-gray-700 text-md">
                       {fortune.overall.description}
                     </p>
                   </div>
                 </motion.div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <p className="text-[#3B2E7E] mb-4">{t("error")}</p>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="mt-5 bg-white rounded-xl shadow-md p-0 overflow-hidden">
+          <div className="p-5">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="relative">
+                  <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
+                  <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
+                </div>
+                <p className="mt-4 text-[#3B2E7E] font-medium">
+                  {t("loading")}
+                </p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-red-500 mb-4">{error}</p>
+                <motion.button
+                  className="btn-magic btn-shine"
+                  onClick={fetchDailyFortune}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {t("tryAgain")}
+                </motion.button>
+              </div>
+            ) : fortune ? (
+              <div className="space-y-5">
                 {/* 카테고리별 운세 */}
                 <motion.div variants={itemVariants}>
                   <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
@@ -716,7 +747,7 @@ export default function HomePage() {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       </motion.section>
 
       {/* 슬라이드 섹션 */}

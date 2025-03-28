@@ -34,30 +34,30 @@ function formatUserProfile(userProfile?: UserProfile | null): string {
 export interface DailyFortune {
   date: string; // 날짜
   overall: {
-    score: number; // 1-5 사이의 점수
+    score: number; // 0-100 사이의 점수 (100점 만점)
     description: string; // 전체 운세 설명
   };
   categories: {
     love: {
-      score: number; // 1-5 사이의 점수
+      score: number; // 0-100 사이의 점수 (100점 만점)
       description: string; // 연애운 설명
       trend: string; // 연애운 경향 한 줄 요약
       talisman: string; // 연애운 관련 조언 한 줄 메시지
     };
     money: {
-      score: number; // 1-5 사이의 점수
+      score: number; // 0-100 사이의 점수 (100점 만점)
       description: string; // 금전운 설명
       trend: string; // 금전운 경향 한 줄 요약
       talisman: string; // 금전운 관련 조언 한 줄 메시지
     };
     health: {
-      score: number; // 1-5 사이의 점수
+      score: number; // 0-100 사이의 점수 (100점 만점)
       description: string; // 건강운 설명
       trend: string; // 건강운 경향 한 줄 요약
       talisman: string; // 건강운 관련 조언 한 줄 메시지
     };
     social: {
-      score: number; // 1-5 사이의 점수
+      score: number; // 0-100 사이의 점수 (100점 만점)
       description: string; // 인간관계운 설명
       trend: string; // 인간관계운 경향 한 줄 요약
       talisman: string; // 인간관계운 관련 조언 한 줄 메시지
@@ -176,30 +176,30 @@ export async function getDailyFortune(
 {
   "date": "YYYY-MM-DD", // 오늘 날짜
   "overall": {
-    "score": 숫자(1-5), // 전체 운세 점수
+    "score": 숫자(0-100), // 전체 운세 점수(100점 만점)
     "description": "오늘의 전반적인 운세 설명"
   },
   "categories": {
     "love": {
-      "score": 3,
+      "score": 70,
       "description": "오늘은 특별한 기복 없이 차분한 연애운이 흐르고 있어요. 연인과의 대화가 평소보다 부드럽게 이어지고, 마음이 안정되는 하루가 될 거예요. 혼자인 사람도 조용한 일상 속에서 스스로를 돌아보며 마음의 평화를 느낄 수 있어요.",
       "trend": "안정적인 하루다냥!",
       "talisman": "따뜻한 말 한마디는 사랑을 부르는 주문이냥~🐾"
     },
     "money": {
-      "score": 3,
+      "score": 65,
       "description": "지출이 예상보다 많아질 수 있어요. 계획에 없던 소비는 잠시 미루고 꼭 필요한 것만 사는 것이 좋아요. 오늘은 금전적으로 신중함이 필요한 날이에요. 자산 관리 앱을 켜고 예산을 다시 점검해보는 것도 좋은 방법이에요.",
       "trend": "지출을 관리하라냥~🐾",
       "talisman": "지갑이 울기 전에 냥이가 말린다옹~"
     },
     "health": {
-      "score": 3,
+      "score": 75,
       "description": "큰 병은 없지만 피로가 은근히 누적된 상태예요. 너무 무리하지 말고, 틈틈이 스트레칭이나 휴식을 챙기는 게 좋아요. 오늘은 체력보다 회복이 더 중요한 날! 일찍 잠자리에 들어 충분한 수면을 취해보세요.",
       "trend": "휴식이 필요한 날!",
       "talisman": "잘 자야 예뻐진다옹~ 꿈속에서도 스트레칭 잊지 마라옹!"
     },
     "social": {
-      "score": 3,
+      "score": 80,
       "description": "대인관계에서는 경청의 자세가 복을 부르는 날이에요. 감정을 앞세우기보다는 상대의 이야기를 천천히 들어보세요. 생각보다 큰 공감대를 발견할 수 있고, 오해를 줄이며 관계가 더 깊어질 수 있어요.",
       "trend": "차분한 대화가 필요하다냥🐾",
       "talisman": "먼저 말하는 것보다 먼저 들어주는 게 멋진 거다옹~"
@@ -213,7 +213,7 @@ export async function getDailyFortune(
 }
 
 각 카테고리 설명은 200자 내외로 간결하게 작성하세요.  
-점수는 1(매우 나쁨)부터 5(매우 좋음)까지의 정수로 표현하세요.  
+점수는 0(매우 나쁨)부터 100(매우 좋음)까지의 정수로 표현하세요.  
 luckyItem은 오늘 입으면 운 좋은 아이템을 예시로 명사만 작성하세요.  
 luckySong은 '가수 - 노래제목' 형식으로 작성하세요.
 
@@ -338,33 +338,33 @@ advice 역시 같은 톤을 유지하되, talisman보다 조금 더 조언적인
     return {
       date: formattedDate,
       overall: {
-        score: 3,
+        score: 60,
         description: "오늘은 평범한 하루가 될 것 같습니다.",
       },
       categories: {
         love: {
-          score: 3,
+          score: 60,
           description:
             "오늘은 큰 사건 없이 조용한 하루가 될 거예요. 연인과의 관계는 무던하고 평화로울 수 있지만, 가끔은 따뜻한 말 한마디가 관계에 큰 힘이 됩니다.",
           trend: "안정적인 하루",
-          talisman: "평화롭게 마음을 유지하세요",
+          talisman: "평화롭게 마음을 유지하라냥🔮",
         },
         money: {
-          score: 3,
+          score: 55,
           description:
             "지출이 많아질 수 있는 날이에요. 충동구매를 삼가고, 꼭 필요한 것만 구매하는 게 좋아요. 특히 친구나 동료와의 약속에서는 지갑을 조심하세요.",
           trend: "지출을 관리하세요",
           talisman: "필요한 것만 구매하세요",
         },
         health: {
-          score: 3,
+          score: 70,
           description:
             "몸은 괜찮지만 마음의 피로가 누적되어 있을 수 있어요. 짧은 산책이나 좋아하는 음악을 들으며 여유를 가지는 것이 오늘의 회복 포인트입니다.",
           trend: "휴식이 필요한 날",
-          talisman: "충분한 수면을 취하세요",
+          talisman: "충분한 수면을 취하라냥🐱",
         },
         social: {
-          score: 3,
+          score: 65,
           description:
             "대인관계에서 불필요한 오해를 줄이기 위해서는 경청하는 자세가 중요해요. 특히 직장이나 학교에서 누군가의 말을 끝까지 들어주는 태도가 빛을 발할 수 있어요.",
           trend: "차분한 대화가 필요해요",

@@ -58,9 +58,7 @@ const CategoryPopup: React.FC<CategoryPopupProps> = ({
           {/* 점수 */}
           <div className="flex items-center">
             <span className="mr-2">🌟 점수:</span>
-            <span className="text-lg text-yellow-500">
-              {renderScore(category.score)}
-            </span>
+            <span className="text-lg">{category.score}점</span>
           </div>
 
           {/* 경향 */}
@@ -72,7 +70,7 @@ const CategoryPopup: React.FC<CategoryPopupProps> = ({
 
           {/* 해석 */}
           <div>
-            <p className="font-medium mb-2">💡 해석:</p>
+            <p className="font-medium mb-2">💡 해석</p>
             <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
               {category.description}
             </p>
