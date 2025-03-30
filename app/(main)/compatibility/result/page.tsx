@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
@@ -381,6 +380,7 @@ export default function CompatibilityResultPage() {
   const [compatibilityData, setCompatibilityData] =
     useState<CompatibilityData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDetails, setShowDetails] = useState(false); // 상세 분석 결과 토글을 위한 상태
 
   useEffect(() => {
     if (
@@ -399,38 +399,22 @@ export default function CompatibilityResultPage() {
     }
   }, [state]);
 
-  // 애니메이션 변수
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
-    },
-  };
-
-  // 스코어 바 애니메이션
-  const scoreBarVariants = {
-    hidden: { width: "0%" },
-    visible: {
-      width: compatibilityData ? `${compatibilityData.score}%` : "0%",
-      transition: {
-        duration: 1.5,
-        ease: "easeOut",
-        delay: 0.5,
-      },
-    },
+  // 오행에 따른 이미지 경로 결정
+  const getElementImage = (element: string) => {
+    switch (element) {
+      case "목":
+        return "/assets/images/wood.png";
+      case "화":
+        return "/assets/images/fire.png";
+      case "토":
+        return "/assets/images/earth.png";
+      case "금":
+        return "/assets/images/metal.png";
+      case "수":
+        return "/assets/images/water.png";
+      default:
+        return "/assets/images/wood.png";
+    }
   };
 
   if (isLoading) {
@@ -463,122 +447,166 @@ export default function CompatibilityResultPage() {
     );
   }
 
+  // 랭킹 퍼센트 계산 (임의의 값, 실제로는 DB에서 가져오거나 계산 로직 필요)
+  const rankingPercent = 12;
+
+  // 성격, 속궁합, 애정 점수 (임의의 값)
+  const personalityScore = "???";
+  const chemistryScore = "???";
+  const loveScore = "???";
+
+  // 상세 분석 결과 토글 함수
+  const toggleDetails = () => {
+    setShowDetails(!showDetails);
+  };
+
   return (
-    <motion.div
-      className="container max-w-screen-md mx-auto px-4 py-6 relative z-1"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* 헤더 이미지 영역 */}
-      <div className="flex justify-center mb-6">
-        <Image
-          src="/compatibility-header.png"
-          alt="사주 궁합 테스트 결과"
-          width={480}
-          height={240}
-          className="rounded-lg"
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-r from-blue-100 via-pink-100 to-yellow-100 py-8 px-4">
+      <div className="max-w-md mx-auto">
+        {/* 상단 타이틀 */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl text-gray-700 font-medium mb-6">
+            {state.person1.name}님과 {state.person2.name}님 궁합 총점
+          </h1>
 
-      {/* 결과 카드 */}
-      <motion.div
-        className="bg-white rounded-xl shadow-md p-6 mb-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.h1
-          className="text-2xl font-bold text-center text-[#3B2E7E] mb-4"
-          variants={itemVariants}
-        >
-          궁합 결과
-        </motion.h1>
-
-        <motion.div
-          className="bg-[#F9F6FF] rounded-lg p-5 mb-6"
-          variants={itemVariants}
-        >
-          <h2 className="text-xl font-bold text-center text-[#8D6FD1] mb-4">
-            {compatibilityData.title}
-          </h2>
-
-          {/* 기본 정보 */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[#6F5945] font-semibold">
-                {state.person1.name}
-              </span>
-              <span className="text-[#6F5945] text-sm">
-                {state.person1.birthdate} ({state.person1.birthtime}) /{" "}
-                {state.person1.gender}
-              </span>
-            </div>
-            <div className="text-[#8D6FD1] text-sm mb-3">
-              {compatibilityData.info1}
-            </div>
-
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[#6F5945] font-semibold">
-                {state.person2.name}
-              </span>
-              <span className="text-[#6F5945] text-sm">
-                {state.person2.birthdate} ({state.person2.birthtime}) /{" "}
-                {state.person2.gender}
-              </span>
-            </div>
-            <div className="text-[#8D6FD1] text-sm mb-3">
-              {compatibilityData.info2}
-            </div>
+          <div className="text-7xl font-bold text-gray-800 mb-4">
+            {compatibilityData.score}점
           </div>
 
-          {/* 스코어 바 */}
-          <div className="mt-6 mb-6">
-            <div className="text-right mb-1">
-              <span className="text-[#EC6255] font-bold">
-                {compatibilityData.score}
-              </span>
-              <span className="text-[#6F5945] text-sm ml-1">/ 100</span>
+          <p className="text-xl text-gray-700">
+            상위 {rankingPercent}%의 궁합입니다! 🏆
+          </p>
+        </div>
+
+        {/* 개인 정보 카드 */}
+        <div className="flex justify-between gap-4 mb-16">
+          {/* 첫 번째 사람 */}
+          <div className="w-1/2 bg-white rounded-2xl shadow-md p-4 flex flex-col items-center">
+            <div className="w-20 h-20 mb-2">
+              <Image
+                src={getElementImage(compatibilityData.element1)}
+                alt={compatibilityData.element1}
+                width={80}
+                height={80}
+              />
             </div>
-            <div className="w-full h-4 bg-[#E9E4F0] rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-[#990dfa] to-[#EC6255] rounded-full"
-                variants={scoreBarVariants}
-                initial="hidden"
-                animate="visible"
-              ></motion.div>
+
+            <div className="w-20 h-20 mb-2">
+              <Image
+                src="/assets/images/dog.png"
+                alt="강아지 아이콘"
+                width={80}
+                height={80}
+              />
             </div>
+
+            <h3 className="text-xl font-medium mb-2">{state.person1.name}</h3>
+            <p className="text-gray-600 mb-2">
+              {compatibilityData.ganji1.slice(-2)}일주
+            </p>
+            <p className="text-gray-400">
+              {new Date(state.person1.birthdate)
+                .toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })
+                .replace(/\. /g, ".")
+                .replace(/\.$/, "")}
+            </p>
           </div>
 
-          {/* 상세 분석 결과 */}
-          <div
-            className="text-[#6F5945] mt-5"
-            dangerouslySetInnerHTML={{ __html: compatibilityData.description }}
-          />
-        </motion.div>
+          {/* 두 번째 사람 */}
+          <div className="w-1/2 bg-white rounded-2xl shadow-md p-4 flex flex-col items-center">
+            <div className="w-20 h-20 mb-2">
+              <Image
+                src={getElementImage(compatibilityData.element2)}
+                alt={compatibilityData.element2}
+                width={80}
+                height={80}
+              />
+            </div>
 
-        {/* 액션 버튼 */}
-        <motion.div
-          className="flex flex-col sm:flex-row gap-4"
-          variants={itemVariants}
-        >
-          <Link href="/compatibility" className="flex-1">
-            <motion.button
-              className="w-full bg-[#6F5945] text-white px-4 py-3 rounded-lg font-medium"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              다시 테스트하기
-            </motion.button>
-          </Link>
-          <motion.button
-            className="flex-1 bg-[#990dfa] text-white px-4 py-3 rounded-lg font-medium"
+            <div className="w-20 h-20 mb-2">
+              <Image
+                src="/assets/images/dog.png"
+                alt="강아지 아이콘"
+                width={80}
+                height={80}
+              />
+            </div>
+
+            <h3 className="text-xl font-medium mb-2">{state.person2.name}</h3>
+            <p className="text-gray-600 mb-2">
+              {compatibilityData.ganji2.slice(-2)}일주
+            </p>
+            <p className="text-gray-400">
+              {new Date(state.person2.birthdate)
+                .toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })
+                .replace(/\. /g, ".")
+                .replace(/\.$/, "")}
+            </p>
+          </div>
+        </div>
+
+        {/* 세부 점수 */}
+        <div className="flex justify-between gap-4 text-center">
+          <div className="w-1/3">
+            <p className="text-3xl font-bold mb-2">{personalityScore}</p>
+            <p className="text-gray-600">성격 점수</p>
+          </div>
+
+          <div className="w-1/3">
+            <p className="text-3xl font-bold mb-2">{chemistryScore}</p>
+            <p className="text-gray-600">속궁합 점수</p>
+          </div>
+
+          <div className="w-1/3">
+            <p className="text-3xl font-bold mb-2">{loveScore}</p>
+            <p className="text-gray-600">애정 점수</p>
+          </div>
+        </div>
+
+        {/* 상세 분석 결과 (토글) */}
+        <div className="mt-12">
+          <button
+            className={`w-full py-3 ${
+              showDetails
+                ? "bg-purple-100 text-purple-700"
+                : "bg-white text-gray-700"
+            } rounded-lg shadow font-medium transition-colors`}
+            onClick={toggleDetails}
+          >
+            {showDetails ? "상세 분석 결과 접기" : "상세 분석 결과 보기"}
+          </button>
+
+          {/* 상세 분석 결과 콘텐츠 */}
+          {showDetails && (
+            <div className="mt-4 bg-white rounded-lg shadow p-5 overflow-hidden">
+              <div
+                className="text-gray-700"
+                dangerouslySetInnerHTML={{
+                  __html: compatibilityData.description,
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* 공유 버튼 */}
+        <div className="mt-6">
+          <button
+            className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg shadow font-medium"
             onClick={() => {
               if (navigator.share) {
                 navigator
                   .share({
                     title: "사주 궁합 테스트 결과",
-                    text: `${state.person1.name}님과 ${state.person2.name}님의 궁합 점수: ${compatibilityData.score}점 (${compatibilityData.title})`,
+                    text: `${state.person1.name}님과 ${state.person2.name}님의 궁합 점수: ${compatibilityData.score}점`,
                     url: window.location.href,
                   })
                   .catch((err) => {
@@ -591,13 +619,20 @@ export default function CompatibilityResultPage() {
                   .catch((err) => console.error("링크 복사 실패:", err));
               }
             }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
           >
             결과 공유하기
-          </motion.button>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+          </button>
+        </div>
+
+        {/* 다시 테스트하기 버튼 */}
+        <div className="mt-4">
+          <Link href="/compatibility" className="block">
+            <button className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg shadow font-medium">
+              다시 테스트하기
+            </button>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
