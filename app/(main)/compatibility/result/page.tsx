@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
-
+import { XMarkIcon } from "@heroicons/react/24/outline";
 interface Person {
   name: string;
   birthdate: string;
@@ -280,7 +280,7 @@ function generateCompatibilityData(person1: Person, person2: Person) {
   const yinYangMatch =
     g1.yinYang !== g2.yinYang
       ? "음양 조화를 함께 이뤄가는 사이에요~ 🌗"
-      : "성향은 비슷하지만, 조율이 필요할지도 몰라요~ 🐱";
+      : "서로 도전적인 관계지만, 노력으로 조화를 이룰 수 있어요.🐱";
 
   // 카테고리별 분석 정리
   const loveAnalysis =
@@ -380,7 +380,6 @@ export default function CompatibilityResultPage() {
   const [compatibilityData, setCompatibilityData] =
     useState<CompatibilityData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showDetails, setShowDetails] = useState(false); // 상세 분석 결과 토글을 위한 상태
 
   useEffect(() => {
     if (
@@ -450,26 +449,16 @@ export default function CompatibilityResultPage() {
   // 랭킹 퍼센트 계산 (임의의 값, 실제로는 DB에서 가져오거나 계산 로직 필요)
   const rankingPercent = 12;
 
-  // 성격, 속궁합, 애정 점수 (임의의 값)
-  const personalityScore = "???";
-  const chemistryScore = "???";
-  const loveScore = "???";
-
-  // 상세 분석 결과 토글 함수
-  const toggleDetails = () => {
-    setShowDetails(!showDetails);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-100 via-pink-100 to-yellow-100 py-8 px-4">
+    <div className="min-h-screen mb-20 bg-gradient-to-r from-blue-100 via-purple-100 to-yellow-100 py-8 px-4">
       <div className="max-w-md mx-auto">
         {/* 상단 타이틀 */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl text-gray-700 font-medium mb-6">
+          <h1 className="text-xl text-gray-700 font-medium mb-6">
             {state.person1.name}님과 {state.person2.name}님 궁합 총점
           </h1>
 
-          <div className="text-7xl font-bold text-gray-800 mb-4">
+          <div className="text-3xl font-bold text-gray-800 mb-4">
             {compatibilityData.score}점
           </div>
 
@@ -479,27 +468,28 @@ export default function CompatibilityResultPage() {
         </div>
 
         {/* 개인 정보 카드 */}
-        <div className="flex justify-between gap-4 mb-16">
+        <div className="flex justify-between gap-4 mb-8">
           {/* 첫 번째 사람 */}
           <div className="w-1/2 bg-white rounded-2xl shadow-md p-4 flex flex-col items-center">
-            <div className="w-20 h-20 mb-2">
-              <Image
-                src={getElementImage(compatibilityData.element1)}
-                alt={compatibilityData.element1}
-                width={80}
-                height={80}
-              />
+            <div className="flex gap-1 items-center">
+              <div className="w-10 h-10">
+                <Image
+                  src={getElementImage(compatibilityData.element1)}
+                  alt={compatibilityData.element1}
+                  width={32}
+                  height={40}
+                />
+              </div>
+              <XMarkIcon className="w-5 h-5" />
+              <div className="w-10 h-10 ml-1">
+                <Image
+                  src="/assets/images/dog.png"
+                  alt="강아지 아이콘"
+                  width={40}
+                  height={40}
+                />
+              </div>
             </div>
-
-            <div className="w-20 h-20 mb-2">
-              <Image
-                src="/assets/images/dog.png"
-                alt="강아지 아이콘"
-                width={80}
-                height={80}
-              />
-            </div>
-
             <h3 className="text-xl font-medium mb-2">{state.person1.name}</h3>
             <p className="text-gray-600 mb-2">
               {compatibilityData.ganji1.slice(-2)}일주
@@ -518,22 +508,24 @@ export default function CompatibilityResultPage() {
 
           {/* 두 번째 사람 */}
           <div className="w-1/2 bg-white rounded-2xl shadow-md p-4 flex flex-col items-center">
-            <div className="w-20 h-20 mb-2">
-              <Image
-                src={getElementImage(compatibilityData.element2)}
-                alt={compatibilityData.element2}
-                width={80}
-                height={80}
-              />
-            </div>
-
-            <div className="w-20 h-20 mb-2">
-              <Image
-                src="/assets/images/dog.png"
-                alt="강아지 아이콘"
-                width={80}
-                height={80}
-              />
+            <div className="flex gap-1 items-center">
+              <div className="w-10 h-10">
+                <Image
+                  src={getElementImage(compatibilityData.element2)}
+                  alt={compatibilityData.element2}
+                  width={32}
+                  height={40}
+                />
+              </div>
+              <XMarkIcon className="w-5 h-5" />
+              <div className="w-10 h-10 ml-1">
+                <Image
+                  src="/assets/images/dog.png"
+                  alt="강아지 아이콘"
+                  width={40}
+                  height={40}
+                />
+              </div>
             </div>
 
             <h3 className="text-xl font-medium mb-2">{state.person2.name}</h3>
@@ -553,48 +545,13 @@ export default function CompatibilityResultPage() {
           </div>
         </div>
 
-        {/* 세부 점수 */}
-        <div className="flex justify-between gap-4 text-center">
-          <div className="w-1/3">
-            <p className="text-3xl font-bold mb-2">{personalityScore}</p>
-            <p className="text-gray-600">성격 점수</p>
-          </div>
-
-          <div className="w-1/3">
-            <p className="text-3xl font-bold mb-2">{chemistryScore}</p>
-            <p className="text-gray-600">속궁합 점수</p>
-          </div>
-
-          <div className="w-1/3">
-            <p className="text-3xl font-bold mb-2">{loveScore}</p>
-            <p className="text-gray-600">애정 점수</p>
-          </div>
-        </div>
-
-        {/* 상세 분석 결과 (토글) */}
-        <div className="mt-12">
-          <button
-            className={`w-full py-3 ${
-              showDetails
-                ? "bg-purple-100 text-purple-700"
-                : "bg-white text-gray-700"
-            } rounded-lg shadow font-medium transition-colors`}
-            onClick={toggleDetails}
-          >
-            {showDetails ? "상세 분석 결과 접기" : "상세 분석 결과 보기"}
-          </button>
-
-          {/* 상세 분석 결과 콘텐츠 */}
-          {showDetails && (
-            <div className="mt-4 bg-white rounded-lg shadow p-5 overflow-hidden">
-              <div
-                className="text-gray-700"
-                dangerouslySetInnerHTML={{
-                  __html: compatibilityData.description,
-                }}
-              />
-            </div>
-          )}
+        <div className="mt-4 bg-white rounded-lg shadow p-5 overflow-hidden">
+          <div
+            className="text-gray-700"
+            dangerouslySetInnerHTML={{
+              __html: compatibilityData.description,
+            }}
+          />
         </div>
 
         {/* 공유 버튼 */}
