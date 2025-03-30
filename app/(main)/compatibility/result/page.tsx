@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+
 interface Person {
   name: string;
   birthdate: string;
@@ -380,6 +382,8 @@ export default function CompatibilityResultPage() {
   const [compatibilityData, setCompatibilityData] =
     useState<CompatibilityData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentStep, setCurrentStep] = useState(1); // 현재 슬라이드 단계
+  const totalSteps = 8; // 전체 슬라이드 단계 수
 
   useEffect(() => {
     if (
@@ -406,7 +410,7 @@ export default function CompatibilityResultPage() {
       case "화":
         return "/assets/images/fire.png";
       case "토":
-        return "/assets/images/earth.png";
+        return "/assets/images/wood.png"; // 임시로 wood.png 사용
       case "금":
         return "/assets/images/metal.png";
       case "수":
@@ -415,6 +419,56 @@ export default function CompatibilityResultPage() {
         return "/assets/images/wood.png";
     }
   };
+
+  // 이전 슬라이드로 이동
+  const goToPrevSlide = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // 다음 슬라이드로 이동
+  const goToNextSlide = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  // 지정된 슬라이드로 이동
+  const goToSlide = (step: number) => {
+    if (step >= 1 && step <= totalSteps) {
+      setCurrentStep(step);
+    }
+  };
+
+  // 슬라이드 변환 애니메이션 설정
+  const slideVariants = {
+    hidden: (direction: number) => ({
+      x: direction > 0 ? "100%" : "-100%",
+      opacity: 0,
+    }),
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        duration: 0.5,
+        bounce: 0.2,
+      },
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? "-100%" : "100%",
+      opacity: 0,
+      transition: {
+        type: "spring",
+        duration: 0.5,
+        bounce: 0.2,
+      },
+    }),
+  };
+
+  // 랭킹 퍼센트 계산 (임의의 값, 실제로는 DB에서 가져오거나 계산 로직 필요)
+  const rankingPercent = 12;
 
   if (isLoading) {
     return (
@@ -446,149 +500,699 @@ export default function CompatibilityResultPage() {
     );
   }
 
-  // 랭킹 퍼센트 계산 (임의의 값, 실제로는 DB에서 가져오거나 계산 로직 필요)
-  const rankingPercent = 12;
-
   return (
-    <div className="min-h-screen mb-20 bg-gradient-to-r from-blue-100 via-purple-100 to-yellow-100 py-8 px-4">
-      <div className="max-w-md mx-auto">
-        {/* 상단 타이틀 */}
-        <div className="text-center mb-8">
-          <h1 className="text-xl text-gray-700 font-medium mb-6">
-            {state.person1.name}님과 {state.person2.name}님 궁합 총점
-          </h1>
-
-          <div className="text-3xl font-bold text-gray-800 mb-4">
-            {compatibilityData.score}점
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 py-6 px-4 text-white">
+      <div className="absolute inset-0 w-full h-full">
+        <Image
+          src="/bg_dark.png"
+          alt="배경이미지"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
+      <div className="max-w-md mx-auto relative">
+        {/* 진행 상태 표시기 */}
+        <div className="mb-6 flex justify-between items-center">
+          <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 ease-in-out"
+              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+            />
           </div>
-
-          <p className="text-xl text-gray-700">
-            상위 {rankingPercent}%의 궁합입니다! 🏆
-          </p>
+          <span className="ml-3 text-sm text-gray-300">
+            {currentStep}/{totalSteps}
+          </span>
         </div>
 
-        {/* 개인 정보 카드 */}
-        <div className="flex justify-between gap-4 mb-8">
-          {/* 첫 번째 사람 */}
-          <div className="w-1/2 bg-white rounded-2xl shadow-md p-4 flex flex-col items-center">
-            <div className="flex gap-1 items-center">
-              <div className="w-10 h-10">
-                <Image
-                  src={getElementImage(compatibilityData.element1)}
-                  alt={compatibilityData.element1}
-                  width={32}
-                  height={40}
-                />
-              </div>
-              <XMarkIcon className="w-5 h-5" />
-              <div className="w-10 h-10 ml-1">
-                <Image
-                  src="/assets/images/dog.png"
-                  alt="강아지 아이콘"
-                  width={40}
-                  height={40}
-                />
-              </div>
-            </div>
-            <h3 className="text-xl font-medium mb-2">{state.person1.name}</h3>
-            <p className="text-gray-600 mb-2">
-              {compatibilityData.ganji1.slice(-2)}일주
-            </p>
-            <p className="text-gray-400">
-              {new Date(state.person1.birthdate)
-                .toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                })
-                .replace(/\. /g, ".")
-                .replace(/\.$/, "")}
-            </p>
-          </div>
+        {/* 슬라이드 컨테이너 - 카드 스타일 제거 */}
+        <div className="relative overflow-hidden min-h-[500px]">
+          {/* 각 슬라이드 */}
+          <AnimatePresence initial={false} custom={currentStep}>
+            {currentStep === 1 && (
+              <motion.div
+                key="slide1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-between py-10"
+              >
+                <motion.div
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                  <h1 className="text-xl text-center text-white font-medium mb-4">
+                    그 사람의 사주와,
+                  </h1>
+                  <h1 className="text-xl text-center text-white font-medium mb-6">
+                    나의 사주를 분석하여 궁합을 자세히 알아봐!
+                  </h1>
+                </motion.div>
 
-          {/* 두 번째 사람 */}
-          <div className="w-1/2 bg-white rounded-2xl shadow-md p-4 flex flex-col items-center">
-            <div className="flex gap-1 items-center">
-              <div className="w-10 h-10">
-                <Image
-                  src={getElementImage(compatibilityData.element2)}
-                  alt={compatibilityData.element2}
-                  width={32}
-                  height={40}
-                />
-              </div>
-              <XMarkIcon className="w-5 h-5" />
-              <div className="w-10 h-10 ml-1">
-                <Image
-                  src="/assets/images/dog.png"
-                  alt="강아지 아이콘"
-                  width={40}
-                  height={40}
-                />
-              </div>
-            </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="w-32 h-32 relative"
+                >
+                  <Image
+                    src="/assets/images/dog.png"
+                    alt="고양이 캐릭터"
+                    width={100}
+                    height={100}
+                    className="mx-auto"
+                  />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.7, type: "spring", stiffness: 300 }}
+                    className="absolute top-0 right-0"
+                  >
+                    <span className="text-4xl">❤️</span>
+                  </motion.div>
+                </motion.div>
 
-            <h3 className="text-xl font-medium mb-2">{state.person2.name}</h3>
-            <p className="text-gray-600 mb-2">
-              {compatibilityData.ganji2.slice(-2)}일주
-            </p>
-            <p className="text-gray-400">
-              {new Date(state.person2.birthdate)
-                .toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                })
-                .replace(/\. /g, ".")
-                .replace(/\.$/, "")}
-            </p>
-          </div>
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                  onClick={goToNextSlide}
+                  className="px-10 py-3 bg-gray-700 bg-opacity-50 rounded-full text-white hover:bg-opacity-70 transition-all"
+                >
+                  다음
+                </motion.button>
+              </motion.div>
+            )}
+
+            {currentStep === 2 && (
+              <motion.div
+                key="slide2"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-8">
+                  <motion.h2
+                    className="text-2xl text-center font-medium text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    음양 해석 🌗
+                  </motion.h2>
+
+                  <motion.div
+                    className="flex items-center justify-center gap-8"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <div className="text-center">
+                      <div className="relative w-24 h-24 mx-auto bg-gray-700 bg-opacity-50 rounded-full overflow-hidden mb-2">
+                        <div className="absolute top-0 left-0 w-1/2 h-full bg-black" />
+                        <div className="absolute top-0 right-0 w-1/2 h-full bg-white" />
+                        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-black rounded-full" />
+                        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-white rounded-full" />
+                      </div>
+                      <p className="text-lg font-medium text-white">
+                        {state.person1.name}
+                      </p>
+                      <p className="text-gray-300">
+                        {compatibilityData.yinYang1}성
+                      </p>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="relative w-24 h-24 mx-auto bg-gray-700 bg-opacity-50 rounded-full overflow-hidden mb-2">
+                        <div className="absolute top-0 left-0 w-1/2 h-full bg-black" />
+                        <div className="absolute top-0 right-0 w-1/2 h-full bg-white" />
+                        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-black rounded-full" />
+                        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-white rounded-full" />
+                      </div>
+                      <p className="text-lg font-medium text-white">
+                        {state.person2.name}
+                      </p>
+                      <p className="text-gray-300">
+                        {compatibilityData.yinYang2}성
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  <motion.p
+                    className="text-center text-lg text-gray-200 max-w-md"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {compatibilityData.yinYangMatch}
+                  </motion.p>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 3 && (
+              <motion.div
+                key="slide3"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-8">
+                  <motion.h2
+                    className="text-2xl text-center font-medium text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    오행 궁합 🌿
+                  </motion.h2>
+
+                  <motion.div
+                    className="flex items-center justify-center gap-8"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <div className="text-center">
+                      <div className="w-24 h-24 mx-auto mb-2">
+                        <Image
+                          src={getElementImage(compatibilityData.element1)}
+                          alt={compatibilityData.element1}
+                          width={100}
+                          height={100}
+                          className="filter drop-shadow-lg"
+                        />
+                      </div>
+                      <p className="text-lg font-medium text-white">
+                        {state.person1.name}
+                      </p>
+                      <p className="text-gray-300">
+                        {compatibilityData.element1Name}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-center">
+                      {compatibilityData.element1 ===
+                      compatibilityData.element2 ? (
+                        <span className="text-3xl">🔄</span>
+                      ) : (
+                        <motion.svg
+                          className="w-12 h-8"
+                          viewBox="0 0 24 8"
+                          fill="none"
+                          initial={{ width: 0 }}
+                          animate={{ width: 48 }}
+                          transition={{ delay: 0.5, duration: 0.3 }}
+                        >
+                          <path
+                            d="M0 4H22M22 4L18 1M22 4L18 7"
+                            stroke="#fff"
+                            strokeWidth="2"
+                          />
+                        </motion.svg>
+                      )}
+                    </div>
+
+                    <div className="text-center">
+                      <div className="w-24 h-24 mx-auto mb-2">
+                        <Image
+                          src={getElementImage(compatibilityData.element2)}
+                          alt={compatibilityData.element2}
+                          width={100}
+                          height={100}
+                          className="filter drop-shadow-lg"
+                        />
+                      </div>
+                      <p className="text-lg font-medium text-white">
+                        {state.person2.name}
+                      </p>
+                      <p className="text-gray-300">
+                        {compatibilityData.element2Name}
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="bg-gray-800 bg-opacity-50 p-4 rounded-xl"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <p className="text-center text-lg text-gray-200">
+                      {compatibilityData.element1Name}과{" "}
+                      {compatibilityData.element2Name}의 만남!
+                      {(() => {
+                        const elementRelation: Record<string, string[]> = {
+                          목: ["화"],
+                          화: ["토"],
+                          토: ["금"],
+                          금: ["수"],
+                          수: ["목"],
+                        };
+
+                        if (
+                          elementRelation[compatibilityData.element1]?.includes(
+                            compatibilityData.element2
+                          )
+                        ) {
+                          return " 서로 상생의 관계로 긍정적인 에너지를 주고받을 수 있어요.";
+                        } else if (
+                          compatibilityData.element1 ===
+                          compatibilityData.element2
+                        ) {
+                          return " 같은 성질을 가진 오행으로 안정적인 관계를 유지할 수 있어요.";
+                        } else {
+                          return " 서로 다른 성질의 오행으로 도전적인 관계가 될 수 있어요.";
+                        }
+                      })()}
+                    </p>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 4 && (
+              <motion.div
+                key="slide4"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-8">
+                  <motion.h2
+                    className="text-2xl text-center font-medium text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    연애 스타일 해석 💘
+                  </motion.h2>
+
+                  <motion.div
+                    className="bg-pink-900 bg-opacity-30 border border-pink-700 border-opacity-30 rounded-xl p-6 max-w-md"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p className="text-pink-200 text-lg leading-relaxed">
+                      {(() => {
+                        const score = compatibilityData.score;
+                        if (score >= 85) {
+                          return "두 사람은 감정 표현에 적극적이며 서로의 마음을 잘 이해하고 배려할 수 있는 로맨틱한 궁합입니다. 함께 있을 때 안정감을 느끼며, 연애의 설렘이 오래 지속될 가능성이 높습니다.";
+                        } else if (score >= 70) {
+                          return "연애에 있어 큰 갈등은 없지만, 서로의 마음을 표현하는 방식에서 차이가 생길 수 있습니다. 공감 능력을 키우면 사랑이 더욱 깊어질 수 있어요.";
+                        } else {
+                          return "감정 표현 방식이나 연애 가치관에서 차이가 있어 다툼이 생기기 쉽습니다. 다만 진심 어린 대화와 배려로 관계를 이어갈 수 있어요.";
+                        }
+                      })()}
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    className="flex items-center justify-center gap-3 text-pink-500 text-4xl"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {["💕", "💖", "💓", "💗", "💘"].map((emoji, i) => (
+                      <motion.span
+                        key={i}
+                        className="animate-pulse"
+                        style={{ animationDelay: `${i * 0.2}s` }}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          delay: 0.7 + i * 0.1,
+                          type: "spring",
+                          stiffness: 200,
+                        }}
+                      >
+                        {emoji}
+                      </motion.span>
+                    ))}
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 5 && (
+              <motion.div
+                key="slide5"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-8">
+                  <motion.h2
+                    className="text-2xl text-center font-medium text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    소통 스타일 비교 🗣️
+                  </motion.h2>
+
+                  <motion.div
+                    className="bg-blue-900 bg-opacity-30 border border-blue-700 border-opacity-30 rounded-xl p-6 max-w-md w-full"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <div
+                      className="text-blue-200"
+                      dangerouslySetInnerHTML={{
+                        __html: (() => {
+                          const hourZhi1 = getHourGanji(
+                            state.person1.birthtime
+                          );
+                          const hourZhi2 = getHourGanji(
+                            state.person2.birthtime
+                          );
+                          const hourTrait1 = getHourTrait(hourZhi1);
+                          const hourTrait2 = getHourTrait(hourZhi2);
+
+                          if (hourTrait1 && hourTrait2) {
+                            return `<ul class="list-disc pl-5 space-y-3">
+                              <li><strong>${hourZhi1}시 (${state.person1.name}):</strong> ${hourTrait1}</li>
+                              <li><strong>${hourZhi2}시 (${state.person2.name}):</strong> ${hourTrait2}</li>
+                            </ul>`;
+                          } else {
+                            return "서로의 표현 방식이 다를 수 있어 조율이 필요합니다.";
+                          }
+                        })(),
+                      }}
+                    />
+                  </motion.div>
+
+                  <motion.p
+                    className="text-center text-lg text-blue-200 max-w-md"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {getJiJiRelationship(
+                      getHourGanji(state.person1.birthtime),
+                      getHourGanji(state.person2.birthtime)
+                    )}
+                  </motion.p>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 6 && (
+              <motion.div
+                key="slide6"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-8">
+                  <motion.h2
+                    className="text-2xl text-center font-medium text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    결혼 궁합 해석 💍
+                  </motion.h2>
+
+                  <motion.div
+                    className="relative w-full max-w-md"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <div className="absolute inset-0 overflow-hidden flex items-center justify-center opacity-10">
+                      <div className="w-64 h-64 rounded-full bg-yellow-400"></div>
+                    </div>
+
+                    <div className="bg-yellow-900 bg-opacity-30 border border-yellow-700 border-opacity-30 rounded-xl p-6 relative z-10">
+                      <p className="text-yellow-200 text-lg leading-relaxed">
+                        {(() => {
+                          const score = compatibilityData.score;
+                          if (score > 80) {
+                            return "가정의 평화를 중시하며, 서로를 이해하고 존중하는 결혼 생활이 가능합니다. 안정적인 미래를 함께 그릴 수 있는 최고의 파트너예요.";
+                          } else if (score > 60) {
+                            return "결혼 생활에서도 서로의 성향 차이를 조율하며 살아간다면, 따뜻한 가정을 이룰 수 있습니다.";
+                          } else {
+                            return "생활 방식이나 가치관 차이로 인해 다툼이 잦을 수 있으나, 충분한 대화와 노력으로 극복할 수 있습니다.";
+                          }
+                        })()}
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="flex items-center justify-center gap-4"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {["🏡", "💑", "👨‍👩‍👧"].map((emoji, i) => (
+                      <motion.div
+                        key={i}
+                        className="w-16 h-16 bg-yellow-900 bg-opacity-30 rounded-full flex items-center justify-center"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          delay: 0.7 + i * 0.1,
+                          type: "spring",
+                          stiffness: 200,
+                        }}
+                      >
+                        <span className="text-3xl">{emoji}</span>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 7 && (
+              <motion.div
+                key="slide7"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-8">
+                  <motion.h2
+                    className="text-2xl text-center font-medium text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    재정 궁합 해석 💰
+                  </motion.h2>
+
+                  <motion.div
+                    className="bg-amber-900 bg-opacity-30 border border-amber-700 border-opacity-30 rounded-xl p-6 max-w-md"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p className="text-amber-200 text-lg leading-relaxed">
+                      {compatibilityData.element1 === "금" ||
+                      compatibilityData.element2 === "금"
+                        ? "한 사람은 재물의 기운이 강하며, 실용적이고 현실적인 재정 스타일을 가지고 있어 경제적으로 안정적인 관계를 만들 수 있습니다."
+                        : "서로 다른 재정 스타일을 가질 수 있어 재정적 조율이 필요합니다. 서로의 경제적 가치관을 이해하는 것이 중요합니다."}
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    className="flex items-center justify-center gap-6 text-amber-400 text-4xl"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {["💵", "💳", "🏦", "📊"].map((emoji, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          delay: 0.7 + i * 0.1,
+                          type: "spring",
+                          stiffness: 200,
+                        }}
+                      >
+                        {emoji}
+                      </motion.span>
+                    ))}
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 마지막 슬라이드 (요약) */}
+            {currentStep === 8 && (
+              <motion.div
+                key="slide8"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 left-0 w-full h-full"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <h2 className="text-2xl text-center font-medium text-white mb-6">
+                      {state.person1.name}님과 {state.person2.name}님 궁합 결과
+                    </h2>
+
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.3, type: "spring" }}
+                      className="text-8xl font-bold text-center mb-2"
+                    >
+                      {compatibilityData.score}
+                      <span className="text-3xl ml-1">점</span>
+                    </motion.div>
+
+                    <p className="text-xl text-center text-gray-300 mb-4">
+                      상위 {rankingPercent}%의 궁합입니다! 🏆
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="flex justify-center gap-8 mb-6"
+                  >
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2">
+                        <Image
+                          src={getElementImage(compatibilityData.element1)}
+                          alt={compatibilityData.element1}
+                          width={64}
+                          height={64}
+                        />
+                      </div>
+                      <p className="text-white">{state.person1.name}</p>
+                    </div>
+
+                    <div className="flex items-center">
+                      <span className="text-2xl">❤️</span>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2">
+                        <Image
+                          src={getElementImage(compatibilityData.element2)}
+                          alt={compatibilityData.element2}
+                          width={64}
+                          height={64}
+                        />
+                      </div>
+                      <p className="text-white">{state.person2.name}</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex gap-4"
+                  >
+                    <button
+                      className="px-4 py-2 bg-gray-700 bg-opacity-50 text-white rounded-lg hover:bg-opacity-70 transition-all"
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator
+                            .share({
+                              title: "사주 궁합 테스트 결과",
+                              text: `${state.person1.name}님과 ${state.person2.name}님의 궁합 점수: ${compatibilityData.score}점`,
+                              url: window.location.href,
+                            })
+                            .catch((err) => {
+                              console.error("공유 실패:", err);
+                            });
+                        } else {
+                          navigator.clipboard
+                            .writeText(window.location.href)
+                            .then(() => alert("링크가 복사되었습니다!"))
+                            .catch((err) =>
+                              console.error("링크 복사 실패:", err)
+                            );
+                        }
+                      }}
+                    >
+                      결과 공유
+                    </button>
+
+                    <Link href="/compatibility">
+                      <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg">
+                        다시 테스트
+                      </button>
+                    </Link>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <div className="mt-4 bg-white rounded-lg shadow p-5 overflow-hidden">
-          <div
-            className="text-gray-700"
-            dangerouslySetInnerHTML={{
-              __html: compatibilityData.description,
-            }}
-          />
-        </div>
-
-        {/* 공유 버튼 */}
-        <div className="mt-6">
-          <button
-            className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg shadow font-medium"
-            onClick={() => {
-              if (navigator.share) {
-                navigator
-                  .share({
-                    title: "사주 궁합 테스트 결과",
-                    text: `${state.person1.name}님과 ${state.person2.name}님의 궁합 점수: ${compatibilityData.score}점`,
-                    url: window.location.href,
-                  })
-                  .catch((err) => {
-                    console.error("공유 실패:", err);
-                  });
-              } else {
-                navigator.clipboard
-                  .writeText(window.location.href)
-                  .then(() => alert("링크가 복사되었습니다!"))
-                  .catch((err) => console.error("링크 복사 실패:", err));
-              }
-            }}
-          >
-            결과 공유하기
-          </button>
-        </div>
-
-        {/* 다시 테스트하기 버튼 */}
-        <div className="mt-4">
-          <Link href="/compatibility" className="block">
-            <button className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg shadow font-medium">
-              다시 테스트하기
+        {/* 네비게이션 버튼 */}
+        {currentStep > 1 && (
+          <div className="flex justify-between mt-6">
+            <button
+              onClick={goToPrevSlide}
+              disabled={currentStep === 1}
+              className={`p-3 rounded-full ${
+                currentStep === 1
+                  ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                  : "bg-gray-800 bg-opacity-70 text-white hover:bg-opacity-90"
+              }`}
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
             </button>
-          </Link>
-        </div>
+
+            <div className="flex gap-2">
+              {Array.from({ length: totalSteps }).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goToSlide(idx + 1)}
+                  className={`w-2 h-2 rounded-full ${
+                    currentStep === idx + 1 ? "bg-purple-500" : "bg-gray-600"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={goToNextSlide}
+              disabled={currentStep === totalSteps}
+              className={`p-3 rounded-full ${
+                currentStep === totalSteps
+                  ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                  : "bg-gray-800 bg-opacity-70 text-white hover:bg-opacity-90"
+              }`}
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
