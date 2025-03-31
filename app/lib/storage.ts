@@ -57,7 +57,22 @@ export async function saveTalismanImage(
   imageUrl: string,
   userId?: string,
   metadata?: Record<string, string>
-): Promise<string> {
+): Promise<{
+  url: string;
+  talisman?: {
+    id: string;
+    userId: string;
+    storagePath: string;
+    fileName: string;
+    fileSize: string | null;
+    fileType: string | null;
+    concern: string | null;
+    concernType: string | null;
+    translatedPhrase: string | null;
+    generatedBy: string;
+    createdAt: Date;
+  } | null;
+}> {
   try {
     if (!userId) {
       throw new Error("사용자 ID가 필요합니다.");
@@ -101,6 +116,7 @@ export async function saveTalismanImage(
     console.log("공개 URL 생성:", publicUrl.publicUrl);
 
     // Drizzle ORM을 사용하여 데이터베이스에 저장
+    let savedTalisman = null;
     try {
       console.log("Drizzle ORM으로 데이터베이스 저장 시도");
       const newTalisman = await db
@@ -118,12 +134,16 @@ export async function saveTalismanImage(
         .returning();
 
       console.log("DB 저장 성공:", newTalisman);
+      savedTalisman = newTalisman[0];
     } catch (dbError) {
       console.error("Drizzle ORM 데이터베이스 저장 오류:", dbError);
       // 저장에 실패해도 URL은 반환
     }
 
-    return publicUrl.publicUrl;
+    return {
+      url: publicUrl.publicUrl,
+      talisman: savedTalisman,
+    };
   } catch (error) {
     console.error("부적 이미지 저장 오류:", error);
     throw error;

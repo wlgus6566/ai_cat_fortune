@@ -78,7 +78,7 @@ export interface UserProfile {
 }
 
 // 앱 네비게이션 타입
-export type AppTab = "home" | "chat" | "profile";
+export type AppTab = "home" | "chat" | "profile" | "consultations";
 export interface IErrorResponse {
   success: false;
   error: {

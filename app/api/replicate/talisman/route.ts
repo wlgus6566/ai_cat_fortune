@@ -329,8 +329,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       imageUrl: replicateImageUrl,
-      storedImageUrl: storedImageUrl,
+      storedImageUrl: storedImageUrl?.url || replicateImageUrl,
       translatedPhrase: phrase,
+      id: storedImageUrl?.talisman?.id,
     });
   } catch (error) {
     console.error("Image generation error:", error);

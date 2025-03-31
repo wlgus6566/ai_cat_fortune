@@ -58,14 +58,20 @@ const ChatInput = ({
 interface FortuneChatProps {
   userName: string;
   userProfile: UserProfile;
+  readOnly?: boolean;
+  initialMessages?: ChatMessageType[];
 }
 
 export default function FortuneChat({
   userName,
   userProfile,
+  readOnly = false,
+  initialMessages = [],
 }: FortuneChatProps) {
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
-  const [currentStep, setCurrentStep] = useState<ChatStep>("INITIAL");
+  const [messages, setMessages] = useState<ChatMessageType[]>(initialMessages);
+  const [currentStep, setCurrentStep] = useState<ChatStep>(
+    initialMessages.length > 0 ? "FORTUNE_RESULT" : "INITIAL"
+  );
   const [selectedConcern, setSelectedConcern] = useState<ConcernType | null>(
     null
   );
@@ -99,6 +105,8 @@ export default function FortuneChat({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [talismanImageUrl, setTalismanImageUrl] = useState<string | null>(null);
   const [translatedPhrase, setTranslatedPhrase] = useState<string | null>(null);
+  // 부적 ID를 저장하는 상태 추가
+  const [talismanId, setTalismanId] = useState<string | null>(null);
   // 채팅창 자동 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -238,6 +246,14 @@ export default function FortuneChat({
       // 이미지 URL 저장
       const imageUrl = data.storedImageUrl || data.imageUrl;
       setTalismanImageUrl(imageUrl);
+
+      // 부적 ID 저장
+      if (data.id) {
+        setTalismanId(data.id);
+        console.log("부적 ID 저장:", data.id);
+      } else {
+        console.warn("부적 ID가 응답에 없습니다.");
+      }
 
       const translatedPhrase = data.translatedPhrase;
       setTranslatedPhrase(translatedPhrase);
@@ -586,6 +602,7 @@ export default function FortuneChat({
     setTalismanError(null);
     setTalismanImageUrl(null);
     setTranslatedPhrase(null);
+    setTalismanId(null); // 부적 ID 초기화 추가
     // 다시 초기화 플래그 설정 (이중 실행 방지)
     initializedRef.current = true;
 
@@ -608,6 +625,50 @@ export default function FortuneChat({
     setCurrentOptions([...CONCERN_TYPES, "직접 입력하기"]);
     setCurrentStep("CONCERN_SELECT");
     setInitialMessagesComplete(true);
+  };
+
+  // 사용자와의 상담 세션이 끝나면 상담 내역 저장
+  const saveConsultation = async () => {
+    if (messages.length === 0) return;
+
+    // 상담 제목 (사용자의 첫 고민 메시지 또는 선택한 고민)
+    const title = currentConcernText || "포춘냥이와의 상담";
+
+    console.log("상담 내역 저장 준비:", {
+      title,
+      messageCount: messages.length,
+      talismanId,
+    });
+
+    try {
+      const response = await fetch("/api/consultations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          messages,
+          talismanId: talismanId, // 실제 부적 ID 사용
+        }),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.error || "상담 내역 저장에 실패했습니다.");
+      }
+
+      console.log("상담 내역이 성공적으로 저장되었습니다:", responseData);
+    } catch (error) {
+      console.error("상담 내역 저장 오류:", error);
+    }
+  };
+
+  // 채팅 종료 시 상담 내역 저장
+  const handleEndChat = async () => {
+    await saveConsultation();
+    resetChat();
   };
 
   return (
@@ -639,76 +700,100 @@ export default function FortuneChat({
       </div>
 
       {/* 부적 생성 버튼 */}
-      {showTalismanButton && !isLoading && !typingMessageId && (
-        <div className="p-3 border-t border-gray-200 bg-red-50">
+      {showTalismanButton && !readOnly && (
+        <div className="mb-4 flex justify-center">
           <button
             onClick={handleGenerateTalisman}
             disabled={isGeneratingTalisman}
-            className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 
+            className={`
+              px-5 py-2.5 rounded-lg flex items-center justify-center 
               ${
                 isGeneratingTalisman
-                  ? "bg-gray-300 text-gray-500"
-                  : "bg-red-600 text-white hover:bg-red-700 shadow-md"
-              }`}
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
+              }
+              transition-all duration-300 shadow-md hover:shadow-lg
+            `}
           >
             {isGeneratingTalisman ? (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center">
+                <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
                 <span>부적 생성 중...</span>
-                <div className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
               </div>
             ) : (
-              "행운의 부적 이미지 생성하기 ✨"
+              <>
+                <span className="mr-2 text-xl">🧧</span>
+                <span>행운의 부적 받기</span>
+              </>
             )}
           </button>
-
-          {talismanError && (
-            <div className="mt-2 p-2 bg-red-100 text-red-700 text-sm rounded">
-              {talismanError}
-            </div>
-          )}
         </div>
       )}
 
-      {/* 입력 영역 - 직접 입력 모드일 때만 표시 */}
-      {currentStep === "DIRECT_INPUT" &&
-        !typingMessageId &&
-        inputMode === "DIRECT_INPUT" && (
-          <div className="p-3 border-t border-gray-200 bg-gray-50">
-            <ChatInput
-              onSend={handleDirectInput}
-              disabled={!!typingMessageId || isLoading}
-            />
-          </div>
-        )}
+      {/* 에러 메시지 */}
+      {talismanError && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm text-center">
+          {talismanError}
+        </div>
+      )}
 
-      {/* 선택지 영역 - 선택 모드이고 선택지가 있을 때만 표시 */}
-      {currentOptions.length > 0 &&
-        initialMessagesComplete &&
-        !typingMessageId &&
-        currentStep !== "DIRECT_INPUT" && (
-          <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {currentOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => handleOptionSelect(option)}
-                  disabled={!!typingMessageId}
-                  className={`
-                  px-4 py-2 rounded-full border transition-all duration-300
-                  ${
-                    selectedOption === option
-                      ? "keyword-selected border-purple-500 shadow-md"
-                      : "bg-white border-purple-300 hover:bg-purple-50"
-                  }
-                  ${typingMessageId ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                >
-                  {option}
-                </button>
-              ))}
+      {/* 입력 영역 (읽기 전용이 아닐 때만 표시) */}
+      {!readOnly && (
+        <>
+          {currentStep === "DIRECT_INPUT" && (
+            <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <ChatInput
+                onSend={handleDirectInput}
+                disabled={!!typingMessageId || isLoading}
+              />
             </div>
-          </div>
-        )}
+          )}
+
+          {currentOptions.length > 0 &&
+            initialMessagesComplete &&
+            !typingMessageId &&
+            currentStep !== "DIRECT_INPUT" && (
+              <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {currentOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handleOptionSelect(option)}
+                      disabled={!!typingMessageId}
+                      className={`
+                        px-4 py-2 rounded-full border transition-all duration-300
+                        ${
+                          selectedOption === option
+                            ? "keyword-selected border-purple-500 shadow-md"
+                            : "bg-white border-purple-300 hover:bg-purple-50"
+                        }
+                        ${
+                          typingMessageId ? "opacity-50 cursor-not-allowed" : ""
+                        }
+                      `}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* 채팅 종료 버튼 */}
+          {messages.length > 0 &&
+            currentStep === "FORTUNE_RESULT" &&
+            !readOnly && (
+              <div className="mt-4 p-3 flex justify-center">
+                <button
+                  onClick={handleEndChat}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
+                >
+                  상담 내용 저장/상담 종료
+                </button>
+              </div>
+            )}
+        </>
+      )}
     </div>
   );
 }

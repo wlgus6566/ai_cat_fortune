@@ -36,6 +36,13 @@
       "when": 1743052208896,
       "tag": "0004_previous_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1743404191525,
+      "tag": "0005_jazzy_shiver_man",
+      "breakpoints": true
     }
   ]
 }

@@ -5,7 +5,9 @@ import {
   text,
   timestamp,
   uuid,
+  json,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const usersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
@@ -58,6 +60,57 @@ export const talismansTable = pgTable("talismans", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const consultationsTable = pgTable("consultations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => userProfilesTable.id, { onDelete: "cascade" }),
+  talismanId: uuid("talisman_id").references(() => talismansTable.id, {
+    onDelete: "set null",
+  }),
+  title: text("title").notNull(),
+  messages: json("messages").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+// 관계 정의
+export const userProfilesRelations = relations(
+  userProfilesTable,
+  ({ many }) => ({
+    talismans: many(talismansTable),
+    consultations: many(consultationsTable),
+  })
+);
+
+export const talismansRelations = relations(
+  talismansTable,
+  ({ one, many }) => ({
+    userProfile: one(userProfilesTable, {
+      fields: [talismansTable.userId],
+      references: [userProfilesTable.id],
+    }),
+    consultations: many(consultationsTable),
+  })
+);
+
+export const consultationsRelations = relations(
+  consultationsTable,
+  ({ one }) => ({
+    userProfile: one(userProfilesTable, {
+      fields: [consultationsTable.userId],
+      references: [userProfilesTable.id],
+    }),
+    talisman: one(talismansTable, {
+      fields: [consultationsTable.talismanId],
+      references: [talismansTable.id],
+    }),
+  })
+);
+
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
 
@@ -69,3 +122,6 @@ export type SelectUserProfile = typeof userProfilesTable.$inferSelect;
 
 export type InsertTalisman = typeof talismansTable.$inferInsert;
 export type SelectTalisman = typeof talismansTable.$inferSelect;
+
+export type InsertConsultation = typeof consultationsTable.$inferInsert;
+export type SelectConsultation = typeof consultationsTable.$inferSelect;
