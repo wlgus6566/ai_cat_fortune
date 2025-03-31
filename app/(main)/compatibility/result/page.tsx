@@ -527,13 +527,20 @@ export default function CompatibilityResultPage() {
           </div>
           <motion.div
             className="flex justify-center absolute bottom-20 left-25"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 100 }}
+            animate={{
+              rotate: [-2, 2, -2], // 기본 흔들림
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              type: "tween",
+            }}
           >
-            <Image
+            <motion.img
+              key="origin"
               src="/cat_book.png"
-              alt="고양이 마법사"
+              alt="마법사 고양이"
               width={100}
               height={100}
               className="object-contain"
@@ -652,7 +659,7 @@ export default function CompatibilityResultPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                다음
+                결과보기
               </motion.button>
             </motion.div>
           )}
@@ -667,7 +674,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -736,7 +743,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -875,7 +882,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -939,7 +946,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -998,7 +1005,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -1067,7 +1074,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -1124,7 +1131,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -1259,31 +1266,33 @@ export default function CompatibilityResultPage() {
       </div>
 
       {/* 네비게이션 버튼 */}
-      <div className="flex justify-between absolute left-4 right-4 top-40">
-        <button
-          onClick={goToPrevSlide}
-          disabled={currentStep === 1}
-          className={`p-3 rounded-full ${
-            currentStep === 1
-              ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
-              : "bg-white/10 text-white hover:bg-white/20"
-          }`}
-        >
-          <ChevronLeftIcon className="w-5 h-5" />
-        </button>
+      {currentStep !== 1 && (
+        <div className="flex justify-between absolute left-4 right-4 top-30">
+          <button
+            onClick={goToPrevSlide}
+            disabled={currentStep === 1}
+            className={`p-3 rounded-full ${
+              currentStep === 1
+                ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            <ChevronLeftIcon className="w-5 h-5" />
+          </button>
 
-        <button
-          onClick={goToNextSlide}
-          disabled={currentStep === totalSteps}
-          className={`p-3 rounded-full ${
-            currentStep === totalSteps
-              ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
-              : "bg-white/10 text-white hover:bg-white/20"
-          }`}
-        >
-          <ChevronRightIcon className="w-5 h-5" />
-        </button>
-      </div>
+          <button
+            onClick={goToNextSlide}
+            disabled={currentStep === totalSteps}
+            className={`p-3 rounded-full ${
+              currentStep === totalSteps
+                ? "bg-gray-800/50 text-gray-600 cursor-not-allowed"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            <ChevronRightIcon className="w-5 h-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
