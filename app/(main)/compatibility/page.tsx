@@ -1,10 +1,13 @@
 "use client";
 
+import type React from "react";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
+import PageHeader from "@/app/components/PageHeader";
 
 export default function CompatibilityPage() {
   const router = useRouter();
@@ -23,9 +26,26 @@ export default function CompatibilityPage() {
       birthtime: "",
     },
   });
+  const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 유효성 검사
+    if (!formData.person1.name || !formData.person2.name) {
+      setError("두 사람의 이름을 모두 입력해주세요.");
+      return;
+    }
+
+    if (!formData.person1.birthdate || !formData.person2.birthdate) {
+      setError("두 사람의 생년월일을 모두 선택해주세요.");
+      return;
+    }
+
+    if (!formData.person1.birthtime || !formData.person2.birthtime) {
+      setError("두 사람의 태어난 시간을 모두 선택해주세요.");
+      return;
+    }
 
     // Context 상태 업데이트
     setState(formData);
@@ -70,207 +90,306 @@ export default function CompatibilityPage() {
   };
 
   return (
-    <motion.div
-      className="container max-w-screen-md mx-auto px-4 py-6 relative z-1"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* 헤더 이미지 영역 */}
-      <div className="flex justify-center mb-8">
-        <Image
-          src="/compatibility-header.png" // 상단 이미지 경로
-          alt="사주 궁합 테스트"
-          width={480}
-          height={240}
-          className="rounded-lg"
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9]">
+      <PageHeader
+        title="사주로 보는 너와 나의 궁합"
+        className="bg-transparent shadow-none"
+      />
 
-      {/* 메인 콘텐츠 영역 */}
-      <motion.div
-        className="bg-white rounded-xl shadow-md p-6 mb-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.h1
-          className="text-2xl font-bold text-center text-[#3B2E7E] mb-6"
+      <div className="container max-w-md mx-auto px-4 py-6 relative">
+        {/* 배경 요소 */}
+        {/* <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 20,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "linear",
+            }}
+          >
+            <Image
+              src="/assets/images/star.png"
+              alt="별"
+              width={100}
+              height={100}
+              className="w-full h-full"
+            />
+          </motion.div>
+        </div> */}
+
+        {/* <div className="absolute bottom-20 left-0 w-16 h-16 opacity-20">
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{
+              duration: 3,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          >
+            <Image
+              src="/assets/images/moon.png"
+              alt="달"
+              width={60}
+              height={60}
+              className="w-full h-full"
+            />
+          </motion.div>
+        </div> */}
+
+        {/* 메인 컨텐츠 */}
+        <motion.div
+          className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            className="flex justify-center mb-6"
+            variants={itemVariants}
+          >
+            <Image
+              src="/cat_book.png"
+              alt="고양이 마법사"
+              width={100}
+              height={100}
+              className="w-24 h-24 object-contain"
+            />
+          </motion.div>
+
+          <motion.h2
+            className="text-xl font-bold text-center text-[#3B2E7E] mb-6"
+            variants={itemVariants}
+          >
+            사주로 보는 너와 나의 궁합
+          </motion.h2>
+
+          {error && (
+            <motion.div
+              className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 text-red-700 rounded"
+              variants={itemVariants}
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <motion.div className="space-y-6" variants={itemVariants}>
+              {/* 첫 번째 사람 정보 */}
+              <div className="p-4 bg-[#F9F5FF] rounded-xl">
+                <h3 className="font-semibold text-[#3B2E7E] mb-4">
+                  첫 번째 사람
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      이름
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.person1.name}
+                      onChange={(e) =>
+                        handleInputChange("person1", "name", e.target.value)
+                      }
+                      placeholder="이름"
+                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      성별
+                    </label>
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleInputChange("person1", "gender", "남")
+                        }
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          formData.person1.gender === "남"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        }`}
+                      >
+                        남성
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleInputChange("person1", "gender", "여")
+                        }
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          formData.person1.gender === "여"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        }`}
+                      >
+                        여성
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      생년월일
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.person1.birthdate}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "person1",
+                          "birthdate",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      태어난 시간
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.person1.birthtime}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "person1",
+                          "birthtime",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      정확한 시간을 모르시면 12:00으로 입력해주세요.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 두 번째 사람 정보 */}
+              <div className="p-4 bg-[#F9F5FF] rounded-xl">
+                <h3 className="font-semibold text-[#3B2E7E] mb-4">
+                  두 번째 사람
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      이름
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.person2.name}
+                      onChange={(e) =>
+                        handleInputChange("person2", "name", e.target.value)
+                      }
+                      placeholder="이름"
+                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      성별
+                    </label>
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleInputChange("person2", "gender", "남")
+                        }
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          formData.person2.gender === "남"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        }`}
+                      >
+                        남성
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleInputChange("person2", "gender", "여")
+                        }
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          formData.person2.gender === "여"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        }`}
+                      >
+                        여성
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      생년월일
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.person2.birthdate}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "person2",
+                          "birthdate",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      태어난 시간
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.person2.birthtime}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "person2",
+                          "birthtime",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      정확한 시간을 모르시면 12:00으로 입력해주세요.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div className="mt-8" variants={itemVariants}>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 rounded-xl bg-[#990dfa] text-white font-medium hover:bg-[#8A0AE0] transition-colors"
+              >
+                궁합 확인하기
+              </button>
+            </motion.div>
+          </form>
+        </motion.div>
+
+        {/* 하단 설명 */}
+        <motion.div
+          className="text-center text-sm text-[#3B2E7E]/70"
           variants={itemVariants}
         >
-          이름과 생년월일을 입력하고,
-          <br />
-          우리의 사주 궁합을 테스트해 보세요
-        </motion.h1>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 첫 번째 사람 정보 */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-bold text-[#3B2E7E] mb-4">
-              첫 번째 사람
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[#6F5945] mb-1">이름</label>
-                <input
-                  type="text"
-                  value={formData.person1.name}
-                  onChange={(e) =>
-                    handleInputChange("person1", "name", e.target.value)
-                  }
-                  className="w-full px-4 py-2 rounded-lg border border-[#E9E4F0] focus:outline-none focus:border-[#8D6FD1]"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-[#6F5945] mb-1">생년월일</label>
-                <input
-                  type="date"
-                  value={formData.person1.birthdate}
-                  onChange={(e) =>
-                    handleInputChange("person1", "birthdate", e.target.value)
-                  }
-                  className="w-full px-4 py-2 rounded-lg border border-[#E9E4F0] focus:outline-none focus:border-[#8D6FD1]"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-[#6F5945] mb-1">성별</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="남"
-                      checked={formData.person1.gender === "남"}
-                      onChange={(e) =>
-                        handleInputChange("person1", "gender", e.target.value)
-                      }
-                      className="mr-2"
-                    />
-                    남성
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="여"
-                      checked={formData.person1.gender === "여"}
-                      onChange={(e) =>
-                        handleInputChange("person1", "gender", e.target.value)
-                      }
-                      className="mr-2"
-                    />
-                    여성
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[#6F5945] mb-1">태어난 시간</label>
-                <input
-                  type="time"
-                  value={formData.person1.birthtime}
-                  onChange={(e) =>
-                    handleInputChange("person1", "birthtime", e.target.value)
-                  }
-                  className="w-full px-4 py-2 rounded-lg border border-[#E9E4F0] focus:outline-none focus:border-[#8D6FD1]"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 두 번째 사람 정보 */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-bold text-[#3B2E7E] mb-4">
-              두 번째 사람
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[#6F5945] mb-1">이름</label>
-                <input
-                  type="text"
-                  value={formData.person2.name}
-                  onChange={(e) =>
-                    handleInputChange("person2", "name", e.target.value)
-                  }
-                  className="w-full px-4 py-2 rounded-lg border border-[#E9E4F0] focus:outline-none focus:border-[#8D6FD1]"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-[#6F5945] mb-1">생년월일</label>
-                <input
-                  type="date"
-                  value={formData.person2.birthdate}
-                  onChange={(e) =>
-                    handleInputChange("person2", "birthdate", e.target.value)
-                  }
-                  className="w-full px-4 py-2 rounded-lg border border-[#E9E4F0] focus:outline-none focus:border-[#8D6FD1]"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-[#6F5945] mb-1">성별</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="남"
-                      checked={formData.person2.gender === "남"}
-                      onChange={(e) =>
-                        handleInputChange("person2", "gender", e.target.value)
-                      }
-                      className="mr-2"
-                    />
-                    남성
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="여"
-                      checked={formData.person2.gender === "여"}
-                      onChange={(e) =>
-                        handleInputChange("person2", "gender", e.target.value)
-                      }
-                      className="mr-2"
-                    />
-                    여성
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[#6F5945] mb-1">태어난 시간</label>
-                <input
-                  type="time"
-                  value={formData.person2.birthtime}
-                  onChange={(e) =>
-                    handleInputChange("person2", "birthtime", e.target.value)
-                  }
-                  className="w-full px-4 py-2 rounded-lg border border-[#E9E4F0] focus:outline-none focus:border-[#8D6FD1]"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 제출 버튼 */}
-          <motion.button
-            type="submit"
-            className="w-full bg-[#990dfa] text-white py-4 rounded-lg font-medium text-lg"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            궁합 확인하기
-          </motion.button>
-        </form>
-      </motion.div>
-
-      {/* 앱 홍보 영역 */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] rounded-xl p-8 text-white"
-      ></motion.section>
-    </motion.div>
+          <p>
+            사주 정보를 바탕으로 두 사람의 궁합을 분석해드립니다.
+            <br />
+            정확한 정보를 입력할수록 더 정확한 결과를 얻을 수 있어요.
+          </p>
+        </motion.div>
+      </div>
+    </div>
   );
 }
