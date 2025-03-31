@@ -685,7 +685,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center">
+                      <div className="flex items-center min-w-[130px]">
                         <div className="text-[#6366f1] mr-2">
                           <Music className="h-5 w-5" />
                         </div>

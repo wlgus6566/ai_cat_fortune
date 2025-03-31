@@ -178,10 +178,7 @@ export default function CompatibilityPage() {
           initial="hidden"
           animate="visible"
         >
-          <motion.div
-            className="flex justify-center mb-6"
-            variants={itemVariants}
-          >
+          {/* <motion.div className="flex justify-center" variants={itemVariants}>
             <Image
               src="/cat_book.png"
               alt="고양이 마법사"
@@ -189,7 +186,7 @@ export default function CompatibilityPage() {
               height={100}
               className="w-24 h-24 object-contain"
             />
-          </motion.div>
+          </motion.div> */}
 
           <motion.h2
             className="text-xl font-bold text-center text-[#3B2E7E] mb-6"

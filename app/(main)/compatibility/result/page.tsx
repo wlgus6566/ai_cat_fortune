@@ -286,7 +286,7 @@ function generateCompatibilityData(person1: Person, person2: Person) {
   const yinYangMatch =
     g1.yinYang !== g2.yinYang
       ? "너희 둘은 음양이 딱 잘 맞는 조합이야! 균형 최고다옹~ ⚖️"
-      : "같은 성향이라 더 친해질 수도 있지만, 가끔 티격태격할 수도 있어냥~ 서로 노력하면 꽁냥꽁냥 가능! 💞";
+      : "같은 성향이라 더 친해질 수도 있지만, 가끔 티격태격할 수도 있어냥~<br/>서로 노력하면 꽁냥꽁냥 가능! 💞";
 
   // 카테고리별 분석 정리
   const loveAnalysis =
@@ -574,7 +574,7 @@ export default function CompatibilityResultPage() {
             />
           </div>
           <motion.div
-            className="flex justify-center absolute bottom-20 left-25"
+            className="flex justify-center absolute bottom-14 left-25"
             animate={{
               rotate: [-2, 2, -2], // 기본 흔들림
             }}
@@ -589,8 +589,8 @@ export default function CompatibilityResultPage() {
               key="origin"
               src="/cat_book.png"
               alt="마법사 고양이"
-              width={100}
-              height={100}
+              width={90}
+              height={90}
               className="object-contain"
             />
           </motion.div>
@@ -724,7 +724,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-0 text-2xl text-center font-bold text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -732,21 +732,11 @@ export default function CompatibilityResultPage() {
                 음양 조화 🌓
               </motion.h2>
 
-              <motion.p
-                className="text-center text-lg text-gray-200 max-w-md mb-8"
+              <motion.div
+                className="flex items-center justify-center gap-10 -mt-[150px]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                dangerouslySetInnerHTML={{
-                  __html: compatibilityData.yinYangMatch,
-                }}
-              />
-
-              <motion.div
-                className="flex items-center justify-center gap-10 mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
               >
                 <div className="text-center">
                   <p className="text-lg font-medium text-white mb-2">
@@ -780,6 +770,15 @@ export default function CompatibilityResultPage() {
                   </p>
                 </div>
               </motion.div>
+              <motion.p
+                className="text-center text-md px-8 text-gray-200 max-w-md mt-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                dangerouslySetInnerHTML={{
+                  __html: compatibilityData.yinYangMatch,
+                }}
+              />
             </motion.div>
           )}
 
@@ -793,7 +792,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-0 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -886,12 +885,12 @@ export default function CompatibilityResultPage() {
               </motion.div>
 
               <motion.div
-                className="p-7 max-w-md mt-5"
+                className="p-7 px-10 max-w-md text-md"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <p className="text-center text-lg text-gray-200">
+                <p className="text-center text-md text-gray-200">
                   {compatibilityData.element1Name}과 <br />
                   {compatibilityData.element2Name}의 만남!
                   <br /> <br />
@@ -909,13 +908,13 @@ export default function CompatibilityResultPage() {
                         compatibilityData.element2
                       )
                     ) {
-                      return " 서로가 서로를 북돋아주는 상생 관계라서, 같이 있으면 좋은 기운이 몽글몽글 피어난다옹~ 🌿";
+                      return "서로가 서로를 북돋아주는 상생 관계라서, 같이 있으면 좋은 기운이 몽글몽글 피어난다옹~ 🌿";
                     } else if (
                       compatibilityData.element1 === compatibilityData.element2
                     ) {
-                      return " 성향이 비슷한 오행이라, 안정적이고 찰떡궁합처럼 잘 지낼 수 있다냥~ 🐾";
+                      return "안정적이고 찰떡궁합처럼 잘 지낼 수 있다냥~ 🐾";
                     } else {
-                      return " 음… 조금 다르긴 하지만, 그만큼 서로를 보완해주는 짝꿍이 될 수도 있다옹! 💫";
+                      return "조금은 다르긴 하지만, 그만큼 서로를 보완해주는 짝꿍이 될 수도 있다옹! 💫";
                     }
                   })()}
                 </p>
@@ -933,7 +932,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-0 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -942,7 +941,7 @@ export default function CompatibilityResultPage() {
               </motion.h2>
 
               <motion.div
-                className="rounded-xl p-10 max-w-md mb-8"
+                className="rounded-xl px-10 max-w-md mb-8 -mt-[100px]"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -997,7 +996,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-0 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -1006,7 +1005,7 @@ export default function CompatibilityResultPage() {
               </motion.h2>
 
               <motion.div
-                className="p-10 max-w-md w-full mb-8"
+                className="px-10 max-w-md w-full mb-5"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -1033,7 +1032,7 @@ export default function CompatibilityResultPage() {
               </motion.div>
 
               <motion.p
-                className="text-center text-lg p-10 pt-0 max-w-md"
+                className="text-center text-md p-10 pt-0 max-w-md"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -1056,7 +1055,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-0 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -1125,7 +1124,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-0 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -1318,7 +1317,7 @@ export default function CompatibilityResultPage() {
 
       {/* 네비게이션 버튼 */}
       {currentStep !== 1 && (
-        <div className="flex justify-between absolute left-4 right-4 top-30">
+        <div className="flex justify-between absolute left-4 right-4 top-10">
           <button
             onClick={goToPrevSlide}
             disabled={currentStep === 1}
