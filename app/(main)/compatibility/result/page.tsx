@@ -1123,19 +1123,18 @@ export default function CompatibilityResultPage() {
               transition={{ duration: 0.5 }}
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
-              <motion.div
+              <motion.h2
+                className="absolute top-30 text-2xl text-center font-bold mb-6 text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-center mb-6"
               >
-                <h2 className="absolute top-30 text-2xl font-bold text-white mb-5 left-50 translate-x-[-50%]">
-                  궁합 결과
-                </h2>
+                궁합 결과
                 <p className="text-gray-300 text-xl ">
                   {compatibilityData.title}
                 </p>
-              </motion.div>
+              </motion.h2>
+
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
