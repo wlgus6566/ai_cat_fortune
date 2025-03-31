@@ -2,15 +2,17 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
+import { useUser } from "@/app/contexts/UserContext";
 import PageHeader from "@/app/components/PageHeader";
 
 export default function CompatibilityPage() {
   const router = useRouter();
+  const { userProfile, isLoaded } = useUser();
   const { setState } = useCompatibility();
   const [formData, setFormData] = useState({
     person1: {
@@ -27,6 +29,42 @@ export default function CompatibilityPage() {
     },
   });
   const [error, setError] = useState("");
+
+  // 사용자 프로필 정보로 폼 데이터 초기화
+  useEffect(() => {
+    if (userProfile && isLoaded) {
+      // gender 형식 변환 ("남성"/"여성" -> "남"/"여")
+      const gender =
+        userProfile.gender === "남성"
+          ? "남"
+          : userProfile.gender === "여성"
+          ? "여"
+          : "남"; // 기본값은 남성
+
+      // birthTime 형식 변환
+      let birthtime = "12:00"; // 기본값
+      if (userProfile.birthTime && userProfile.birthTime !== "모름") {
+        // 예: "자시(23:00-01:00)" -> "23:00"
+        const timeMatch = userProfile.birthTime.match(
+          /\((\d{2}):00-\d{2}:00\)/
+        );
+        if (timeMatch) {
+          birthtime = `${timeMatch[1]}:00`;
+        }
+      }
+
+      // formData 업데이트
+      setFormData((prev) => ({
+        ...prev,
+        person1: {
+          name: userProfile.name || "",
+          birthdate: userProfile.birthDate || "",
+          gender: gender as "남" | "여",
+          birthtime: birthtime,
+        },
+      }));
+    }
+  }, [userProfile, isLoaded]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,10 +129,7 @@ export default function CompatibilityPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9]">
-      <PageHeader
-        title="사주로 보는 너와 나의 궁합"
-        className="bg-transparent shadow-none"
-      />
+      <PageHeader title="궁합보기" className="bg-transparent shadow-none" />
 
       <div className="container max-w-md mx-auto px-4 py-6 relative">
         {/* 배경 요소 */}

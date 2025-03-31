@@ -766,17 +766,19 @@ export default function HomePage() {
           <SwiperSlide>
             {/* 첫 번째 카드 */}
             <div className="bg-[#F0EAFF] rounded-2xl p-6 relative overflow-hidden">
-              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <BookHeart className="h-8 w-8 text-[#6366f1]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">
-                사주로 보는
-                <br />
-                궁합
-              </h3>
-              <p className="text-[#6366f1] text-sm font-medium">
-                내 짝은 어디에?
-              </p>
+              <Link href="/compatibility">
+                <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                  <BookHeart className="h-8 w-8 text-[#6366f1]" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-1">
+                  사주로 보는
+                  <br />
+                  궁합
+                </h3>
+                <p className="text-[#6366f1] text-sm font-medium">
+                  내 짝은 어디에?
+                </p>
+              </Link>
             </div>
           </SwiperSlide>
 

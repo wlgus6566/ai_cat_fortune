@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -386,6 +386,51 @@ export default function CompatibilityResultPage() {
   const [currentStep, setCurrentStep] = useState(1); // 현재 슬라이드 단계
   const totalSteps = 8; // 전체 슬라이드 단계 수
 
+  // 타이핑 애니메이션을 위한 상태
+  const textLines = ["두근두근…", "두 사람의 궁합을", " 분석 중이다옹...🐾"];
+  const [typedLines, setTypedLines] = useState<string[]>(["", "", ""]);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
+
+  // 타이핑 애니메이션
+  useEffect(() => {
+    if (currentStep !== 1) return;
+
+    const typingTimer = setInterval(() => {
+      if (currentLineIndex < textLines.length) {
+        const currentLine = textLines[currentLineIndex];
+
+        if (currentCharIndex < currentLine.length) {
+          // 현재 줄의 다음 문자 추가
+          setTypedLines((prev) => {
+            const newLines = [...prev];
+            newLines[currentLineIndex] = currentLine.substring(
+              0,
+              currentCharIndex + 1
+            );
+            return newLines;
+          });
+          setCurrentCharIndex((prev) => prev + 1);
+        } else {
+          // 현재 줄 타이핑 완료, 다음 줄로 이동
+          if (currentLineIndex < textLines.length - 1) {
+            setCurrentLineIndex((prev) => prev + 1);
+            setCurrentCharIndex(0);
+          } else {
+            // 모든 줄 타이핑 완료
+            clearInterval(typingTimer);
+            setTypingComplete(true);
+          }
+        }
+      }
+    }, 70); // 100ms마다 한 글자씩 추가
+
+    return () => {
+      clearInterval(typingTimer);
+    };
+  }, [currentStep, currentLineIndex, currentCharIndex, textLines]);
+
   useEffect(() => {
     if (
       state.person1.name &&
@@ -620,10 +665,12 @@ export default function CompatibilityResultPage() {
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
                 <h1 className="text-2xl text-center font-bold mb-6 text-white">
-                  사주 속에서
-                  <br />
-                  너와 그 사람의 인연을 <br />
-                  읽고 있어…
+                  {typedLines.map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      {index < typedLines.length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
                 </h1>
               </motion.div>
 
@@ -653,7 +700,7 @@ export default function CompatibilityResultPage() {
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
+                transition={{ delay: 2, duration: 0.5 }}
                 onClick={goToNextSlide}
                 className="mt-10 px-10 py-3 bg-[#990dfa] rounded-full text-white hover:bg-[#8A0AE0] transition-all"
                 whileHover={{ scale: 1.05 }}
