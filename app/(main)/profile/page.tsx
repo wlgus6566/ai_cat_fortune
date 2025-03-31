@@ -382,7 +382,7 @@ export default function ProfilePage() {
               <div className="bg-white rounded-3xl shadow-md overflow-hidden">
                 <div>
                   <Link
-                    href="/chat-archive"
+                    href="/consultations"
                     className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors"
                   >
                     <div className="flex items-center">

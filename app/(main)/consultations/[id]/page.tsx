@@ -5,6 +5,7 @@ import { useUser } from "@/app/contexts/UserContext";
 import { useRouter } from "next/navigation";
 import ConsultationDetail from "@/app/components/ConsultationDetail";
 import { SelectConsultation } from "@/db/schema";
+import { use } from "react";
 
 // 상담 내역 타입 정의
 interface ConsultationWithTalisman extends SelectConsultation {
@@ -17,13 +18,13 @@ interface ConsultationWithTalisman extends SelectConsultation {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ConsultationDetailPage({ params }: PageProps) {
-  const { id } = params;
+  const { id } = use(params);
   const { isProfileComplete } = useUser();
   const router = useRouter();
   const [consultation, setConsultation] =

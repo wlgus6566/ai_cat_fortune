@@ -18,13 +18,13 @@ export default function CompatibilityPage() {
     person1: {
       name: "",
       birthdate: "",
-      gender: "남" as "남" | "여",
+      gender: "여" as "남" | "여",
       birthtime: "",
     },
     person2: {
       name: "",
       birthdate: "",
-      gender: "여" as "남" | "여",
+      gender: "남" as "남" | "여",
       birthtime: "",
     },
   });

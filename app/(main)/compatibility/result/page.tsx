@@ -187,21 +187,24 @@ function getHourGanji(time: string): string {
 // 시주 특성 가져오기
 function getHourTrait(hourZhi: string): string {
   const traits: Record<string, string> = {
-    자: "침착하고 계획적인 성향을 가졌으며, 의사소통에서 논리적인 접근을 선호합니다.",
-    축: "침착하고 관계에서 신중함을 중시하며, 배려심 깊은 대화 스타일을 가졌습니다.",
-    인: "활발하고 창의적인 성향으로, 대화에서 새로운 아이디어를 자주 제시합니다.",
-    묘: "온화하면서도 명확한 의사표현을 잘하며, 상대방의 말을 경청하는 능력이 뛰어납니다.",
-    진: "실용적이고 직설적인 대화 방식을 선호하며, 결단력 있는 의사결정을 합니다.",
-    사: "유연하고 적응력이 뛰어나며, 타협점을 찾는 대화 스타일을 가졌습니다.",
-    오: "열정적이고 활기찬 대화를 즐기며, 감정 표현에 솔직합니다.",
-    미: "세심하고 배려심 깊은 대화 방식으로, 관계에서 조화를 추구합니다.",
-    신: "분석적이고 통찰력이 있으며, 문제 해결 지향적인 대화를 선호합니다.",
-    유: "섬세하고 감성적인 소통 방식으로, 상대방의 감정에 민감하게 반응합니다.",
-    술: "안정적이고 신뢰를 중시하며, 차분한 대화를 통해 깊은 관계를 형성합니다.",
-    해: "포용력이 넓고 다양한 관점을 수용하는 열린 마음의 대화 스타일을 가졌습니다.",
+    자: "차분하고 계획적인 냥이! 말할 땐 논리정연하게 설명하는 걸 좋아한다옹~ 📘",
+    축: "말수는 적지만 신중하고 따뜻한 타입이냥. 조용히 챙겨주는 배려왕 스타일~ 😽",
+    인: "에너지 넘치는 냥이! 대화할 때 톡톡 튀는 아이디어를 마구 뿜어낸다옹! 🎨",
+    묘: "말도 예쁘게 잘하고 잘 들어주는 냥이! 말 한마디에도 부드러움이 가득해~ 🌸",
+    진: "직설적이고 현실적인 스타일! 돌직구 대화로 결단력도 있는 편이라옹~ 🛠️",
+    사: "유연하게 휙휙~ 상황에 맞춰 말도 잘하고, 합의점을 잘 찾아가는 센스냥! 🌈",
+    오: "열정냥이 등장! 감정 표현이 풍부해서 대화가 생생하고 활기 넘친다옹~ 🔥",
+    미: "섬세하고 다정한 스타일~ 조화를 중요하게 생각해서 말할 때도 톤 조절 최고냥~ 🍵",
+    신: "분석력 갑! 논리적으로 상황을 파악해서 해결책을 툭 던져주는 브레인냥이~ 🧠",
+    유: "감성충만 냥이~ 섬세한 감정 캐치력이 좋아서 눈치 100단! 🌙",
+    술: "믿음직한 냥이~ 차분하게 대화하면서 신뢰를 쌓아가는 타입이야~ 🐾",
+    해: "마음이 넓은 고양이~ 다양한 관점을 포용하면서 누구와도 잘 지낸다옹! 🌊",
   };
 
-  return traits[hourZhi] || "독특한 소통 방식을 가졌습니다.";
+  return (
+    traits[hourZhi] ||
+    "음냐… 독특하고 개성 넘치는 소통 스타일을 가진 냥이로군~! 😼"
+  );
 }
 
 // 시주간 관계 분석
@@ -228,13 +231,13 @@ function getJiJiRelationship(hourZhi1: string, hourZhi2: string): string {
   const diff = Math.abs(hourIndices[hourZhi1] - hourIndices[hourZhi2]);
 
   if (diff === 6) {
-    return "두 사람은 정반대의 시간대에 태어나 서로 보완적인 생활 리듬을 가질 수 있습니다.";
+    return "정반대 시간대에 태어난 너희! 서로 완전 다른 스타일이지만, 그래서 더 찰떡같이 보완될 수 있다옹~ 🌓✨";
   } else if (diff === 3 || diff === 9) {
-    return "두 사람은 상호 자극을 주는 관계로, 활발한 상호작용이 기대됩니다.";
+    return "서로에게 자극이 팡팡! 대화하면 아이디어도 톡톡, 감정도 두근두근~ 활발한 케미 기대된다냥! 🔥🐾";
   } else if (diff === 4 || diff === 8) {
-    return "두 사람은 서로 다른 관점을 가지고 있어, 새로운 시각을 제공해 줄 수 있습니다.";
+    return "조금 다른 시선에서 세상을 바라보는 둘! 덕분에 서로에게 새로운 시각을 열어줄 수 있다옹~ 🌈👀";
   } else {
-    return "두 사람은 조화로운 에너지를 가지고 있어, 자연스러운 소통이 가능합니다.";
+    return "비슷한 에너지의 시간대라 그런지 말도 잘 통하고, 자연스럽게 척척! 조화로운 소통이 가능한 커플이다옹~ 😽💬";
   }
 }
 
@@ -268,10 +271,10 @@ function generateCompatibilityData(person1: Person, person2: Person) {
   const catReaction = score >= 85 ? "😍" : score >= 70 ? "🤔" : "😾";
   const title =
     score >= 85
-      ? "찰떡궁합이야!! 💖"
+      ? "완전 찰떡궁합이냥! 💖"
       : score >= 70
-      ? "괜찮은 궁합이에요!"
-      : "노력형 궁합이에요~";
+      ? "꽤 잘 어울리는 편이야~ 😽"
+      : "음... 노력형 궁합일지도? 😿";
   const image =
     score >= 85
       ? "/cat_love.png"
@@ -282,23 +285,23 @@ function generateCompatibilityData(person1: Person, person2: Person) {
   // 음양 분석
   const yinYangMatch =
     g1.yinYang !== g2.yinYang
-      ? "너희 둘은 음양이 조화로운 편이야"
-      : "서로 도전적인 관계지만, <br/>노력으로 조화를 이룰 수 있어";
+      ? "너희 둘은 음양이 딱 잘 맞는 조합이야! 균형 최고다옹~ ⚖️"
+      : "같은 성향이라 더 친해질 수도 있지만, 가끔 티격태격할 수도 있어냥~ 서로 노력하면 꽁냥꽁냥 가능! 💞";
 
   // 카테고리별 분석 정리
   const loveAnalysis =
     score >= 85
-      ? "두 사람은 감정 표현에 적극적이며 서로의 마음을 잘 이해하고 배려할 수 있는 로맨틱한 궁합입니다. 함께 있을 때 안정감을 느끼며, 연애의 설렘이 오래 지속될 가능성이 높습니다."
+      ? "냥냥~ 서로 마음도 잘 통하고, 표현도 잘해서 알콩달콩 꿀 떨어지는 궁합이야! 같이 있으면 따뜻하고 포근한 느낌이 든다옹~ 😽"
       : score >= 70
-      ? "연애에 있어 큰 갈등은 없지만, 서로의 마음을 표현하는 방식에서 차이가 생길 수 있습니다. 공감 능력을 키우면 사랑이 더욱 깊어질 수 있어요."
-      : "감정 표현 방식이나 연애 가치관에서 차이가 있어 다툼이 생기기 쉽습니다. 다만 진심 어린 대화와 배려로 관계를 이어갈 수 있어요.";
+      ? "조금 다르게 표현하는 편이라 가끔은 헷갈릴 수도 있지만, 서로를 이해하려고 노력하면 더 다정한 사이가 될 수 있어냥! 💌"
+      : "헉, 감정 표현이나 연애 스타일이 좀 다를 수 있어서 오해가 생길지도 몰라냥. 하지만 진심으로 대화하면 천천히 가까워질 수 있어! 🐾";
 
   const marriageAnalysis =
     score > 80
-      ? "가정의 평화를 중시하며, 서로를 이해하고 존중하는 결혼 생활이 가능합니다. 안정적인 미래를 함께 그릴 수 있는 최고의 파트너예요."
+      ? "따뜻하고 안정적인 결혼 생활이 기대되는 궁합이야~ 서로를 존중하고 이해하면 최고의 파트너가 될 수 있다냥! 🏡"
       : score > 60
-      ? "결혼 생활에서도 서로의 성향 차이를 조율하며 살아간다면, 따뜻한 가정을 이룰 수 있습니다."
-      : "생활 방식이나 가치관 차이로 인해 다툼이 잦을 수 있으나, 충분한 대화와 노력으로 극복할 수 있습니다.";
+      ? "성격 차이는 조금 있을 수도 있지만, 서로 맞춰가면 꽤 괜찮은 커플이 될 수 있어냥~ 💍"
+      : "생활 패턴이나 생각 차이로 다툼이 생길 수도 있지만, 대화를 잘 하면 충분히 극복할 수 있어냥. 포기하지 말라옹! 🐱";
 
   const communicationStyle =
     hourTrait1 && hourTrait2
@@ -306,12 +309,12 @@ function generateCompatibilityData(person1: Person, person2: Person) {
         <li><strong>${hourZhi1}시:</strong> ${hourTrait1}</li>
         <li><strong>${hourZhi2}시:</strong> ${hourTrait2}</li>
       </ul>`
-      : "서로의 표현 방식이 다를 수 있어 조율이 필요합니다.";
+      : "서로의 표현 방식이 다를 수 있어 조율이 필요하다냥~! ";
 
   const financialCompatibility =
     g1.element === "금" || g2.element === "금"
-      ? "한 사람은 재물의 기운이 강하며, 실용적이고 현실적인 재정 스타일을 가지고 있어 경제적으로 안정적인 관계를 만들 수 있습니다."
-      : "서로 다른 재정 스타일을 가질 수 있어 재정적 조율이 필요합니다. 서로의 경제적 가치관을 이해하는 것이 중요합니다.";
+      ? "오호~ 한 명은 돈을 다루는 감이 좋은 편이야! 실속 있는 커플이라고 볼 수 있지롱! 💰"
+      : "재정 스타일이 조금 다를 수 있겠지만, 서로 맞춰보려는 마음이 있다면 잘 조율할 수 있다옹~ 💸";
 
   const detailedDescription = `
 <div class="grid gap-4">
@@ -320,18 +323,18 @@ function generateCompatibilityData(person1: Person, person2: Person) {
     <p class="text-pink-700 mt-2">${loveAnalysis}</p>
   </div>
 
-  <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-    <h3 class="font-bold text-green-600 text-lg">🌿 오행 궁합</h3>
-    <p class="text-green-700 mt-2">${g1.elementName}과 ${
+<div class="bg-green-50 border border-green-200 rounded-lg p-4">
+  <h3 class="font-bold text-green-600 text-lg">🌿 오행 궁합</h3>
+  <p class="text-green-700 mt-2">${g1.elementName}과 ${
     g2.elementName
-  }의 만남! ${
+  }의 만남이냥~! ${
     elementRelation[g1.element]?.includes(g2.element)
-      ? "서로 상생의 관계로 긍정적인 에너지를 주고받을 수 있어요."
+      ? "서로가 서로를 도와주는 상생 관계라서, 함께하면 좋은 기운이 팡팡 솟아난다옹! 🌈"
       : g1.element === g2.element
-      ? "같은 성질을 가진 오행으로 안정적인 관계를 유지할 수 있어요."
-      : "서로 다른 성질의 오행으로 도전적인 관계가 될 수 있어요."
+      ? "같은 속성이라서 안정적이고 편안한 관계가 될 수 있어냥~ 🐾"
+      : "성질이 좀 달라서 티격태격할 수 있지만, 그만큼 서로를 보완할 수도 있다옹! 💫"
   }</p>
-  </div>
+</div>
 
   <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
     <h3 class="font-bold text-yellow-700 text-lg">💍 결혼 생활</h3>
@@ -883,14 +886,15 @@ export default function CompatibilityResultPage() {
               </motion.div>
 
               <motion.div
-                className="p-10 max-w-md mt-10"
+                className="p-7 max-w-md mt-5"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
                 <p className="text-center text-lg text-gray-200">
-                  {compatibilityData.element1Name}과{" "}
+                  {compatibilityData.element1Name}과 <br />
                   {compatibilityData.element2Name}의 만남!
+                  <br /> <br />
                   {(() => {
                     const elementRelation: Record<string, string[]> = {
                       목: ["화"],
@@ -905,13 +909,13 @@ export default function CompatibilityResultPage() {
                         compatibilityData.element2
                       )
                     ) {
-                      return " 서로 상생의 관계로 긍정적인 에너지를 주고받을 수 있어요.";
+                      return " 서로가 서로를 북돋아주는 상생 관계라서, 같이 있으면 좋은 기운이 몽글몽글 피어난다옹~ 🌿";
                     } else if (
                       compatibilityData.element1 === compatibilityData.element2
                     ) {
-                      return " 같은 성질을 가진 오행으로 안정적인 관계를 유지할 수 있어요.";
+                      return " 성향이 비슷한 오행이라, 안정적이고 찰떡궁합처럼 잘 지낼 수 있다냥~ 🐾";
                     } else {
-                      return " 서로 다른 성질의 오행으로 도전적인 관계가 될 수 있어요.";
+                      return " 음… 조금 다르긴 하지만, 그만큼 서로를 보완해주는 짝꿍이 될 수도 있다옹! 💫";
                     }
                   })()}
                 </p>
@@ -947,11 +951,11 @@ export default function CompatibilityResultPage() {
                   {(() => {
                     const score = compatibilityData.score;
                     if (score >= 85) {
-                      return "두 사람은 감정 표현에 적극적이며 서로의 마음을 잘 이해하고 배려할 수 있는 로맨틱한 궁합입니다. 함께 있을 때 안정감을 느끼며, 연애의 설렘이 오래 지속될 가능성이 높습니다.";
+                      return "두 사람은 서로의 마음을 쏙쏙 잘 알아채고 표현도 찰떡이냥! 같이 있으면 포근하고 안정감 넘치는 꿀케미 커플이라구~ 💖";
                     } else if (score >= 70) {
-                      return "연애에 있어 큰 갈등은 없지만, 서로의 마음을 표현하는 방식에서 차이가 생길 수 있습니다. 공감 능력을 키우면 사랑이 더욱 깊어질 수 있어요.";
+                      return "연애 방식이 살~짝 다를 수 있지만, 공감 능력을 키우면 더욱 다정해질 수 있다냥! 서로를 향한 마음만은 진심이니까~ 🐾";
                     } else {
-                      return "감정 표현 방식이나 연애 가치관에서 차이가 있어 다툼이 생기기 쉽습니다. 다만 진심 어린 대화와 배려로 관계를 이어갈 수 있어요.";
+                      return "음냐… 감정 표현 스타일이나 연애에 대한 생각이 좀 달라서 티격태격할 수도 있지만! 진심 어린 대화와 배려가 있다면 분명 가까워질 수 있다옹~ 🐱💬";
                     }
                   })()}
                 </p>
@@ -1021,7 +1025,7 @@ export default function CompatibilityResultPage() {
                             <li><strong>${hourZhi2}시 (${state.person2.name}):</strong> ${hourTrait2}</li>
                           </ul>`;
                       } else {
-                        return "서로의 표현 방식이 다를 수 있어 조율이 필요합니다.";
+                        return "서로의 표현 방식이 다를 수 있어 조율이 필요.";
                       }
                     })(),
                   }}
@@ -1029,7 +1033,7 @@ export default function CompatibilityResultPage() {
               </motion.div>
 
               <motion.p
-                className="text-center text-lg p-12 max-w-md"
+                className="text-center text-lg p-10 pt-0 max-w-md"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -1075,11 +1079,11 @@ export default function CompatibilityResultPage() {
                     {(() => {
                       const score = compatibilityData.score;
                       if (score > 80) {
-                        return "가정의 평화를 중시하며, 서로를 이해하고 존중하는 결혼 생활이 가능합니다. 안정적인 미래를 함께 그릴 수 있는 최고의 파트너예요.";
+                        return "서로를 보듬어주는 따뜻한 관계라서, 알콩달콩 평화로운 결혼 생활이 가능하다냥~ 함께 미래를 그리기에 찐으로 잘 어울리는 냥꾼 커플이야! 💖🏡";
                       } else if (score > 60) {
-                        return "결혼 생활에서도 서로의 성향 차이를 조율하며 살아간다면, 따뜻한 가정을 이룰 수 있습니다.";
+                        return "성향이 조금 다를 수 있지만, 서로 맞춰가면 따뜻한 집냥이 커플처럼 조화롭게 살아갈 수 있다옹~ ✨";
                       } else {
-                        return "생활 방식이나 가치관 차이로 인해 다툼이 잦을 수 있으나, 충분한 대화와 노력으로 극복할 수 있습니다.";
+                        return "음냐… 생활 스타일이나 생각 차이로 싸울 수도 있지만, 진심 어린 대화와 배려가 있다면 충분히 극복 가능하다냥! 믿어봐~ 😿💬";
                       }
                     })()}
                   </p>
@@ -1138,8 +1142,8 @@ export default function CompatibilityResultPage() {
                 <p className="text-lg ">
                   {compatibilityData.element1 === "금" ||
                   compatibilityData.element2 === "금"
-                    ? "한 사람은 재물의 기운이 강하며, 실용적이고 현실적인 재정 스타일을 가지고 있어 경제적으로 안정적인 관계를 만들 수 있습니다."
-                    : "서로 다른 재정 스타일을 가질 수 있어 재정적 조율이 필요합니다. 서로의 경제적 가치관을 이해하는 것이 중요합니다."}
+                    ? "오오~ 한 사람은 재물 냄새를 귀신같이 잘 맡는 냥이야! 실속 있고 똑부러진 스타일이라 둘이 함께라면 든든한 재정 궁합이랄까? 💰🐱"
+                    : "서로 돈 쓰는 스타일이 다를 수 있어서, 가끔은 티격태격할지도 몰라냥. 하지만 서로의 생각을 잘 이해하려고 하면 충분히 조율할 수 있다옹~ 💸💬"}
                 </p>
               </motion.div>
 
