@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import { useRouter } from "next/navigation";
 import ConsultationDetail from "@/app/components/ConsultationDetail";
@@ -32,14 +32,8 @@ export default function ConsultationDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // 프로필이 완성된 상태에서만 상담 내역 불러오기
-    if (isProfileComplete) {
-      fetchConsultation();
-    }
-  }, [id, isProfileComplete]);
-
-  const fetchConsultation = async () => {
+  // useCallback을 사용하여 함수 메모이제이션
+  const fetchConsultation = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -60,7 +54,14 @@ export default function ConsultationDetailPage({ params }: PageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    // 프로필이 완성된 상태에서만 상담 내역 불러오기
+    if (isProfileComplete) {
+      fetchConsultation();
+    }
+  }, [id, isProfileComplete, fetchConsultation]);
 
   if (!isProfileComplete) {
     return null; // 프로필이 완성되지 않은 경우 렌더링하지 않음 (MainLayout에서 처리)

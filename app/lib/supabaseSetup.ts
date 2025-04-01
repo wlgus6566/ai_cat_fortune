@@ -1,4 +1,6 @@
 import { createSupabaseClient } from "./supabase";
+// 서버에서만 실행되는 코드에서만 db를 import합니다.
+// db의 import는 여기에서만 사용하고, 외부에서 직접 사용하지 않도록 합니다.
 import { db } from "@/db";
 import { userProfilesTable, talismansTable } from "@/db/schema";
 import { sql } from "drizzle-orm";
@@ -6,8 +8,18 @@ import { sql } from "drizzle-orm";
 /**
  * Supabase 초기 설정을 수행합니다.
  * - talismans 스토리지 버킷 생성 및 설정
+ *
+ * 이 함수는 서버에서만 실행되어야 합니다.
  */
 export const setupSupabase = async () => {
+  // typeof window를 체크하여 브라우저에서 실행되고 있는지 확인
+  if (typeof window !== "undefined") {
+    return {
+      success: false,
+      message: "이 함수는 서버에서만 실행할 수 있습니다.",
+    };
+  }
+
   try {
     const supabase = createSupabaseClient();
 
@@ -51,8 +63,20 @@ export const setupSupabase = async () => {
 
 /**
  * 현재 설정된 Supabase 리소스 상태를 확인합니다.
+ *
+ * 이 함수는 서버에서만 실행되어야 합니다.
  */
 export const checkSupabaseResources = async () => {
+  // typeof window를 체크하여 브라우저에서 실행되고 있는지 확인
+  if (typeof window !== "undefined") {
+    return {
+      userProfilesTable: false,
+      talismansTable: false,
+      talismansBucket: false,
+      details: "이 함수는 서버에서만 실행할 수 있습니다.",
+    };
+  }
+
   try {
     const supabase = createSupabaseClient();
     const result = {

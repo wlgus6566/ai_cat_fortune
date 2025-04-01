@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { createSupabaseClient } from "@/app/lib/supabase";
-import { setupSupabase, checkSupabaseResources } from "@/app/lib/supabaseSetup";
 
 // SQL 쿼리 문자열
 const CREATE_USER_PROFILES_SQL = `
@@ -56,7 +55,16 @@ export default function DatabaseSetupPage() {
     setResult(null);
 
     try {
-      const resourcesStatus = await checkSupabaseResources();
+      // API 라우트로 요청
+      const response = await fetch("/api/admin/check-resources");
+      const resourcesStatus = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          resourcesStatus.error || "자원 상태 확인 중 오류가 발생했습니다."
+        );
+      }
+
       setResources(resourcesStatus);
 
       setResult({
@@ -81,7 +89,17 @@ export default function DatabaseSetupPage() {
     setResult(null);
 
     try {
-      const setupResult = await setupSupabase();
+      // API 라우트로 요청
+      const response = await fetch("/api/admin/setup-supabase", {
+        method: "POST",
+      });
+      const setupResult = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          setupResult.error || "초기 설정 중 오류가 발생했습니다."
+        );
+      }
 
       setResult({
         success: setupResult.success,

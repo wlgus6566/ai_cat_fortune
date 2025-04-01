@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ChatMessage from "./ChatMessage";
 import {
@@ -85,12 +85,12 @@ export default function FortuneChat({
   const { openTalisman } = useTalisman();
 
   // 4단계 세부 고민 선택을 위한 상태
-  // inputMode는 JSX 조건부 렌더링에 사용 (linter 경고 수정)
+  // 선택 모드 또는 직접 입력 모드를 저장하는 상태
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [inputMode, setInputMode] = useState<InputMode>("SELECTION");
   const [detailLevel1, setDetailLevel1] = useState<string | null>(null);
   const [detailLevel2, setDetailLevel2] = useState<string | null>(null);
-  // detailLevel3는 API 호출에 사용되므로 유지 (linter 경고 억제)
-  // eslint-disable-next-line react-hooks/exhaustive-deps, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [detailLevel3, setDetailLevel3] = useState<string | null>(null);
 
   // 부적 생성 관련 상태
@@ -104,6 +104,8 @@ export default function FortuneChat({
   const [showTalismanPopup, setShowTalismanPopup] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [talismanImageUrl, setTalismanImageUrl] = useState<string | null>(null);
+  // 번역된 문구를 저장하는 상태 (부적 생성 후 Context API에 전달)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [translatedPhrase, setTranslatedPhrase] = useState<string | null>(null);
   // 부적 ID를 저장하는 상태 추가
   const [talismanId, setTalismanId] = useState<string | null>(null);
@@ -115,13 +117,16 @@ export default function FortuneChat({
     scrollToBottom();
   }, [messages]);
 
-  // 환영 메시지 배열
-  const welcomeMessages = [
-    `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
-    "너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!",
-    "내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖",
-    "어떤 고민이 있나냥! 말해봐라냥! 😽",
-  ];
+  // 환영 메시지 배열 - useMemo로 감싸서 의존성 배열 경고 해결
+  const welcomeMessages = useMemo(
+    () => [
+      `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
+      "너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!",
+      "내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖",
+      "어떤 고민이 있나냥! 말해봐라냥! 😽",
+    ],
+    [userName]
+  );
 
   // 타이핑 효과를 위한 함수
   const addMessageWithTypingEffect = useCallback(

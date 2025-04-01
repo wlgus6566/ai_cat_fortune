@@ -166,9 +166,6 @@ export default function CompatibilityResultPage() {
   const [error, setError] = useState("");
   const [loadingStage, setLoadingStage] = useState(1); // 3단계 로딩 (1: 초기, 2: 분석중, 3: 완료)
 
-  // 타이핑 애니메이션 텍스트
-  const typingText = "고양이 점술사가 사랑의 궁합을 봐줄게냥~ 😺💫";
-
   // 로딩 애니메이션 내 텍스트
   const [loadingText, setLoadingText] = useState("");
   const [showResultButton, setShowResultButton] = useState(false);
