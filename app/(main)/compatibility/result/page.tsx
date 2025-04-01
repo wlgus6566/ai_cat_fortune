@@ -147,7 +147,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             transition={{ duration: 0.3 }}
             className="px-4 pb-4"
           >
-            <div className="bg-white/20 p-4 rounded-xl text-white backdrop-blur-sm border border-white/20">
+            <div className="bg-white/10 p-4 rounded-xl text-white border border-white/20">
               {children}
             </div>
           </motion.div>
@@ -410,17 +410,8 @@ export default function CompatibilityResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* 배경 이미지 */}
-      <div className="absolute inset-0 w-full h-full">
-        <Image
-          src="/bg_only_sky.png"
-          alt="배경이미지"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
       {/* 배경 장식 요소 */}
       {/* {[...Array(15)].map((_, i) => (
         <motion.div
@@ -438,7 +429,6 @@ export default function CompatibilityResultPage() {
           {Math.random() > 0.7 ? "✨" : Math.random() > 0.5 ? "⭐" : "🌟"}
         </motion.div>
       ))} */}
-
       {/* 커스텀 헤더 */}
       <div className="sticky top-0 z-10 backdrop-blur-md bg-[#3B2E7E]/50 border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center">
@@ -451,7 +441,6 @@ export default function CompatibilityResultPage() {
           <h1 className="text-xl font-semibold text-white ml-2">궁합 결과</h1>
         </div>
       </div>
-
       <div className="container max-w-md mx-auto px-4 py-6 relative z-10">
         {/* 결과 컨테이너 */}
         <motion.div
@@ -462,21 +451,7 @@ export default function CompatibilityResultPage() {
         >
           {/* 상단 요소: 제목 및 테마 */}
           <motion.div variants={slideInUp} className="text-center mb-8">
-            <motion.div
-              className="inline-block mb-4"
-              animate={{
-                y: [0, -10, 0],
-                rotate: [0, 5, 0, -5, 0],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-            >
-              <Sparkles className="h-12 w-12 text-yellow-300" />
-            </motion.div>
-            <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-yellow-200">
+            <h1 className="text-3xl font-bold mb-2">
               {compatibilityData?.magicTitle || "별빛 아래 운명의 실타래"}
             </h1>
             <p className="text-lg opacity-90 bg-white/10 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
@@ -579,7 +554,7 @@ export default function CompatibilityResultPage() {
               <p className="mb-3">
                 {compatibilityData?.details?.성격궁합?.analysis}
               </p>
-              <div className="bg-white/30 p-3 rounded-lg">
+              <div className="bg-white/20 p-3 rounded-lg">
                 <p className="text-sm font-medium">
                   🐾 {compatibilityData?.details?.성격궁합?.tip}
                 </p>
@@ -772,19 +747,17 @@ export default function CompatibilityResultPage() {
               {compatibilityData?.catComment}
             </p>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/20 p-4 rounded-lg border border-white/10">
-                <h3 className="text-md font-bold mb-2 flex items-center">
-                  <span className="mr-2">🎁</span> 행운 아이템
-                </h3>
-                <p className="text-sm">{compatibilityData?.luckyItem}</p>
-              </div>
-              <div className="bg-white/20 p-4 rounded-lg border border-white/10">
-                <h3 className="text-md font-bold mb-2 flex items-center">
-                  <span className="mr-2">💑</span> 추천 데이트
-                </h3>
-                <p className="text-sm">{compatibilityData?.recommendedDate}</p>
-              </div>
+            <div className="bg-white/20 p-4 rounded-lg border border-white/10">
+              <h3 className="text-md font-bold mb-2 flex items-center">
+                <span className="mr-2">🎁</span> 행운 아이템
+              </h3>
+              <p className="text-sm">{compatibilityData?.luckyItem}</p>
+            </div>
+            <div className="mt-2 bg-white/20 p-4 rounded-lg border border-white/10">
+              <h3 className="text-md font-bold mb-2 flex items-center">
+                <span className="mr-2">💑</span> 추천 데이트
+              </h3>
+              <p className="text-sm">{compatibilityData?.recommendedDate}</p>
             </div>
           </motion.div>
 
