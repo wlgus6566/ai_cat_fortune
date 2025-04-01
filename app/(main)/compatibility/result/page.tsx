@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
-import { CompatibilityResult } from "@/app/lib/openai";
-import PageHeader from "@/app/components/PageHeader";
+import type { CompatibilityResult } from "@/app/lib/openai";
 import CircularProgress from "@/app/components/CircularProgress";
+import { Heart, Star, Sparkles, ArrowLeft } from "lucide-react";
 
 // 애니메이션 변수
 const containerVariants = {
@@ -31,11 +32,27 @@ const slideInUp = {
   },
 };
 
+// 별 애니메이션
+const starVariants = {
+  animate: (i: number) => ({
+    scale: [1, 1.2, 1],
+    rotate: [0, 5, -5, 0],
+    opacity: [0.7, 1, 0.7],
+    transition: {
+      duration: 3,
+      repeat: Number.POSITIVE_INFINITY,
+      delay: i * 0.3,
+    },
+  }),
+};
+
 interface CategoryCardProps {
   title: string;
   score: number;
   children: React.ReactNode;
   delay?: number;
+  icon?: React.ReactNode;
+  color?: string;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -43,12 +60,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   score,
   children,
   delay = 0,
+  icon,
+  color = "rgba(255, 107, 158, 0.8)",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <motion.div
-      className="mb-4 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-md shadow-lg"
+      className="mb-4 rounded-2xl overflow-hidden backdrop-blur-md shadow-lg border border-white/20"
+      style={{
+        background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
+      }}
       initial="hidden"
       animate="visible"
       variants={{
@@ -70,27 +92,51 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-[#EBDFFF] flex items-center justify-center mr-3">
-            <span className="text-[#990dfa] font-bold">{score}</span>
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center mr-3"
+            style={{
+              background: `linear-gradient(135deg, ${color}, rgba(255, 255, 255, 0.3))`,
+            }}
+          >
+            {icon || <span className="text-white font-bold">{score}</span>}
           </div>
-          <h3 className="text-lg font-medium text-white">{title}</h3>
+          <div>
+            <h3 className="text-lg font-medium text-white">{title}</h3>
+            <div className="flex items-center mt-1">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="relative w-4 h-4 mr-1">
+                  <Star
+                    className={`w-4 h-4 ${
+                      i < Math.round(score / 20)
+                        ? "text-yellow-300 fill-yellow-300"
+                        : "text-gray-400"
+                    }`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <svg
-          className={`w-5 h-5 text-white transform transition-transform ${
-            isOpen ? "rotate-180" : ""
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+            isOpen ? "bg-white/30 rotate-180" : "bg-white/10"
           }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          ></path>
-        </svg>
+          <svg
+            className="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M19 9l-7 7-7-7"
+            ></path>
+          </svg>
+        </div>
       </div>
       <AnimatePresence>
         {isOpen && (
@@ -101,7 +147,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             transition={{ duration: 0.3 }}
             className="px-4 pb-4"
           >
-            <div className="bg-white/20 p-4 rounded-xl text-white">
+            <div className="bg-white/20 p-4 rounded-xl text-white backdrop-blur-sm border border-white/20">
               {children}
             </div>
           </motion.div>
@@ -211,32 +257,88 @@ export default function CompatibilityResultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#3B2E7E] to-[#7057C9] flex flex-col items-center justify-center text-white p-6">
+      <div className="min-h-screen font-gothic flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+        {/* 배경 장식 요소 */}
+        {/* {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-white opacity-30"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              fontSize: `${Math.random() * 20 + 10}px`,
+            }}
+            custom={i}
+            variants={starVariants}
+            animate="animate"
+          >
+            {Math.random() > 0.7 ? "✨" : Math.random() > 0.5 ? "⭐" : "🌟"}
+          </motion.div>
+        ))} */}
+
         <motion.div
-          className="w-20 h-20 mb-8"
-          animate={{ rotate: 360 }}
+          className="w-24 h-24 mb-8 relative"
+          animate={{
+            rotate: 360,
+            y: [0, -10, 0],
+          }}
           transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "linear",
+            rotate: {
+              duration: 20,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "linear",
+            },
+            y: {
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            },
           }}
         >
+          <div className="absolute inset-0 bg-purple-500 rounded-full opacity-20 blur-xl"></div>
           <Image
             src="/assets/images/star.png"
             alt="로딩중"
-            width={80}
-            height={80}
-            className="w-full h-full"
+            width={96}
+            height={96}
+            className="w-full h-full relative z-10"
           />
         </motion.div>
 
-        <h2 className="text-xl font-bold mb-4 text-center">
+        <motion.h2
+          className="text-2xl font-bold mb-6 text-center"
+          animate={{
+            scale: [1, 1.05, 1],
+            textShadow: [
+              "0 0 8px rgba(255,255,255,0.5)",
+              "0 0 16px rgba(255,255,255,0.8)",
+              "0 0 8px rgba(255,255,255,0.5)",
+            ],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
+        >
           {loadingStage === 1
             ? "사주 정보를 확인하고 있어요..."
             : "두 사람의 인연을 분석중입니다..."}
-        </h2>
+        </motion.h2>
 
-        <p className="text-lg text-center mb-8">{loadingText}</p>
+        <motion.div
+          className="text-lg text-center mb-8 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full"
+          animate={{
+            opacity: [0.7, 1, 0.7],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
+        >
+          {loadingText}
+        </motion.div>
 
         {showResultButton && (
           <motion.button
@@ -254,31 +356,51 @@ export default function CompatibilityResultPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#EAE1F4] to-[#F9F9F9] flex flex-col items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        {/* 배경 장식 요소 */}
+        {[...Array(10)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-white opacity-20"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              fontSize: `${Math.random() * 20 + 10}px`,
+            }}
+            custom={i}
+            variants={starVariants}
+            animate="animate"
+          >
+            {Math.random() > 0.7 ? "✨" : Math.random() > 0.5 ? "⭐" : "🌟"}
+          </motion.div>
+        ))}
+
+        <div className="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 mb-8 max-w-md w-full border border-white/30">
           <div className="text-center mb-6">
-            <svg
-              className="w-16 h-16 text-red-500 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            <h2 className="text-xl font-bold text-[#3B2E7E]">
+            <div className="w-16 h-16 mx-auto mb-4 text-red-500 flex items-center justify-center">
+              <svg
+                className="w-full h-full"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white">
               오류가 발생했습니다
             </h2>
           </div>
-          <p className="text-center text-[#3B2E7E]/70 mb-6">{error}</p>
+          <p className="text-center text-white/80 mb-6">{error}</p>
           <button
             onClick={() => router.push("/compatibility")}
-            className="w-full px-6 py-3 rounded-xl bg-[#990dfa] text-white font-medium hover:bg-[#8A0AE0] transition-colors"
+            className="w-full px-6 py-3 rounded-xl bg-white text-[#3B2E7E] font-medium hover:bg-white/90 transition-colors"
           >
             다시 시도하기
           </button>
@@ -288,13 +410,49 @@ export default function CompatibilityResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#3B2E7E] to-[#7057C9] text-white">
-      <PageHeader
-        title="궁합 결과"
-        className="bg-transparent shadow-none text-white"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] text-white relative overflow-hidden">
+      {/* 배경 이미지 */}
+      <div className="absolute inset-0 w-full h-full">
+        <Image
+          src="/bg_only_sky.png"
+          alt="배경이미지"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
+      {/* 배경 장식 요소 */}
+      {/* {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-white opacity-20"
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            fontSize: `${Math.random() * 20 + 10}px`,
+          }}
+          custom={i}
+          variants={starVariants}
+          animate="animate"
+        >
+          {Math.random() > 0.7 ? "✨" : Math.random() > 0.5 ? "⭐" : "🌟"}
+        </motion.div>
+      ))} */}
 
-      <div className="container max-w-md mx-auto px-4 py-6">
+      {/* 커스텀 헤더 */}
+      <div className="sticky top-0 z-10 backdrop-blur-md bg-[#3B2E7E]/50 border-b border-white/10">
+        <div className="container mx-auto px-4 py-4 flex items-center">
+          <button
+            onClick={() => router.push("/compatibility")}
+            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+          >
+            <ArrowLeft className="h-6 w-6 text-white" />
+          </button>
+          <h1 className="text-xl font-semibold text-white ml-2">궁합 결과</h1>
+        </div>
+      </div>
+
+      <div className="container max-w-md mx-auto px-4 py-6 relative z-10">
         {/* 결과 컨테이너 */}
         <motion.div
           variants={containerVariants}
@@ -304,10 +462,24 @@ export default function CompatibilityResultPage() {
         >
           {/* 상단 요소: 제목 및 테마 */}
           <motion.div variants={slideInUp} className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">
+            <motion.div
+              className="inline-block mb-4"
+              animate={{
+                y: [0, -10, 0],
+                rotate: [0, 5, 0, -5, 0],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            >
+              <Sparkles className="h-12 w-12 text-yellow-300" />
+            </motion.div>
+            <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-yellow-200">
               {compatibilityData?.magicTitle || "별빛 아래 운명의 실타래"}
             </h1>
-            <p className="text-lg opacity-90">
+            <p className="text-lg opacity-90 bg-white/10 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
               <span className="font-semibold">
                 {compatibilityData?.compatibilityTheme || "상생의 기운"}
               </span>
@@ -317,49 +489,73 @@ export default function CompatibilityResultPage() {
           {/* 점수 요약 카드 */}
           <motion.div
             variants={slideInUp}
-            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8"
+            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20"
+            style={{
+              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+            }}
           >
-            <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-6">
               <div className="mr-4 text-lg">
-                <span className="font-medium">{state.person1.name}</span>
+                <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-pink-200 to-pink-100">
+                  {state.person1.name}
+                </span>
               </div>
-              <div className="bg-pink-500 rounded-full p-1">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </div>
+              <motion.div
+                className="bg-gradient-to-br from-pink-500 to-red-500 rounded-full p-2"
+                animate={{
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              >
+                <Heart className="w-8 h-8 text-white fill-white" />
+              </motion.div>
               <div className="ml-4 text-lg">
-                <span className="font-medium">{state.person2.name}</span>
+                <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-pink-100 to-pink-200">
+                  {state.person2.name}
+                </span>
               </div>
             </div>
 
             {/* 원형 차트 */}
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-6">
               <div className="relative">
+                <motion.div
+                  className="absolute -inset-4 rounded-full opacity-20 blur-xl"
+                  style={{
+                    background: "linear-gradient(135deg, #FF6B9E, #FFDD94)",
+                  }}
+                  animate={{
+                    opacity: [0.2, 0.4, 0.2],
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  }}
+                />
                 <CircularProgress
                   percentage={compatibilityData?.score || 83}
-                  size={120}
+                  size={140}
                   strokeWidth={12}
                   color="#FF6B9E"
+                  backgroundColor="rgba(255, 255, 255, 0.2)"
                 />
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                  <span className="text-2xl font-bold">
+                  <span className="text-3xl font-bold text-white">
                     {compatibilityData?.score || 83}
                   </span>
-                  <span className="block text-sm">점</span>
+                  <span className="block text-sm text-pink-200">점</span>
                 </div>
               </div>
             </div>
 
-            <p className="text-center font-medium text-lg">
+            <p className="text-center font-medium text-xl text-white">
               {compatibilityData?.summary ||
                 "함께 있을수록 더 빛나는 인연이야, 냥~"}
             </p>
@@ -367,13 +563,18 @@ export default function CompatibilityResultPage() {
 
           {/* 궁합 세부 카드 */}
           <motion.div variants={slideInUp} className="space-y-4">
-            <h2 className="text-xl font-bold mb-4">세부 분석</h2>
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <Star className="h-5 w-5 text-yellow-300 mr-2 fill-yellow-300" />
+              세부 분석
+            </h2>
 
             {/* 성격 궁합 */}
             <CategoryCard
               title="성격 궁합"
               score={compatibilityData?.details?.성격궁합?.score || 85}
               delay={0.1}
+              icon={<Sparkles className="h-6 w-6 text-white" />}
+              color="rgba(255, 107, 158, 0.8)"
             >
               <p className="mb-3">
                 {compatibilityData?.details?.성격궁합?.analysis}
@@ -390,6 +591,8 @@ export default function CompatibilityResultPage() {
               title="연애 스타일"
               score={compatibilityData?.details?.연애스타일?.score || 78}
               delay={0.2}
+              icon={<Heart className="h-6 w-6 text-white" />}
+              color="rgba(255, 77, 128, 0.8)"
             >
               <p className="mb-3">
                 {compatibilityData?.details?.연애스타일?.analysis}
@@ -406,6 +609,22 @@ export default function CompatibilityResultPage() {
               title="갈등 요소"
               score={compatibilityData?.details?.갈등요소?.score || 67}
               delay={0.3}
+              icon={
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              }
+              color="rgba(255, 159, 64, 0.8)"
             >
               <p className="mb-3">
                 {compatibilityData?.details?.갈등요소?.analysis}
@@ -422,6 +641,22 @@ export default function CompatibilityResultPage() {
               title="미래 전망"
               score={compatibilityData?.details?.미래전망?.score || 88}
               delay={0.4}
+              icon={
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              }
+              color="rgba(72, 187, 120, 0.8)"
             >
               <p className="mb-3">
                 {compatibilityData?.details?.미래전망?.analysis}
@@ -440,42 +675,64 @@ export default function CompatibilityResultPage() {
                 compatibilityData?.details?.음양오행분석?.상성?.궁합지수 || 91
               }
               delay={0.5}
+              icon={
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                  />
+                </svg>
+              }
+              color="rgba(129, 140, 248, 0.8)"
             >
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/20 p-3 rounded-lg">
-                    <h4 className="font-medium mb-2">{state.person1.name}</h4>
-                    <p className="text-sm">
-                      오행:{" "}
+                <div className="bg-white/20 p-3 rounded-lg border border-white/10">
+                  <h4 className="font-medium mb-2">{state.person1.name}</h4>
+                  <p className="text-sm">
+                    오행:{" "}
+                    <span className="font-medium">
                       {compatibilityData?.details?.음양오행분석?.user?.오행 ||
                         "목"}
-                    </p>
-                    <p className="text-sm">
-                      음양:{" "}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    음양:{" "}
+                    <span className="font-medium">
                       {compatibilityData?.details?.음양오행분석?.user?.음양 ||
                         "양"}
-                    </p>
-                    <p className="text-sm mt-2">
-                      {compatibilityData?.details?.음양오행분석?.user?.설명}
-                    </p>
-                  </div>
+                    </span>
+                  </p>
+                  <p className="text-sm mt-2">
+                    {compatibilityData?.details?.음양오행분석?.user?.설명}
+                  </p>
+                </div>
 
-                  <div className="bg-white/20 p-3 rounded-lg">
-                    <h4 className="font-medium mb-2">{state.person2.name}</h4>
-                    <p className="text-sm">
-                      오행:{" "}
+                <div className="mt-2 bg-white/20 p-3 rounded-lg border border-white/10">
+                  <h4 className="font-medium mb-2">{state.person2.name}</h4>
+                  <p className="text-sm">
+                    오행:{" "}
+                    <span className="font-medium">
                       {compatibilityData?.details?.음양오행분석?.partner
                         ?.오행 || "화"}
-                    </p>
-                    <p className="text-sm">
-                      음양:{" "}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    음양:{" "}
+                    <span className="font-medium">
                       {compatibilityData?.details?.음양오행분석?.partner
                         ?.음양 || "양"}
-                    </p>
-                    <p className="text-sm mt-2">
-                      {compatibilityData?.details?.음양오행분석?.partner?.설명}
-                    </p>
-                  </div>
+                    </span>
+                  </p>
+                  <p className="text-sm mt-2">
+                    {compatibilityData?.details?.음양오행분석?.partner?.설명}
+                  </p>
                 </div>
 
                 <div className="bg-white/30 p-3 rounded-lg">
@@ -495,26 +752,34 @@ export default function CompatibilityResultPage() {
           {/* 하단 콘텐츠 */}
           <motion.div
             variants={slideInUp}
-            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mt-8"
+            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mt-8 border border-white/20"
+            style={{
+              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+            }}
           >
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="mr-2">🧙‍♂️</span> 전체 조언
             </h3>
-            <p className="mb-6">{compatibilityData?.totalAdvice}</p>
+            <p className="mb-6 leading-relaxed">
+              {compatibilityData?.totalAdvice}
+            </p>
 
             <h3 className="text-lg font-bold mb-4 flex items-center">
               <span className="mr-2">🐾</span> 고양이의 한마디
             </h3>
-            <p className="mb-6">{compatibilityData?.catComment}</p>
+            <p className="mb-6 leading-relaxed">
+              {compatibilityData?.catComment}
+            </p>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="bg-white/20 p-4 rounded-lg border border-white/10">
                 <h3 className="text-md font-bold mb-2 flex items-center">
                   <span className="mr-2">🎁</span> 행운 아이템
                 </h3>
                 <p className="text-sm">{compatibilityData?.luckyItem}</p>
               </div>
-              <div>
+              <div className="bg-white/20 p-4 rounded-lg border border-white/10">
                 <h3 className="text-md font-bold mb-2 flex items-center">
                   <span className="mr-2">💑</span> 추천 데이트
                 </h3>
@@ -524,7 +789,7 @@ export default function CompatibilityResultPage() {
           </motion.div>
 
           {/* 하단 버튼 */}
-          <motion.div variants={slideInUp} className="text-center mt-8">
+          <motion.div variants={slideInUp} className="text-center mt-8 mb-12">
             <button
               onClick={() => router.push("/compatibility")}
               className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
