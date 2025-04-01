@@ -562,7 +562,7 @@ export default function CompatibilityResultPage() {
 
   return (
     <div className="min-h-screen text-white">
-      {currentStep !== 1 ? (
+      {currentStep !== 1 && currentStep !== 8 ? (
         <>
           <div className="absolute inset-0 w-full h-full">
             <Image
@@ -639,98 +639,80 @@ export default function CompatibilityResultPage() {
             />
           </motion.div>
         </div>
-
-        {/* <div className="absolute bottom-40 left-5 w-12 h-12 opacity-20">
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{
-              duration: 3,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-            }}
-          >
-            <Image
-              src="/assets/images/moon.png"
-              alt="달"
-              width={40}
-              height={40}
-              className="w-full h-full"
-            />
-          </motion.div>
-        </div> */}
       </div>
 
       {/* 슬라이드 컨테이너 */}
       <div className="relative font-gothic w-full h-[calc(100vh-120px)] overflow-hidden flex justify-center items-center">
         {/* 각 슬라이드 */}
         <AnimatePresence initial={false} custom={currentStep}>
-          {currentStep === 1 && (
-            <motion.div
-              key="slide1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0 flex flex-col items-center justify-center px-4"
-            >
+          {currentStep === 1 ||
+            (currentStep === 2 && (
               <motion.div
-                className="flex flex-col items-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                key="slide1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 flex flex-col items-center justify-center px-4"
               >
-                <h1 className="text-2xl text-center font-bold mb-6 text-white">
-                  {typedLines.map((line, index) => (
-                    <React.Fragment key={index}>
-                      {line}
-                      {index < typedLines.length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
-                </h1>
-              </motion.div>
-              <motion.div
-                animate={{
-                  rotate: [-2, 2, -2], // 기본 흔들림
-                }}
-                transition={{
-                  delay: 0.4,
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  type: "tween",
-                }}
-                className="relative w-40 h-40"
-              >
-                <Image
-                  src="/cat_book.png"
-                  alt="고양이 캐릭터"
-                  width={120}
-                  height={120}
-                  className="object-contain"
-                />
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.7, type: "spring", stiffness: 300 }}
-                  className="absolute top-0 right-0"
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
                 >
-                  <span className="text-4xl">❤️</span>
+                  <h1 className="text-2xl text-center font-bold mb-6 text-white">
+                    {typedLines.map((line, index) => (
+                      <React.Fragment key={index}>
+                        {line}
+                        {index < typedLines.length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
+                  </h1>
                 </motion.div>
-              </motion.div>
+                <motion.div
+                  animate={{
+                    rotate: [-2, 2, -2], // 기본 흔들림
+                  }}
+                  transition={{
+                    delay: 0.4,
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    type: "tween",
+                  }}
+                  className="relative w-40 h-40"
+                >
+                  <Image
+                    src="/cat_book.png"
+                    alt="고양이 캐릭터"
+                    width={120}
+                    height={120}
+                    className="object-contain"
+                  />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.7, type: "spring", stiffness: 300 }}
+                    className="absolute top-0 right-0"
+                  >
+                    <span className="text-4xl">❤️</span>
+                  </motion.div>
+                </motion.div>
 
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2, duration: 0.5 }}
-                onClick={goToNextSlide}
-                className="mt-10 px-10 py-3 bg-[#990dfa] rounded-full text-white hover:bg-[#8A0AE0] transition-all"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                결과보기
-              </motion.button>
-            </motion.div>
-          )}
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2, duration: 0.5 }}
+                  onClick={goToNextSlide}
+                  className="mt-10 px-10 py-3 bg-[#990dfa] rounded-full text-white hover:bg-[#8A0AE0] transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  결과보기
+                </motion.button>
+              </motion.div>
+            ))}
 
           {currentStep === 2 && (
             <motion.div
@@ -1199,15 +1181,12 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold text-white"
+                className="absolute top-0 text-2xl text-center font-bold text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
                 궁합 결과
-                <p className="text-gray-300 text-xl ">
-                  {compatibilityData.title}
-                </p>
               </motion.h2>
 
               <motion.div
@@ -1216,23 +1195,12 @@ export default function CompatibilityResultPage() {
                 transition={{ delay: 0.3, type: "spring" }}
                 className="relative mb-6"
               >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#990dfa] to-[#FF6B6B] flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[#30154E] flex items-center justify-center text-4xl font-bold">
-                    {compatibilityData.score}
-                  </div>
+                <div className=" text-5xl text-white text-center font-bold font-handwriting">
+                  {compatibilityData.score}점
                 </div>
-                <motion.div
-                  className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold rounded-full w-12 h-12 flex items-center justify-center text-sm"
-                  initial={{ rotate: -15 }}
-                  animate={{ rotate: 15 }}
-                  transition={{
-                    repeat: Number.POSITIVE_INFINITY,
-                    repeatType: "reverse",
-                    duration: 1.5,
-                  }}
-                >
-                  {rankingPercent}%
-                </motion.div>
+                <p className="mt-10 text-gray-300 text-xl ">
+                  {compatibilityData.title}
+                </p>
               </motion.div>
 
               <motion.div
