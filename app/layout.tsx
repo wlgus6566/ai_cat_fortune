@@ -1,4 +1,4 @@
-import { Noto_Sans_KR } from "next/font/google";
+import { Nanum_Gothic, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "./contexts/UserContext";
 import { NextIntlClientProvider } from "next-intl";
@@ -26,6 +26,12 @@ const notoSansKr = Noto_Sans_KR({
   variable: "--font-noto-sans",
 });
 
+const nanumGothic = Nanum_Gothic({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-nanum-gothic",
+});
+
 export default function RootLayout({
   children,
 }: {
@@ -34,7 +40,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head />
-      <body className={`${notoSansKr.variable} antialiased ${inter.className}`}>
+      <body
+        className={`${notoSansKr.variable} ${nanumGothic.variable} antialiased ${inter.className}`}
+      >
         <Providers>
           <NextIntlClientProvider locale="ko" messages={messages["ko"]}>
             <UserProvider>

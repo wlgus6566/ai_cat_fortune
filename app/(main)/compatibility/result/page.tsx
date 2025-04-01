@@ -285,7 +285,7 @@ function generateCompatibilityData(person1: Person, person2: Person) {
   // 음양 분석
   const yinYangMatch =
     g1.yinYang !== g2.yinYang
-      ? "너희 둘은 음양이 딱 잘 맞는 조합이야! 균형 최고다옹~ ⚖️"
+      ? "너희 둘은 음양이 딱 잘 맞는 조합이야!<br/>균형 최고다옹~ ⚖️"
       : "같은 성향이라 더 친해질 수도 있지만, 가끔 티격태격할 수도 있어냥~<br/>서로 노력하면 꽁냥꽁냥 가능! 💞";
 
   // 카테고리별 분석 정리
@@ -561,8 +561,8 @@ export default function CompatibilityResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1A0B2E] to-[#30154E] text-white">
-      {currentStep !== 1 && (
+    <div className="min-h-screen text-white">
+      {currentStep !== 1 ? (
         <>
           <div className="absolute inset-0 w-full h-full">
             <Image
@@ -594,6 +594,18 @@ export default function CompatibilityResultPage() {
               className="object-contain"
             />
           </motion.div>
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 w-full h-full">
+            <Image
+              src="/bg_only_sky.png"
+              alt="배경이미지"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
         </>
       )}
 
@@ -649,7 +661,7 @@ export default function CompatibilityResultPage() {
       </div>
 
       {/* 슬라이드 컨테이너 */}
-      <div className="relative w-full h-[calc(100vh-120px)] overflow-hidden flex justify-center items-center">
+      <div className="relative font-gothic w-full h-[calc(100vh-120px)] overflow-hidden flex justify-center items-center">
         {/* 각 슬라이드 */}
         <AnimatePresence initial={false} custom={currentStep}>
           {currentStep === 1 && (
@@ -676,11 +688,17 @@ export default function CompatibilityResultPage() {
                   ))}
                 </h1>
               </motion.div>
-
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
+                animate={{
+                  rotate: [-2, 2, -2], // 기본 흔들림
+                }}
+                transition={{
+                  delay: 0.4,
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  type: "tween",
+                }}
                 className="relative w-40 h-40"
               >
                 <Image
@@ -885,15 +903,15 @@ export default function CompatibilityResultPage() {
               </motion.div>
 
               <motion.div
-                className="p-7 px-10 max-w-md text-md"
+                className="p-5 px-10 max-w-md text-md"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
                 <p className="text-center text-md text-gray-200">
-                  {compatibilityData.element1Name}과 <br />
+                  {/* {compatibilityData.element1Name}과 <br />
                   {compatibilityData.element2Name}의 만남!
-                  <br /> <br />
+                  <br /> <br /> */}
                   {(() => {
                     const elementRelation: Record<string, string[]> = {
                       목: ["화"],
@@ -1074,7 +1092,7 @@ export default function CompatibilityResultPage() {
                 </div>
 
                 <div className="p-10 relative z-10">
-                  <p className="text-lg text-center ">
+                  <p className="text-lg text-center font-gothic ">
                     {(() => {
                       const score = compatibilityData.score;
                       if (score > 80) {
@@ -1133,7 +1151,7 @@ export default function CompatibilityResultPage() {
               </motion.h2>
 
               <motion.div
-                className="p-10 max-w-md mb-8 text-center"
+                className="p-12 max-w-md mb-8 text-center"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -1142,7 +1160,7 @@ export default function CompatibilityResultPage() {
                   {compatibilityData.element1 === "금" ||
                   compatibilityData.element2 === "금"
                     ? "오오~ 한 사람은 재물 냄새를 귀신같이 잘 맡는 냥이야! 실속 있고 똑부러진 스타일이라 둘이 함께라면 든든한 재정 궁합이랄까? 💰🐱"
-                    : "서로 돈 쓰는 스타일이 다를 수 있어서, 가끔은 티격태격할지도 몰라냥. 하지만 서로의 생각을 잘 이해하려고 하면 충분히 조율할 수 있다옹~ 💸💬"}
+                    : "서로 돈 쓰는 스타일이 다를 수 있어서, 가끔은 티격태격할지도 몰라. 하지만 서로의 생각을 잘 이해하려고 하면 충분히 조율할 수 있다옹~ 💸💬"}
                 </p>
               </motion.div>
 
@@ -1181,7 +1199,7 @@ export default function CompatibilityResultPage() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
             >
               <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold mb-6 text-white"
+                className="absolute top-20 text-2xl text-center font-bold text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}

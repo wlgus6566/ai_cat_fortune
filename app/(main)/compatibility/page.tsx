@@ -189,7 +189,7 @@ export default function CompatibilityPage() {
           </motion.div> */}
 
           <motion.h2
-            className="text-xl font-bold text-center text-[#3B2E7E] mb-6"
+            className="text-xl font-bold text-center text-[#3B2E7E] mb-6 font-gothic"
             variants={itemVariants}
           >
             사주로 보는 너와 나의 궁합
