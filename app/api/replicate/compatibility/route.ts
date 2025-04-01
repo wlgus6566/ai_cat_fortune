@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         prompt: prompt,
         go_fast: true,
         num_outputs: 1,
-        aspect_ratio: "1:1",
+        aspect_ratio: "9:16",
         output_format: "webp",
         output_quality: 90,
         negative_prompt:
