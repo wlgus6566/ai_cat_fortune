@@ -6,7 +6,6 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import PageHeader from "@/app/components/PageHeader";
 
 interface Person {
   name: string;
@@ -381,6 +380,87 @@ function generateCompatibilityData(person1: Person, person2: Person) {
   };
 }
 
+// 간지 메타 정보 반환 함수
+function getGanjiMeta(ganji: string): GanjiInfo {
+  return (
+    ganjiInfo[ganji] || {
+      element: "목",
+      elementName: "신비한 나무",
+      yinYang: "양",
+    }
+  ); // 기본값 설정
+}
+
+// 요소별 의상 설정
+const getCostumeByElement = (element: string): string => {
+  switch (element) {
+    case "목":
+      return "wearing a tiny green hoodie with leaf patterns and a flower crown";
+    case "화":
+      return "wearing a flame-shaped hat and a warm sun-patterned cape";
+    case "토":
+      return "wearing a soft earth-colored cloak with mushroom-shaped buttons";
+    case "금":
+      return "wearing a shiny silver armor vest with a tiny star pin";
+    case "수":
+      return "wearing a blue raincoat with waterdrop patches and bubble boots";
+    default:
+      return "wearing a mysterious magical outfit";
+  }
+};
+
+// 요소별 배경 설정
+const getBackgroundByElements = (elements: string[]): string => {
+  const unique = [...new Set(elements)];
+  if (unique.includes("수"))
+    return "a sparkly lakeside under a soft cloudy sky";
+  if (unique.includes("금"))
+    return "a magical night sky filled with shooting stars";
+  if (unique.includes("토"))
+    return "a peaceful field of flowers with a glowing sunset";
+  if (unique.includes("화"))
+    return "a golden sunset sky above fluffy warm clouds";
+  if (unique.includes("목"))
+    return "a dreamy forest with glowing plants and fireflies";
+  return "a fantasy dreamland with floating sparkles and soft colors";
+};
+
+// 로맨틱한 고양이 프롬프트 생성
+const generateRomanticCutePrompt = (
+  myGanji: string,
+  partnerGanji: string
+): string => {
+  const myInfo = getGanjiMeta(myGanji);
+  const partnerInfo = getGanjiMeta(partnerGanji);
+
+  const myCostume = getCostumeByElement(myInfo.element);
+  const partnerCostume = getCostumeByElement(partnerInfo.element);
+
+  const background = getBackgroundByElements([
+    myInfo.element,
+    partnerInfo.element,
+  ]);
+
+  const myCat =
+    myInfo.yinYang === "양"
+      ? `a shy flying kitten with sparkly eyes and tiny wings, ${myCostume}, symbolizing "${myInfo.elementName}"`
+      : `a gentle grounded kitten with round cheeks and sleepy eyes, ${myCostume}, symbolizing "${myInfo.elementName}"`;
+
+  const partnerCat =
+    partnerInfo.yinYang === "양"
+      ? `a playful kitten floating in the air with a soft smile, ${partnerCostume}, representing "${partnerInfo.elementName}"`
+      : `a cuddly kitten lying on the ground with a bashful gaze, ${partnerCostume}, representing "${partnerInfo.elementName}"`;
+
+  return `
+    In ${background}, two magical kittens slowly approach each other.
+    One is ${myCat}, and the other is ${partnerCat}.
+    Their eyes twinkle as they look at each other lovingly, their tails gently curling together into a heart shape.
+    Around them float tiny stars, candy-colored sparkles, and magical flower petals.
+    The air is filled with a soft glow and quiet warmth, as if the whole world is cheering for their love.
+    Illustrated in super cute anime style with big eyes, fluffy fur, blushing cheeks, and a dreamy palette.
+  `;
+};
+
 export default function CompatibilityResultPage() {
   const { state } = useCompatibility();
   const [compatibilityData, setCompatibilityData] =
@@ -389,12 +469,17 @@ export default function CompatibilityResultPage() {
   const [currentStep, setCurrentStep] = useState(1); // 현재 슬라이드 단계
   const totalSteps = 8; // 전체 슬라이드 단계 수
 
+  // 팝업 관련 상태
+  const [showCardPopup, setShowCardPopup] = useState(false);
+  const [cardImage, setCardImage] = useState<string | null>(null);
+  const [isGeneratingCard, setIsGeneratingCard] = useState(false);
+  const [cardGenError, setCardGenError] = useState<string | null>(null);
+
   // 타이핑 애니메이션을 위한 상태
   const textLines = ["두근두근…", "두 사람의 궁합을", " 분석 중이다옹...🐾"];
   const [typedLines, setTypedLines] = useState<string[]>(["", "", ""]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [typingComplete, setTypingComplete] = useState(false);
 
   // 타이핑 애니메이션
   useEffect(() => {
@@ -423,11 +508,10 @@ export default function CompatibilityResultPage() {
           } else {
             // 모든 줄 타이핑 완료
             clearInterval(typingTimer);
-            setTypingComplete(true);
           }
         }
       }
-    }, 70); // 100ms마다 한 글자씩 추가
+    }, 70); // 70ms마다 한 글자씩 추가
 
     return () => {
       clearInterval(typingTimer);
@@ -501,34 +585,191 @@ export default function CompatibilityResultPage() {
     }
   };
 
-  // 슬라이드 변환 애니메이션 설정
-  const slideVariants = {
-    hidden: (direction: number) => ({
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 0,
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        duration: 0.5,
-        bounce: 0.2,
-      },
-    },
-    exit: (direction: number) => ({
-      x: direction > 0 ? "-100%" : "100%",
-      opacity: 0,
-      transition: {
-        type: "spring",
-        duration: 0.5,
-        bounce: 0.2,
-      },
-    }),
+  // 궁합 카드 생성 함수
+  const generateCompatibilityCard = async () => {
+    console.log("카드 생성 함수 호출됨");
+
+    if (!compatibilityData) {
+      console.log("compatibilityData가 없음");
+      return;
+    }
+
+    setIsGeneratingCard(true);
+    setCardGenError(null);
+    console.log(
+      "카드 생성 시작:",
+      compatibilityData.ganji1,
+      compatibilityData.ganji2
+    );
+
+    try {
+      // 프롬프트 생성
+      const prompt = generateRomanticCutePrompt(
+        compatibilityData.ganji1,
+        compatibilityData.ganji2
+      );
+      console.log("생성된 프롬프트:", prompt);
+
+      // API 호출
+      console.log("API 호출 시작");
+      const response = await fetch("/api/replicate/compatibility", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
+      console.log("API 응답 상태:", response.status);
+
+      const data = await response.json();
+      console.log("API 응답 데이터:", data);
+
+      if (
+        response.ok &&
+        data.success &&
+        data.output &&
+        data.output.length > 0
+      ) {
+        console.log("이미지 생성 성공:", data.output[0]);
+        setCardImage(data.output[0]);
+        setShowCardPopup(true);
+      } else {
+        console.error("이미지 생성 실패:", data);
+        setCardGenError(
+          data.error?.message || "이미지를 생성하는 중 오류가 발생했습니다."
+        );
+      }
+    } catch (error) {
+      console.error("카드 생성 중 오류:", error);
+      setCardGenError("이미지를 생성하는 중 오류가 발생했습니다.");
+    } finally {
+      setIsGeneratingCard(false);
+      console.log("카드 생성 함수 종료");
+    }
   };
 
-  // 랭킹 퍼센트 계산 (임의의 값, 실제로는 DB에서 가져오거나 계산 로직 필요)
-  const rankingPercent = 12;
+  // 카드 팝업 컴포넌트
+  const CardPopup: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    imageUrl: string | null;
+  }> = ({ isOpen, onClose, imageUrl }) => {
+    if (!isOpen) return null;
+
+    return (
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => onClose()}
+      >
+        <motion.div
+          className="relative bg-white rounded-xl overflow-hidden max-w-md w-full"
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "100%", opacity: 0 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-4">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={() => onClose()}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* 챗냥이 슬라이드 인 + 말풍선 */}
+            <motion.div
+              className="flex items-end mb-4"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              transition={{ delay: 0.3, type: "spring", damping: 20 }}
+            >
+              <div className="w-20 h-20 mr-2 flex-shrink-0">
+                <Image
+                  src="/cat_book.png"
+                  alt="챗냥이"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                />
+              </div>
+              <motion.div
+                className="bg-purple-100 p-3 rounded-lg rounded-bl-none"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <p className="text-purple-800">
+                  짜잔~ 너희 궁합 결과가 완성됐어!
+                </p>
+              </motion.div>
+            </motion.div>
+
+            {/* 카드 이미지 */}
+            <div className="flex justify-center my-4">
+              {imageUrl ? (
+                <motion.div
+                  initial={{ y: 100, rotate: -5, scale: 0.8 }}
+                  animate={{ y: 0, rotate: 0, scale: 1 }}
+                  transition={{ delay: 0.9, type: "spring", bounce: 0.4 }}
+                >
+                  <Image
+                    src={imageUrl}
+                    alt="궁합 카드"
+                    width={300}
+                    height={300}
+                    className="rounded-lg shadow-lg"
+                  />
+                </motion.div>
+              ) : (
+                <div className="h-64 w-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500">이미지를 불러오는 중...</p>
+                </div>
+              )}
+            </div>
+
+            {cardGenError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-center">
+                {cardGenError}
+              </div>
+            )}
+
+            <div className="flex justify-center mt-4">
+              <button
+                className="px-4 py-2 bg-purple-600 text-white rounded-full"
+                onClick={() => {
+                  if (imageUrl) {
+                    const link = document.createElement("a");
+                    link.href = imageUrl;
+                    link.download = `궁합카드_${state.person1.name}_${state.person2.name}.jpg`;
+                    link.click();
+                  }
+                }}
+              >
+                카드 저장하기
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -639,25 +880,6 @@ export default function CompatibilityResultPage() {
             />
           </motion.div>
         </div>
-
-        {/* <div className="absolute bottom-40 left-5 w-12 h-12 opacity-20">
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{
-              duration: 3,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-            }}
-          >
-            <Image
-              src="/assets/images/moon.png"
-              alt="달"
-              width={40}
-              height={40}
-              className="w-full h-full"
-            />
-          </motion.div>
-        </div> */}
       </div>
 
       {/* 슬라이드 컨테이너 */}
@@ -1196,137 +1418,124 @@ export default function CompatibilityResultPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-0 flex flex-col items-center justify-center px-4"
+              className="absolute inset-0 flex flex-col items-center justify-start p-6 font-gothic"
             >
-              <motion.h2
-                className="absolute top-20 text-2xl text-center font-bold text-white"
+              {/* 제목 및 점수 */}
+              <motion.div
+                className="flex flex-col items-center mb-8 w-full"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                궁합 결과
-                <p className="text-gray-300 text-xl ">
-                  {compatibilityData.title}
-                </p>
-              </motion.h2>
-
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, type: "spring" }}
-                className="relative mb-6"
-              >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#990dfa] to-[#FF6B6B] flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[#30154E] flex items-center justify-center text-4xl font-bold">
+                <h2 className="text-xl text-center font-bold text-gray-700 mb-4">
+                  {state.person1.name}님과 {state.person2.name}님 궁합 총점
+                </h2>
+                <div className="flex items-baseline justify-center">
+                  <span className="text-2xl font-bold text-[#3B2E7E]">
                     {compatibilityData.score}
-                  </div>
+                  </span>
+                  <span className="text-2xl ml-1 text-[#3B2E7E]">점</span>
                 </div>
-                <motion.div
-                  className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold rounded-full w-12 h-12 flex items-center justify-center text-sm"
-                  initial={{ rotate: -15 }}
-                  animate={{ rotate: 15 }}
-                  transition={{
-                    repeat: Number.POSITIVE_INFINITY,
-                    repeatType: "reverse",
-                    duration: 1.5,
-                  }}
-                >
-                  {rankingPercent}%
-                </motion.div>
               </motion.div>
 
+              {/* 두 사람 정보 */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                className="flex justify-between w-full mb-12"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="flex justify-center gap-8 mb-8"
+                transition={{ delay: 0.3 }}
               >
-                <div className="text-center">
-                  <div
-                    className="w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: `${getElementColor(
-                        compatibilityData.element1
-                      )}30`,
-                    }}
-                  >
+                <div className="text-center w-[45%]">
+                  <div className="flex flex-col items-center">
                     <Image
-                      src={
-                        getElementImage(compatibilityData.element1) ||
-                        "/placeholder.svg"
-                      }
+                      src={getElementImage(compatibilityData.element1)}
                       alt={compatibilityData.element1}
-                      width={40}
-                      height={40}
-                      className="object-contain"
+                      width={64}
+                      height={64}
+                      className="object-contain mb-4"
                     />
+                    <span className="text-4xl mb-2">🐶</span>
+                    <div className="text-lg font-bold">
+                      {state.person1.name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {compatibilityData.ganji1.substring(0, 2)}일주
+                    </div>
+                    <div className="text-sm mt-1 text-gray-500">
+                      {state.person1.birthdate.replace(/-/g, ".")}
+                    </div>
                   </div>
-                  <p className="text-white">{state.person1.name}</p>
                 </div>
 
-                <div className="flex items-center">
-                  <span className="text-2xl">❤️</span>
-                </div>
-
-                <div className="text-center">
-                  <div
-                    className="w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: `${getElementColor(
-                        compatibilityData.element2
-                      )}30`,
-                    }}
-                  >
+                <div className="text-center w-[45%]">
+                  <div className="flex flex-col items-center">
                     <Image
-                      src={
-                        getElementImage(compatibilityData.element2) ||
-                        "/placeholder.svg"
-                      }
+                      src={getElementImage(compatibilityData.element2)}
                       alt={compatibilityData.element2}
-                      width={40}
-                      height={40}
-                      className="object-contain"
+                      width={64}
+                      height={64}
+                      className="object-contain mb-4"
                     />
+                    <span className="text-4xl mb-2">🐶</span>
+                    <div className="text-lg font-bold">
+                      {state.person2.name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {compatibilityData.ganji2.substring(0, 2)}일주
+                    </div>
+                    <div className="text-sm mt-1 text-gray-500">
+                      {state.person2.birthdate.replace(/-/g, ".")}
+                    </div>
                   </div>
-                  <p className="text-white">{state.person2.name}</p>
                 </div>
               </motion.div>
 
+              {/* 버튼 */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                className="flex justify-center w-full mt-4 gap-2"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="flex gap-4"
+                transition={{ delay: 0.7 }}
               >
-                <button
-                  className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-all"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator
-                        .share({
-                          title: "사주 궁합 테스트 결과",
-                          text: `${state.person1.name}님과 ${state.person2.name}님의 궁합 점수: ${compatibilityData.score}점`,
-                          url: window.location.href,
-                        })
-                        .catch((err) => {
-                          console.error("공유 실패:", err);
-                        });
-                    } else {
-                      navigator.clipboard
-                        .writeText(window.location.href)
-                        .then(() => alert("링크가 복사되었습니다!"))
-                        .catch((err) => console.error("링크 복사 실패:", err));
-                    }
-                  }}
-                >
-                  결과 공유
-                </button>
-
                 <Link href="/compatibility">
-                  <button className="px-4 py-2 bg-gradient-to-r from-[#990dfa] to-[#FF6B6B] text-white rounded-lg hover:opacity-90 transition-all">
+                  <button className="px-8 py-3 bg-gradient-to-r from-[#990dfa] to-[#FF6B6B] text-white rounded-full font-bold hover:opacity-90 transition-all">
                     다시 테스트
                   </button>
                 </Link>
+
+                <button
+                  className="px-8 py-3 bg-gradient-to-r from-[#3B2E7E] to-[#6A5ACD] text-white rounded-full font-bold hover:opacity-90 transition-all"
+                  onClick={generateCompatibilityCard}
+                  disabled={isGeneratingCard}
+                >
+                  {isGeneratingCard ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      생성 중...
+                    </span>
+                  ) : (
+                    "우리만의 궁합카드 만들기"
+                  )}
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -1361,6 +1570,17 @@ export default function CompatibilityResultPage() {
           </button>
         </div>
       )}
+
+      {/* 카드 팝업 */}
+      <AnimatePresence>
+        {showCardPopup && (
+          <CardPopup
+            isOpen={showCardPopup}
+            onClose={() => setShowCardPopup(false)}
+            imageUrl={cardImage}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
