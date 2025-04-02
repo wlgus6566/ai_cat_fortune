@@ -98,7 +98,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   icon,
   color = "rgba(255, 107, 158, 0.8)",
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // 제목이 '음양오행 분석'인 경우 기본적으로 펼쳐진 상태로 초기화
+  const [isOpen, setIsOpen] = useState(title === "음양오행 분석");
 
   return (
     <motion.div
@@ -344,6 +345,83 @@ export default function CompatibilityResultPage() {
     });
   };
 
+  // 오행에 따른 이모티콘 반환 함수
+  const getElementEmoji = (element?: string) => {
+    switch (element) {
+      case "목":
+        return "🌿"; // 나무, 식물
+      case "화":
+        return "🔥"; // 불
+      case "토":
+        return "🏔️"; // 땅, 산
+      case "금":
+        return "💎"; // 보석, 금속
+      case "수":
+        return "💧"; // 물방울
+      default:
+        return "✨"; // 기본값
+    }
+  };
+
+  // 두 오행 사이의 상생/상극 관계 이모티콘 반환 함수
+  const getCompatibilitySymbol = (element1?: string, element2?: string) => {
+    // 상생 관계: 목생화, 화생토, 토생금, 금생수, 수생목
+    const generatingRelations = [
+      { from: "목", to: "화" },
+      { from: "화", to: "토" },
+      { from: "토", to: "금" },
+      { from: "금", to: "수" },
+      { from: "수", to: "목" },
+    ];
+
+    // 상극 관계: 목극토, 토극수, 수극화, 화극금, 금극목
+    const conflictingRelations = [
+      { from: "목", to: "토" },
+      { from: "토", to: "수" },
+      { from: "수", to: "화" },
+      { from: "화", to: "금" },
+      { from: "금", to: "목" },
+    ];
+
+    // 기본값 설정
+    if (!element1 || !element2) return "⟷"; // 중립
+
+    // 상생 관계 확인
+    if (
+      generatingRelations.some((r) => r.from === element1 && r.to === element2)
+    ) {
+      return "→"; // 상생
+    }
+
+    // 역상생 관계 확인
+    if (
+      generatingRelations.some((r) => r.from === element2 && r.to === element1)
+    ) {
+      return "←"; // 역상생
+    }
+
+    // 상극 관계 확인
+    if (
+      conflictingRelations.some((r) => r.from === element1 && r.to === element2)
+    ) {
+      return "⇒"; // 상극
+    }
+
+    // 역상극 관계 확인
+    if (
+      conflictingRelations.some((r) => r.from === element2 && r.to === element1)
+    ) {
+      return "⇐"; // 역상극
+    }
+
+    // 동일 오행 관계
+    if (element1 === element2) {
+      return "⟺"; // 동일 오행
+    }
+
+    return "⟷"; // 중립 관계
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] font-gothic flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
@@ -405,24 +483,6 @@ export default function CompatibilityResultPage() {
             ? "사주 정보를 확인하고 있어요..."
             : "두 사람의 인연을 분석중입니다..."}
         </motion.h2>
-
-        <motion.div variants={slideInUp} className="text-center mt-8 mb-12">
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => router.push("/compatibility")}
-              className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
-            >
-              다시 궁합 보기
-            </button>
-
-            <button
-              onClick={() => setShowShareModal(true)}
-              className="px-8 py-3 bg-[#3B2E7E] text-white border border-white/30 rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
-            >
-              결과 공유하기
-            </button>
-          </div>
-        </motion.div>
       </div>
     );
   }
@@ -483,25 +543,16 @@ export default function CompatibilityResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* 배경 이미지 */}
-      {/* 배경 장식 요소 */}
-      {/* {[...Array(15)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-white opacity-20"
-          style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-            fontSize: `${Math.random() * 20 + 10}px`,
-          }}
-          custom={i}
-          variants={starVariants}
-          animate="animate"
-        >
-          {Math.random() > 0.7 ? "✨" : Math.random() > 0.5 ? "⭐" : "🌟"}
-        </motion.div>
-      ))} */}
+    <div className="min-h-screen text-white relative overflow-hidden">
+      <div className="absolute inset-0 w-full h-full">
+        <Image
+          src="/bg_only_sky.png"
+          alt="배경이미지"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
       {/* 커스텀 헤더 */}
       <div className="sticky top-0 z-10 backdrop-blur-md bg-[#3B2E7E]/50 border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex items-center">
@@ -514,7 +565,7 @@ export default function CompatibilityResultPage() {
           <h1 className="text-xl font-semibold text-white ml-2">궁합 결과</h1>
         </div>
       </div>
-      <div className="container max-w-md mx-auto px-4 py-6 relative z-10">
+      <div className="container max-w-md mx-auto px-4 py-6 relative z-10 pb-28">
         {/* 결과 컨테이너 */}
         <motion.div
           variants={containerVariants}
@@ -615,112 +666,12 @@ export default function CompatibilityResultPage() {
               <Star className="h-5 w-5 text-yellow-300 mr-2 fill-yellow-300" />
               세부 분석
             </h2>
-
-            {/* 성격 궁합 */}
-            <CategoryCard
-              title="성격 궁합"
-              score={compatibilityData?.details?.성격궁합?.score || 85}
-              delay={0.1}
-              icon={<Sparkles className="h-6 w-6 text-white" />}
-              color="rgba(255, 107, 158, 0.8)"
-            >
-              <p className="mb-3">
-                {compatibilityData?.details?.성격궁합?.analysis}
-              </p>
-              <div className="bg-white/20 p-3 rounded-lg">
-                <p className="text-sm font-medium">
-                  🐾 {compatibilityData?.details?.성격궁합?.tip}
-                </p>
-              </div>
-            </CategoryCard>
-
-            {/* 연애 스타일 */}
-            <CategoryCard
-              title="연애 스타일"
-              score={compatibilityData?.details?.연애스타일?.score || 78}
-              delay={0.2}
-              icon={<Heart className="h-6 w-6 text-white" />}
-              color="rgba(255, 77, 128, 0.8)"
-            >
-              <p className="mb-3">
-                {compatibilityData?.details?.연애스타일?.analysis}
-              </p>
-              <div className="bg-white/30 p-3 rounded-lg">
-                <p className="text-sm font-medium">
-                  🐾 {compatibilityData?.details?.연애스타일?.tip}
-                </p>
-              </div>
-            </CategoryCard>
-
-            {/* 갈등 요소 */}
-            <CategoryCard
-              title="갈등 요소"
-              score={compatibilityData?.details?.갈등요소?.score || 67}
-              delay={0.3}
-              icon={
-                <svg
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
-              }
-              color="rgba(255, 159, 64, 0.8)"
-            >
-              <p className="mb-3">
-                {compatibilityData?.details?.갈등요소?.analysis}
-              </p>
-              <div className="bg-white/30 p-3 rounded-lg">
-                <p className="text-sm font-medium">
-                  🐾 {compatibilityData?.details?.갈등요소?.tip}
-                </p>
-              </div>
-            </CategoryCard>
-
-            {/* 미래 전망 */}
-            <CategoryCard
-              title="미래 전망"
-              score={compatibilityData?.details?.미래전망?.score || 88}
-              delay={0.4}
-              icon={
-                <svg
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              }
-              color="rgba(72, 187, 120, 0.8)"
-            >
-              <p className="mb-3">
-                {compatibilityData?.details?.미래전망?.analysis}
-              </p>
-              <div className="bg-white/30 p-3 rounded-lg">
-                <p className="text-sm font-medium">
-                  🐾 {compatibilityData?.details?.미래전망?.tip}
-                </p>
-              </div>
-            </CategoryCard>
-
             {/* 음양오행 분석 */}
             <CategoryCard
               title="음양오행 분석"
               score={
-                compatibilityData?.details?.음양오행분석?.상성?.궁합지수 || 91
+                compatibilityData?.details?.yinYangAnalysis?.compatibility
+                  ?.compatibilityScore || 91
               }
               delay={0.5}
               icon={
@@ -741,58 +692,265 @@ export default function CompatibilityResultPage() {
               color="rgba(129, 140, 248, 0.8)"
             >
               <div className="space-y-4">
-                <div className="bg-white/20 p-3 rounded-lg border border-white/10">
-                  <h4 className="font-medium mb-2">{state.person1.name}</h4>
-                  <p className="text-sm">
-                    오행:{" "}
-                    <span className="font-medium">
-                      {compatibilityData?.details?.음양오행분석?.user?.오행 ||
-                        "목"}
-                    </span>
-                  </p>
-                  <p className="text-sm">
-                    음양:{" "}
-                    <span className="font-medium">
-                      {compatibilityData?.details?.음양오행분석?.user?.음양 ||
-                        "양"}
-                    </span>
-                  </p>
-                  <p className="text-sm mt-2">
-                    {compatibilityData?.details?.음양오행분석?.user?.설명}
+                {/* 음양오행 소개 */}
+                <div className="bg-white/30 p-4 rounded-lg text-center">
+                  <p className="text-sm italic">
+                    ✨ 음양오행은 우주의 모든 만물이 다섯 가지 기운(목/木,
+                    화/火, 토/土, 금/金, 수/水)으로 이루어져 있다는 동양
+                    철학입니다. 두 사람의 기운이 어떻게 상호작용하는지
+                    알아보세요! ✨
                   </p>
                 </div>
 
-                <div className="mt-2 bg-white/20 p-3 rounded-lg border border-white/10">
-                  <h4 className="font-medium mb-2">{state.person2.name}</h4>
-                  <p className="text-sm">
-                    오행:{" "}
-                    <span className="font-medium">
-                      {compatibilityData?.details?.음양오행분석?.partner
-                        ?.오행 || "화"}
-                    </span>
-                  </p>
-                  <p className="text-sm">
-                    음양:{" "}
-                    <span className="font-medium">
-                      {compatibilityData?.details?.음양오행분석?.partner
-                        ?.음양 || "양"}
-                    </span>
-                  </p>
-                  <p className="text-sm mt-2">
-                    {compatibilityData?.details?.음양오행분석?.partner?.설명}
-                  </p>
+                {/* Person1 정보 패널 */}
+                <div className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 p-4 rounded-lg border border-white/20 shadow-inner">
+                  <div className="flex items-center mb-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-3">
+                      <span className="text-white text-xl">🌿</span>
+                    </div>
+                    <h4 className="font-medium text-lg">
+                      {state.person1.name}
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-lg text-center">
+                      <p className="text-xs opacity-80">오행</p>
+                      <p className="text-lg font-semibold">
+                        {getElementEmoji(
+                          compatibilityData?.details?.yinYangAnalysis?.user
+                            ?.element
+                        )}{" "}
+                        {compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.element || "목"}
+                      </p>
+                    </div>
+                    <div className="bg-white/20 p-2 rounded-lg text-center">
+                      <p className="text-xs opacity-80">음양</p>
+                      <p className="text-lg font-semibold">
+                        {compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.yinYang === "음"
+                          ? "☽"
+                          : "☀️"}{" "}
+                        {compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.yinYang || "양"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-white/20 p-3 rounded-lg">
+                    <p className="text-sm">
+                      {
+                        compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.description
+                      }
+                    </p>
+                  </div>
                 </div>
 
-                <div className="bg-white/30 p-3 rounded-lg">
-                  <h4 className="font-medium mb-2">상성 분석</h4>
-                  <p className="text-sm mb-2">
-                    {compatibilityData?.details?.음양오행분석?.상성?.설명}
-                  </p>
-                  <p className="text-sm font-medium">
-                    🐾{" "}
-                    {compatibilityData?.details?.음양오행분석?.상성?.고양이설명}
-                  </p>
+                {/* 중앙 연결 화살표 */}
+                <div className="flex justify-center items-center relative py-1">
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-12 bg-white/30"></div>
+                  <div className="absolute w-10 h-10 bg-pink-500/30 backdrop-blur-sm rounded-full flex items-center justify-center z-10 border border-white/30 shadow-lg">
+                    <span className="text-lg">💫</span>
+                  </div>
                 </div>
+
+                {/* Person2 정보 패널 */}
+                <div className="bg-gradient-to-r from-pink-500/30 to-orange-500/30 p-4 rounded-lg border border-white/20 shadow-inner">
+                  <div className="flex items-center mb-3">
+                    <div className="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center mr-3">
+                      <span className="text-white text-xl">🔥</span>
+                    </div>
+                    <h4 className="font-medium text-lg">
+                      {state.person2.name}
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-lg text-center">
+                      <p className="text-xs opacity-80">오행</p>
+                      <p className="text-lg font-semibold">
+                        {getElementEmoji(
+                          compatibilityData?.details?.yinYangAnalysis?.partner
+                            ?.element
+                        )}{" "}
+                        {compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.element || "화"}
+                      </p>
+                    </div>
+                    <div className="bg-white/20 p-2 rounded-lg text-center">
+                      <p className="text-xs opacity-80">음양</p>
+                      <p className="text-lg font-semibold">
+                        {compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.yinYang === "음"
+                          ? "☽"
+                          : "☀️"}{" "}
+                        {compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.yinYang || "양"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-white/20 p-3 rounded-lg">
+                    <p className="text-sm">
+                      {
+                        compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.description
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                {/* 상성 분석 패널 */}
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-600/20 p-5 rounded-lg border border-white/30 mt-4 shadow-inner">
+                  <h4 className="font-medium mb-3 text-center text-lg flex items-center justify-center">
+                    <span className="mr-2">✨</span> 두 사람의 상성{" "}
+                    <span className="ml-2">✨</span>
+                  </h4>
+
+                  <div className="flex justify-center items-center my-4">
+                    <div className="w-16 h-16 rounded-full bg-indigo-600/30 flex items-center justify-center">
+                      {getElementEmoji(
+                        compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.element
+                      )}
+                    </div>
+                    <div className="w-24 h-1 bg-white/30 mx-1 relative">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">
+                        {getCompatibilitySymbol(
+                          compatibilityData?.details?.yinYangAnalysis?.user
+                            ?.element,
+                          compatibilityData?.details?.yinYangAnalysis?.partner
+                            ?.element
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-16 h-16 rounded-full bg-pink-600/30 flex items-center justify-center">
+                      {getElementEmoji(
+                        compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.element
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-white/20 p-4 rounded-lg mb-3">
+                    <p className="text-sm mb-3">
+                      {
+                        compatibilityData?.details?.yinYangAnalysis
+                          ?.compatibility?.description
+                      }
+                    </p>
+                  </div>
+
+                  <div className="bg-white/30 p-4 rounded-lg text-center">
+                    <p className="text-sm font-medium flex items-center justify-center">
+                      <span className="mr-2">🐾</span>
+                      {
+                        compatibilityData?.details?.yinYangAnalysis
+                          ?.compatibility?.catComment
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CategoryCard>
+            {/* 성격 궁합 */}
+            <CategoryCard
+              title="성격 궁합"
+              score={
+                compatibilityData?.details?.personalityCompatibility?.score ||
+                85
+              }
+              delay={0.1}
+              icon={<Sparkles className="h-6 w-6 text-white" />}
+              color="rgba(255, 107, 158, 0.8)"
+            >
+              <p className="mb-3">
+                {compatibilityData?.details?.personalityCompatibility?.analysis}
+              </p>
+              <div className="bg-white/20 p-3 rounded-lg">
+                <p className="text-sm font-medium">
+                  🐾 {compatibilityData?.details?.personalityCompatibility?.tip}
+                </p>
+              </div>
+            </CategoryCard>
+
+            {/* 연애 스타일 */}
+            <CategoryCard
+              title="연애 스타일"
+              score={compatibilityData?.details?.loveStyle?.score || 78}
+              delay={0.2}
+              icon={<Heart className="h-6 w-6 text-white" />}
+              color="rgba(255, 77, 128, 0.8)"
+            >
+              <p className="mb-3">
+                {compatibilityData?.details?.loveStyle?.analysis}
+              </p>
+              <div className="bg-white/30 p-3 rounded-lg">
+                <p className="text-sm font-medium">
+                  🐾 {compatibilityData?.details?.loveStyle?.tip}
+                </p>
+              </div>
+            </CategoryCard>
+
+            {/* 갈등 요소 */}
+            <CategoryCard
+              title="갈등 요소"
+              score={compatibilityData?.details?.conflictElements?.score || 67}
+              delay={0.3}
+              icon={
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              }
+              color="rgba(255, 159, 64, 0.8)"
+            >
+              <p className="mb-3">
+                {compatibilityData?.details?.conflictElements?.analysis}
+              </p>
+              <div className="bg-white/30 p-3 rounded-lg">
+                <p className="text-sm font-medium">
+                  🐾 {compatibilityData?.details?.conflictElements?.tip}
+                </p>
+              </div>
+            </CategoryCard>
+
+            {/* 미래 전망 */}
+            <CategoryCard
+              title="미래 전망"
+              score={compatibilityData?.details?.futurePerspective?.score || 88}
+              delay={0.4}
+              icon={
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              }
+              color="rgba(72, 187, 120, 0.8)"
+            >
+              <p className="mb-3">
+                {compatibilityData?.details?.futurePerspective?.analysis}
+              </p>
+              <div className="bg-white/30 p-3 rounded-lg">
+                <p className="text-sm font-medium">
+                  🐾 {compatibilityData?.details?.futurePerspective?.tip}
+                </p>
               </div>
             </CategoryCard>
           </motion.div>
@@ -836,12 +994,21 @@ export default function CompatibilityResultPage() {
 
           {/* 하단 버튼 */}
           <motion.div variants={slideInUp} className="text-center mt-8 mb-12">
-            <button
-              onClick={() => router.push("/compatibility")}
-              className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
-            >
-              다시 궁합 보기
-            </button>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => router.push("/compatibility")}
+                className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
+              >
+                다시 궁합 보기
+              </button>
+
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="px-8 py-3 bg-[#3B2E7E] text-white border border-white/30 rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
+              >
+                결과 공유하기
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       </div>

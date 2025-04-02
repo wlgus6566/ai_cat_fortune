@@ -509,41 +509,41 @@ export interface CompatibilityResult {
   magicTitle: string; // 마법 제목 (예: "별빛 아래 운명의 실타래")
   compatibilityTheme: string; // 궁합 테마 (예: "상생의 기운")
   details: {
-    성격궁합: {
+    personalityCompatibility: {
       score: number; // 0-100 점수
       analysis: string; // 분석 내용
       tip: string; // 조언
     };
-    연애스타일: {
+    loveStyle: {
       score: number;
       analysis: string;
       tip: string;
     };
-    갈등요소: {
+    conflictElements: {
       score: number;
       analysis: string;
       tip: string;
     };
-    미래전망: {
+    futurePerspective: {
       score: number;
       analysis: string;
       tip: string;
     };
-    음양오행분석: {
+    yinYangAnalysis: {
       user: {
-        오행: string; // 목/화/토/금/수 중 하나
-        음양: string; // 음/양 중 하나
-        설명: string;
+        element: string; // 목/화/토/금/수 중 하나
+        yinYang: string; // 음/양 중 하나
+        description: string;
       };
       partner: {
-        오행: string;
-        음양: string;
-        설명: string;
+        element: string;
+        yinYang: string;
+        description: string;
       };
-      상성: {
-        설명: string;
-        궁합지수: number;
-        고양이설명: string;
+      compatibility: {
+        description: string;
+        compatibilityScore: number;
+        catComment: string;
       };
     };
   };
@@ -591,41 +591,41 @@ export async function getCompatibilityAnalysis(
   "magicTitle": "별빛 아래 운명의 실타래",
   "compatibilityTheme": "상생의 기운",
   "details": {
-    "성격궁합": {
+    "personalityCompatibility": {
       "score": 85,
       "analysis": "지현님은 따뜻하고 사려 깊은 성격이고, 재훈님은 활기차고 추진력이 강한 타입이야. 서로의 부족한 부분을 자연스럽게 채워줄 수 있는 멋진 조합이냥~ 같이 있을수록 서로에게 안정감을 주는 사이가 될 거야.",
       "tip": "상대의 장점을 칭찬해주는 말 한마디가 큰 힘이 된다냥!"
     },
-    "연애스타일": {
+    "loveStyle": {
       "score": 78,
       "analysis": "지현님은 감정 표현을 조심스러워하지만, 재훈님은 다정하게 먼저 다가가는 스타일이라 잘 어울린다냥. 둘 다 진심을 중요하게 여겨서, 시간이 지날수록 깊은 신뢰가 쌓일 수 있어.",
       "tip": "작은 표현도 아끼지 말고 솔직하게 마음을 전해보라냥~"
     },
-    "갈등요소": {
+    "conflictElements": {
       "score": 67,
       "analysis": "재훈님은 때때로 직설적인 말투로 지현님에게 상처를 줄 수 있어. 감정 기복이 있는 날에는 서로 오해할 가능성도 있다냥. 하지만 대화를 통해 충분히 극복할 수 있는 수준이야.",
       "tip": "서운할 땐 바로 말하지 말고, 차분히 마음을 정리한 뒤에 말하라냥!"
     },
-    "미래전망": {
+    "futurePerspective": {
       "score": 88,
       "analysis": "장기적으로 매우 긍정적인 궁합이야! 둘 다 성실하고 배려심이 깊어서 함께 미래를 그려나가기 좋은 타입이냥. 시간이 지날수록 더욱 단단한 관계가 될 가능성이 높아.",
       "tip": "함께하는 시간보다, 함께 성장하는 경험을 쌓는 게 중요하다냥~"
     },
-    "음양오행분석": {
+    "yinYangAnalysis": {
       "user": {
-        "오행": "목",
-        "음양": "양",
-        "설명": "생기와 성장의 기운을 지닌 양 목 타입이야. 활발하고 개방적인 성향이지~"
+        "element": "목",
+        "yinYang": "양",
+        "description": "생기와 성장의 기운을 지닌 양 목 타입이야. 활발하고 개방적인 성향이지~"
       },
       "partner": {
-        "오행": "화",
-        "음양": "양",
-        "설명": "에너지가 넘치고 따뜻한 성격의 양 화 타입이야. 열정적이고 직관적인 매력이 있어!"
+        "element": "화",
+        "yinYang": "양",
+        "description": "에너지가 넘치고 따뜻한 성격의 양 화 타입이야. 열정적이고 직관적인 매력이 있어!"
       },
-      "상성": {
-        "설명": "목 → 화는 상생 관계로, 목의 에너지가 화를 돕는 멋진 조합이야.",
-        "궁합지수": 91,
-        "고양이설명": "${person1.name}님이 ${person2.name}님에게 영감을 주고, ${person2.name}님이 따뜻함으로 응답하는 환상의 콤비라냥!"
+      "compatibility": {
+        "description": "목 → 화는 상생 관계로, 목의 에너지가 화를 돕는 멋진 조합이야.",
+        "compatibilityScore": 91,
+        "catComment": "${person1.name}님이 ${person2.name}님에게 영감을 주고, ${person2.name}님이 따뜻함으로 응답하는 환상의 콤비라냥!"
       }
     }
   },
