@@ -14,6 +14,7 @@ import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
+import { v1 } from "uuid";
 
 // 생년월일 및 시간 관련 타입 정의
 type CalendarType = "양력" | "음력";
@@ -535,8 +536,8 @@ export default function CompatibilityPage() {
       objectType: "feed",
       content: {
         title: "궁합 테스트",
-        description: `${formData.person1.name}님의 궁합 테스트에 참여해보세요!`,
-        imageUrl: `${window.location.origin}/compatibility-header.png`,
+        description: `${formData.person1.name}님과의 궁합을 확인해보라냥!🐾`,
+        imageUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/share.png`,
         link: {
           mobileWebUrl: shareUrl,
           webUrl: shareUrl,
@@ -544,7 +545,7 @@ export default function CompatibilityPage() {
       },
       buttons: [
         {
-          title: "테스트 참여하기",
+          title: "궁합 테스트 참여하기",
           link: {
             mobileWebUrl: shareUrl,
             webUrl: shareUrl,
