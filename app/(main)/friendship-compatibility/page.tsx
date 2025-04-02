@@ -470,7 +470,7 @@ export default function FriendshipCompatibilityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#111827] to-[#1e1b4b] pb-20">
+    <div className="min-h-screen pb-20 bg-purple-50">
       <PageHeader title="친구 궁합" />
       <Toaster position="top-center" />
       <div className="max-w-xl mx-auto px-4 pt-6">
@@ -480,12 +480,12 @@ export default function FriendshipCompatibilityPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-[#25074D]/80 backdrop-blur-md rounded-2xl p-4 mb-6 border border-purple-400/20"
+              className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-purple-400/20"
             >
-              <h3 className="text-lg font-medium text-purple-100 mb-2">
+              <h3 className="text-lg font-medium text-purple-800 mb-2">
                 친구 궁합 링크 공유하기
               </h3>
-              <p className="text-sm text-purple-200 mb-4">
+              <p className="text-sm text-purple-700 mb-4">
                 현재 작성 중인 친구 궁합 정보를 공유할 수 있어요. 궁합을 보고
                 싶은 친구에게 링크를 보내세요!
               </p>
@@ -504,7 +504,7 @@ export default function FriendshipCompatibilityPage() {
                 </button>
                 <button
                   onClick={() => setShareGuideVisible(false)}
-                  className="bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-lg"
+                  className="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-lg"
                 >
                   ✕
                 </button>
@@ -513,23 +513,23 @@ export default function FriendshipCompatibilityPage() {
           )}
         </AnimatePresence>
 
-        <div className="bg-[#25074D]/30 backdrop-blur-md rounded-2xl p-6 border border-purple-400/20 shadow-xl">
+        <div className="bg-white rounded-2xl p-6 border border-purple-200 shadow-lg">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-purple-900">
               친구 궁합 확인하기
             </h2>
             <button
               onClick={handleShareClick}
-              className="text-purple-300 hover:text-purple-100 p-2 rounded-full transition-colors"
+              className="p-2 text-purple-500 hover:text-purple-700 transition-colors"
             >
               <Share2 size={20} />
             </button>
           </div>
 
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-6">
             <div className="relative w-32 h-32">
               <Image
-                src="/new_cat_friends.png"
+                src="/new_cat_book.png"
                 alt="고양이 마법사"
                 fill
                 style={{ objectFit: "contain" }}
@@ -537,7 +537,7 @@ export default function FriendshipCompatibilityPage() {
             </div>
           </div>
 
-          <p className="text-center text-purple-200 mb-6">
+          <p className="text-center text-purple-700 mb-6">
             친구와의 케미를 확인해볼까냥? 🐱✨
             <br />
             생년월일 정보를 입력하면 고양이 점성술사가 친구 궁합을 봐드려요!
@@ -545,15 +545,15 @@ export default function FriendshipCompatibilityPage() {
 
           <form onSubmit={handleSubmit}>
             {/* 첫 번째 사람 정보 */}
-            <div className="mb-6 p-4 bg-[#25074D]/50 rounded-xl border border-purple-400/30">
-              <h3 className="text-lg font-medium text-white mb-4">
+            <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+              <h3 className="text-lg font-medium text-purple-900 mb-4">
                 첫 번째 사람 정보
               </h3>
 
               <div className="mb-4">
                 <label
                   htmlFor="person1-name"
-                  className="block text-sm font-medium text-purple-200 mb-1"
+                  className="block text-sm font-medium text-purple-700 mb-1"
                 >
                   이름
                 </label>
@@ -565,13 +565,13 @@ export default function FriendshipCompatibilityPage() {
                     handleInputChange("person1", "name", e.target.value)
                   }
                   placeholder="이름을 입력하세요"
-                  className="w-full bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300/50"
+                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
                 />
               </div>
 
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-sm font-medium text-purple-200">
+                  <label className="text-sm font-medium text-purple-700">
                     성별
                   </label>
                 </div>
@@ -588,8 +588,8 @@ export default function FriendshipCompatibilityPage() {
                     <div
                       className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
                         formData.person1.gender === "남"
-                          ? "bg-[#9333EA] text-white"
-                          : "bg-[#2D0D56]/40 border border-purple-500/40 text-purple-300"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white border border-purple-300 text-purple-700"
                       }`}
                     >
                       남성
@@ -607,8 +607,8 @@ export default function FriendshipCompatibilityPage() {
                     <div
                       className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
                         formData.person1.gender === "여"
-                          ? "bg-[#9333EA] text-white"
-                          : "bg-[#2D0D56]/40 border border-purple-500/40 text-purple-300"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white border border-purple-300 text-purple-700"
                       }`}
                     >
                       여성
@@ -618,14 +618,14 @@ export default function FriendshipCompatibilityPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-200 mb-1">
+                <label className="block text-sm font-medium text-purple-700 mb-1">
                   생년월일
                 </label>
                 <div className="flex gap-2">
                   <select
                     value={birthYear1}
                     onChange={(e) => setBirthYear1(e.target.value)}
-                    className="flex-1 bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                   >
                     <option value="">년</option>
                     {yearOptions.map((year) => (
@@ -637,7 +637,7 @@ export default function FriendshipCompatibilityPage() {
                   <select
                     value={birthMonth1}
                     onChange={(e) => setBirthMonth1(e.target.value)}
-                    className="flex-1 bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                   >
                     <option value="">월</option>
                     {monthOptions.map((month) => (
@@ -649,7 +649,7 @@ export default function FriendshipCompatibilityPage() {
                   <select
                     value={birthDay1}
                     onChange={(e) => setBirthDay1(e.target.value)}
-                    className="flex-1 bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                   >
                     <option value="">일</option>
                     {dayOptions1.map((day) => (
@@ -662,7 +662,7 @@ export default function FriendshipCompatibilityPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-200 mb-1">
+                <label className="block text-sm font-medium text-purple-700 mb-1">
                   태어난 시간
                 </label>
                 <select
@@ -670,7 +670,7 @@ export default function FriendshipCompatibilityPage() {
                   onChange={(e) =>
                     setKoreanBirthTime1(e.target.value as BirthTime)
                   }
-                  className="w-full bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                 >
                   <option value="모름">모름</option>
                   <option value="자시(23:00-01:00)">자시(23:00-01:00)</option>
@@ -686,22 +686,22 @@ export default function FriendshipCompatibilityPage() {
                   <option value="술시(19:00-21:00)">술시(19:00-21:00)</option>
                   <option value="해시(21:00-23:00)">해시(21:00-23:00)</option>
                 </select>
-                <p className="text-purple-300 text-xs mt-1">
-                  모를 경우 '모름'을 선택하세요
+                <p className="text-xs text-purple-500 mt-1">
+                  모를 경우 &apos;모름&apos;을 선택하세요
                 </p>
               </div>
             </div>
 
             {/* 두 번째 사람 정보 */}
-            <div className="mb-6 p-4 bg-[#25074D]/50 rounded-xl border border-purple-400/30">
-              <h3 className="text-lg font-medium text-white mb-4">
+            <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+              <h3 className="text-lg font-medium text-purple-900 mb-4">
                 두 번째 사람 정보
               </h3>
 
               <div className="mb-4">
                 <label
                   htmlFor="person2-name"
-                  className="block text-sm font-medium text-purple-200 mb-1"
+                  className="block text-sm font-medium text-purple-700 mb-1"
                 >
                   이름
                 </label>
@@ -713,13 +713,13 @@ export default function FriendshipCompatibilityPage() {
                     handleInputChange("person2", "name", e.target.value)
                   }
                   placeholder="이름을 입력하세요"
-                  className="w-full bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300/50"
+                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
                 />
               </div>
 
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-sm font-medium text-purple-200">
+                  <label className="text-sm font-medium text-purple-700">
                     성별
                   </label>
                 </div>
@@ -736,8 +736,8 @@ export default function FriendshipCompatibilityPage() {
                     <div
                       className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
                         formData.person2.gender === "남"
-                          ? "bg-[#9333EA] text-white"
-                          : "bg-[#2D0D56]/40 border border-purple-500/40 text-purple-300"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white border border-purple-300 text-purple-700"
                       }`}
                     >
                       남성
@@ -755,8 +755,8 @@ export default function FriendshipCompatibilityPage() {
                     <div
                       className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
                         formData.person2.gender === "여"
-                          ? "bg-[#9333EA] text-white"
-                          : "bg-[#2D0D56]/40 border border-purple-500/40 text-purple-300"
+                          ? "bg-purple-600 text-white"
+                          : "bg-white border border-purple-300 text-purple-700"
                       }`}
                     >
                       여성
@@ -766,14 +766,14 @@ export default function FriendshipCompatibilityPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-200 mb-1">
+                <label className="block text-sm font-medium text-purple-700 mb-1">
                   생년월일
                 </label>
                 <div className="flex gap-2">
                   <select
                     value={birthYear2}
                     onChange={(e) => setBirthYear2(e.target.value)}
-                    className="flex-1 bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                   >
                     <option value="">년</option>
                     {yearOptions.map((year) => (
@@ -785,7 +785,7 @@ export default function FriendshipCompatibilityPage() {
                   <select
                     value={birthMonth2}
                     onChange={(e) => setBirthMonth2(e.target.value)}
-                    className="flex-1 bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                   >
                     <option value="">월</option>
                     {monthOptions.map((month) => (
@@ -797,7 +797,7 @@ export default function FriendshipCompatibilityPage() {
                   <select
                     value={birthDay2}
                     onChange={(e) => setBirthDay2(e.target.value)}
-                    className="flex-1 bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                   >
                     <option value="">일</option>
                     {dayOptions2.map((day) => (
@@ -810,7 +810,7 @@ export default function FriendshipCompatibilityPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-200 mb-1">
+                <label className="block text-sm font-medium text-purple-700 mb-1">
                   태어난 시간
                 </label>
                 <select
@@ -818,7 +818,7 @@ export default function FriendshipCompatibilityPage() {
                   onChange={(e) =>
                     setKoreanBirthTime2(e.target.value as BirthTime)
                   }
-                  className="w-full bg-[#2D0D56]/40 border border-purple-500/40 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
                 >
                   <option value="모름">모름</option>
                   <option value="자시(23:00-01:00)">자시(23:00-01:00)</option>
@@ -834,14 +834,14 @@ export default function FriendshipCompatibilityPage() {
                   <option value="술시(19:00-21:00)">술시(19:00-21:00)</option>
                   <option value="해시(21:00-23:00)">해시(21:00-23:00)</option>
                 </select>
-                <p className="text-purple-300 text-xs mt-1">
-                  모를 경우 '모름'을 선택하세요
+                <p className="text-xs text-purple-500 mt-1">
+                  모를 경우 &apos;모름&apos;을 선택하세요
                 </p>
               </div>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-100 text-sm">
+              <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
                 {error}
               </div>
             )}
@@ -850,16 +850,12 @@ export default function FriendshipCompatibilityPage() {
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-[#9333EA] hover:bg-[#7928CA] text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-800/30 flex items-center justify-center gap-2 relative overflow-hidden group"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
             >
-              <span className="relative z-10">친구 궁합 확인하기</span>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#9333EA] to-[#7928CA] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="absolute inset-0 bg-[url('/sparkles.png')] bg-cover opacity-0 group-hover:opacity-20 group-hover:animate-pulse"></div>
-              </div>
+              친구 궁합 확인하기
             </motion.button>
 
-            <p className="text-center text-purple-300 text-xs mt-4">
+            <p className="text-center text-purple-500 text-xs mt-4">
               생년월일과 시간 정보는 정확한 궁합 분석을 위해 사용됩니다.
             </p>
           </form>
@@ -868,6 +864,7 @@ export default function FriendshipCompatibilityPage() {
 
       {showShareModal && (
         <ShareModal
+          isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
           onCopyLink={copyToClipboard}
           onShareKakao={shareToKakao}
