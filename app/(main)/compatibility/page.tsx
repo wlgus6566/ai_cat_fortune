@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 // 현재 주석 처리된 코드에서만 사용되지만 향후 필요할 수 있으므로 유지
 // eslint-disable-next-line
 import Image from "next/image";
@@ -12,6 +12,42 @@ import { useCompatibility } from "@/app/context/CompatibilityContext";
 import { useUser } from "@/app/contexts/UserContext";
 import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
+import { Share2 } from "lucide-react";
+import ShareModal from "@/app/components/ShareModal";
+
+// 카카오 SDK 타입 정의
+declare global {
+  interface Window {
+    Kakao: {
+      init: (key: string) => void;
+      isInitialized: () => boolean;
+      Share: {
+        sendDefault: (options: KakaoShareOptions) => void;
+      };
+    };
+  }
+}
+
+// 카카오 공유 옵션 타입
+interface KakaoShareOptions {
+  objectType: string;
+  content: {
+    title: string;
+    description: string;
+    imageUrl: string;
+    link: {
+      mobileWebUrl: string;
+      webUrl: string;
+    };
+  };
+  buttons: {
+    title: string;
+    link: {
+      mobileWebUrl: string;
+      webUrl: string;
+    };
+  }[];
+}
 
 export default function CompatibilityPage() {
   const router = useRouter();
@@ -34,8 +70,30 @@ export default function CompatibilityPage() {
   });
   const [error, setError] = useState("");
   const [isSharedMode, setIsSharedMode] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // 카카오 SDK 초기화
+  useEffect(() => {
+    // 카카오 SDK 스크립트 로드
+    const script = document.createElement("script");
+    script.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js";
+    // script.integrity =
+    //   "sha384-kYPsUbBPlktXsY6/oNHSUDZoTX6+YI51f63jCPENAC7vwVvMUe0JWBZ5t0xk9sUy";
+    script.crossOrigin = "anonymous";
+    script.async = true;
+    script.onload = () => {
+      // Kakao SDK 초기화
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || "");
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // URL 파라미터 처리 및 공유 모드 설정
   useEffect(() => {
@@ -183,28 +241,79 @@ export default function CompatibilityPage() {
     // 필수 필드 체크
     if (!name || !birthdate || !gender || !birthtime) {
       setError("공유하려면 첫 번째 사람의 정보를 모두 입력해주세요.");
-      return;
+      return "";
     }
 
     const encodedName = encodeURIComponent(name);
     const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/compatibility?name=${encodedName}&birthdate=${birthdate}&gender=${gender}&birthtime=${birthtime}&shared=true`;
+    return `${baseUrl}/compatibility?name=${encodedName}&birthdate=${birthdate}&gender=${gender}&birthtime=${birthtime}&shared=true`;
+  };
+
+  // 링크 복사 기능
+  const copyToClipboard = () => {
+    const shareUrl = generateShareLink();
+    if (!shareUrl) return; // 유효성 검사 실패 시 리턴
 
     navigator.clipboard
       .writeText(shareUrl)
       .then(() => {
-        setIsCopied(true);
+        setShowShareModal(false);
         toast.success(
           "공유 링크가 복사되었습니다! 원하는 곳에 붙여넣기 하세요."
         );
-
-        // 3초 후에 복사 상태 초기화
-        setTimeout(() => setIsCopied(false), 3000);
       })
       .catch((err) => {
         console.error("링크 복사 실패:", err);
         toast.error("링크 복사에 실패했습니다. 다시 시도해주세요.");
       });
+  };
+
+  // 카카오톡 공유하기
+  const shareToKakao = () => {
+    console.log("Kakao 객체:", window.Kakao);
+    if (!window.Kakao || !window.Kakao.Share) {
+      toast.error("카카오톡 공유 기능을 불러오는데 실패했습니다.");
+      return;
+    }
+
+    const shareUrl = generateShareLink();
+    if (!shareUrl) return; // 유효성 검사 실패 시 리턴
+
+    window.Kakao.Share.sendDefault({
+      objectType: "feed",
+      content: {
+        title: "궁합 테스트",
+        description: `${formData.person1.name}님의 궁합 테스트에 참여해보세요!`,
+        imageUrl: `${window.location.origin}/compatibility-header.png`,
+        link: {
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
+        },
+      },
+      buttons: [
+        {
+          title: "테스트 참여하기",
+          link: {
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
+          },
+        },
+      ],
+    });
+  };
+
+  // 공유하기 버튼 클릭 핸들러
+  const handleShareClick = () => {
+    const { name, birthdate, gender, birthtime } = formData.person1;
+
+    // 필수 필드 체크
+    if (!name || !birthdate || !gender || !birthtime) {
+      setError("공유하려면 첫 번째 사람의 정보를 모두 입력해주세요.");
+      return;
+    }
+
+    // 모달 열기
+    setShowShareModal(true);
   };
 
   // 애니메이션 변수
@@ -244,46 +353,19 @@ export default function CompatibilityPage() {
         }}
       />
 
+      {/* 공유하기 모달 */}
+      <AnimatePresence>
+        {showShareModal && (
+          <ShareModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            onShareKakao={shareToKakao}
+            onCopyLink={copyToClipboard}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="container max-w-md mx-auto px-4 py-6 relative">
-        {/* 배경 요소 */}
-        {/* <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 20,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
-            }}
-          >
-            <Image
-              src="/assets/images/star.png"
-              alt="별"
-              width={100}
-              height={100}
-              className="w-full h-full"
-            />
-          </motion.div>
-        </div> */}
-
-        {/* <div className="absolute bottom-20 left-0 w-16 h-16 opacity-20">
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{
-              duration: 3,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-            }}
-          >
-            <Image
-              src="/assets/images/moon.png"
-              alt="달"
-              width={60}
-              height={60}
-              className="w-full h-full"
-            />
-          </motion.div>
-        </div> */}
-
         {/* 메인 컨텐츠 */}
         <motion.div
           className="bg-white rounded-2xl shadow-lg p-6 mb-8"
@@ -291,16 +373,6 @@ export default function CompatibilityPage() {
           initial="hidden"
           animate="visible"
         >
-          {/* <motion.div className="flex justify-center" variants={itemVariants}>
-            <Image
-              src="/cat_book.png"
-              alt="고양이 마법사"
-              width={100}
-              height={100}
-              className="w-24 h-24 object-contain"
-            />
-          </motion.div> */}
-
           <motion.h2
             className="text-xl font-bold text-center text-[#3B2E7E] mb-6 font-gothic"
             variants={itemVariants}
@@ -569,24 +641,11 @@ export default function CompatibilityPage() {
               {!isSharedMode && (
                 <button
                   type="button"
-                  onClick={generateShareLink}
+                  onClick={handleShareClick}
                   className="w-full mt-4 px-6 py-3 rounded-xl bg-white border border-[#990dfa] text-[#990dfa] font-medium hover:bg-[#F9F5FF] transition-colors flex items-center justify-center"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    />
-                  </svg>
-                  {isCopied ? "복사됨!" : "공유하기"}
+                  <Share2 className="h-5 w-5 mr-2" />
+                  공유하고 궁합보기
                 </button>
               )}
             </motion.div>

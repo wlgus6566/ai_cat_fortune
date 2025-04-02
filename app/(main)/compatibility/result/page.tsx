@@ -9,6 +9,42 @@ import { useCompatibility } from "@/app/context/CompatibilityContext";
 import type { CompatibilityResult } from "@/app/lib/openai";
 import CircularProgress from "@/app/components/CircularProgress";
 import { Heart, Star, Sparkles, ArrowLeft } from "lucide-react";
+import { toast, Toaster } from "react-hot-toast";
+import ShareModal from "@/app/components/ShareModal";
+
+// 카카오 SDK 타입 정의
+declare global {
+  interface Window {
+    Kakao: {
+      init: (key: string) => void;
+      isInitialized: () => boolean;
+      Share: {
+        sendDefault: (options: KakaoShareOptions) => void;
+      };
+    };
+  }
+}
+
+// 카카오 공유 옵션 타입
+interface KakaoShareOptions {
+  objectType: string;
+  content: {
+    title: string;
+    description: string;
+    imageUrl: string;
+    link: {
+      mobileWebUrl: string;
+      webUrl: string;
+    };
+  };
+  buttons: {
+    title: string;
+    link: {
+      mobileWebUrl: string;
+      webUrl: string;
+    };
+  }[];
+}
 
 // 애니메이션 변수
 const containerVariants = {
@@ -36,7 +72,6 @@ const slideInUp = {
 const starVariants = {
   animate: (i: number) => ({
     scale: [1, 1.2, 1],
-    rotate: [0, 5, -5, 0],
     opacity: [0.7, 1, 0.7],
     transition: {
       duration: 3,
@@ -165,33 +200,29 @@ export default function CompatibilityResultPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [loadingStage, setLoadingStage] = useState(1); // 3단계 로딩 (1: 초기, 2: 분석중, 3: 완료)
+  const [showShareModal, setShowShareModal] = useState(false);
 
-  // 로딩 애니메이션 내 텍스트
-  const [loadingText, setLoadingText] = useState("");
-  const [showResultButton, setShowResultButton] = useState(false);
-
-  // 로딩 애니메이션 (점 표시)
+  // 카카오 SDK 초기화
   useEffect(() => {
-    if (!loading) return;
-
-    const texts = ["읽고 있어", "읽고 있어.", "읽고 있어..", "읽고 있어..."];
-    let index = 0;
-
-    const loadingInterval = setInterval(() => {
-      setLoadingText(texts[index % texts.length]);
-      index++;
-
-      // 3초 후에 결과보기 버튼 표시
-      if (index === 12) {
-        setShowResultButton(true);
-        clearInterval(loadingInterval);
+    // 카카오 SDK 스크립트 로드
+    const script = document.createElement("script");
+    script.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js";
+    // script.integrity =
+    //   "sha384-kYPsUbBPlktXsY6/oNHSUDZoTX6+YI51f63jCPENAC7vwVvMUe0JWBZ5t0xk9sUy";
+    script.crossOrigin = "anonymous";
+    script.async = true;
+    script.onload = () => {
+      // Kakao SDK 초기화
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || "");
       }
-    }, 500);
+    };
+    document.body.appendChild(script);
 
     return () => {
-      clearInterval(loadingInterval);
+      document.body.removeChild(script);
     };
-  }, [loading]);
+  }, []);
 
   useEffect(() => {
     // 사용자가 입력 데이터 없이 직접 URL 접근했을 경우 리다이렉트
@@ -252,58 +283,110 @@ export default function CompatibilityResultPage() {
     };
   }, [state, router]);
 
+  // 현재 URL 생성
+  const generateShareUrl = () => {
+    if (typeof window === "undefined") return "";
+
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/compatibility?name=${encodeURIComponent(
+      state.person1.name
+    )}&birthdate=${state.person1.birthdate}&gender=${
+      state.person1.gender
+    }&birthtime=${state.person1.birthtime}&shared=true`;
+
+    return shareUrl;
+  };
+
+  // 링크 복사 기능
+  const copyToClipboard = () => {
+    const shareUrl = generateShareUrl();
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        toast.success("링크가 복사되었습니다!");
+        setShowShareModal(false);
+      })
+      .catch((err) => {
+        toast.error("링크 복사에 실패했습니다.");
+        console.error("링크 복사 실패:", err);
+      });
+  };
+
+  // 카카오톡 공유하기
+  const shareToKakao = () => {
+    if (!window.Kakao || !window.Kakao.Share) {
+      toast.error("카카오톡 공유 기능을 불러오는데 실패했습니다.");
+      return;
+    }
+
+    const shareUrl = generateShareUrl();
+
+    window.Kakao.Share.sendDefault({
+      objectType: "feed",
+      content: {
+        title: "궁합 테스트 결과",
+        description: `${state.person1.name}님과 ${state.person2.name}님의 궁합 결과를 확인해보세요!`,
+        imageUrl: `${window.location.origin}/compatibility-header.png`, // 프로젝트에 있는 실제 이미지 사용
+        link: {
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
+        },
+      },
+      buttons: [
+        {
+          title: "궁합 확인하기",
+          link: {
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
+          },
+        },
+      ],
+    });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen font-gothic flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
-        {/* 배경 장식 요소 */}
-        {/* {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-white opacity-30"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              fontSize: `${Math.random() * 20 + 10}px`,
-            }}
-            custom={i}
-            variants={starVariants}
-            animate="animate"
-          >
-            {Math.random() > 0.7 ? "✨" : Math.random() > 0.5 ? "⭐" : "🌟"}
-          </motion.div>
-        ))} */}
+      <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] font-gothic flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+        {/* Toaster for notifications */}
+        <Toaster position="top-center" />
+
+        {/* Share Modal */}
+        <AnimatePresence>
+          {showShareModal && (
+            <ShareModal
+              isOpen={showShareModal}
+              onClose={() => setShowShareModal(false)}
+              onShareKakao={shareToKakao}
+              onCopyLink={copyToClipboard}
+              title="결과 공유하기"
+            />
+          )}
+        </AnimatePresence>
 
         <motion.div
-          className="w-24 h-24 mb-8 relative"
+          className="w-24 h-28 mb-8 relative"
           animate={{
-            rotate: 360,
             y: [0, -10, 0],
           }}
           transition={{
-            rotate: {
-              duration: 20,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
-            },
             y: {
               duration: 2,
-              repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
             },
           }}
         >
           <div className="absolute inset-0 bg-purple-500 rounded-full opacity-20 blur-xl"></div>
           <Image
-            src="/assets/images/star.png"
+            src="/new_cat_magic.png"
             alt="로딩중"
-            width={96}
-            height={96}
-            className="w-full h-full relative z-10"
+            width={80}
+            height={120}
+            className="w-full h-full relative z-10 -rotate-12"
           />
         </motion.div>
 
         <motion.h2
-          className="text-2xl font-bold mb-6 text-center"
+          className="text-xl font-dodamdodam font-bold mb-6 text-center"
           animate={{
             scale: [1, 1.05, 1],
             textShadow: [
@@ -323,30 +406,23 @@ export default function CompatibilityResultPage() {
             : "두 사람의 인연을 분석중입니다..."}
         </motion.h2>
 
-        <motion.div
-          className="text-lg text-center mb-8 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full"
-          animate={{
-            opacity: [0.7, 1, 0.7],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        >
-          {loadingText}
-        </motion.div>
+        <motion.div variants={slideInUp} className="text-center mt-8 mb-12">
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => router.push("/compatibility")}
+              className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
+            >
+              다시 궁합 보기
+            </button>
 
-        {showResultButton && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
-            onClick={() => setLoading(false)}
-          >
-            결과 보기
-          </motion.button>
-        )}
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="px-8 py-3 bg-[#3B2E7E] text-white border border-white/30 rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
+            >
+              결과 공유하기
+            </button>
+          </div>
+        </motion.div>
       </div>
     );
   }

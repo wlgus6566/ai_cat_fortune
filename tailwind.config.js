@@ -10,6 +10,7 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-noto-sans)"],
         gothic: ["var(--font-nanum-gothic)"],
+        dodamdodam: ["KCC-DodamdodamR", "sans-serif"],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

@@ -443,7 +443,7 @@ export default function HomePage() {
         animate="visible"
       >
         <motion.div
-          className="w-[100px] h-[100px] relative "
+          className="w-[100px] h-[100px] relative ml-5"
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
