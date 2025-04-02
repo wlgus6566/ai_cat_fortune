@@ -11,7 +11,7 @@ import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
-import { v1 } from "uuid";
+import { UserProfile } from "@/app/type/types";
 
 // 생년월일 및 시간 관련 타입 정의
 type CalendarType = "양력" | "음력";
@@ -101,6 +101,38 @@ const validateName = (
   return { isValid: true, errorMessage: "" };
 };
 
+// 사용자 데이터를 폼 데이터 형식으로 변환하는 함수
+const mapUserProfileToFormData = (userProfile: UserProfile | null) => {
+  if (!userProfile) return null;
+
+  // 성별 변환 (UserProfile의 Gender -> 폼의 "남"/"여")
+  let gender: "남" | "여" = "남";
+  if (userProfile.gender === "여성") {
+    gender = "여";
+  } else if (userProfile.gender === "남성") {
+    gender = "남";
+  }
+
+  // 생년월일 형식 확인
+  const birthDate = userProfile.birthDate || "";
+
+  // 태어난 시간 처리
+  let birthtime = "";
+  if (userProfile.birthTime && userProfile.birthTime !== "모름") {
+    const matches = userProfile.birthTime.match(/\((\d{2}):00-/);
+    if (matches && matches[1]) {
+      birthtime = `${matches[1]}:00`;
+    }
+  }
+
+  return {
+    name: userProfile.name || "",
+    birthdate: birthDate,
+    gender,
+    birthtime,
+  };
+};
+
 export default function FriendshipCompatibilityPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -125,6 +157,7 @@ export default function FriendshipCompatibilityPage() {
   const [birthYear1, setBirthYear1] = useState("");
   const [birthMonth1, setBirthMonth1] = useState("");
   const [birthDay1, setBirthDay1] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [calendarType1, setCalendarType1] = useState<CalendarType>("양력");
   const [koreanBirthTime1, setKoreanBirthTime1] = useState<BirthTime>("모름");
 
@@ -132,6 +165,7 @@ export default function FriendshipCompatibilityPage() {
   const [birthYear2, setBirthYear2] = useState("");
   const [birthMonth2, setBirthMonth2] = useState("");
   const [birthDay2, setBirthDay2] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [calendarType2, setCalendarType2] = useState<CalendarType>("양력");
   const [koreanBirthTime2, setKoreanBirthTime2] = useState<BirthTime>("모름");
 
@@ -201,6 +235,7 @@ export default function FriendshipCompatibilityPage() {
   };
 
   const [error, setError] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [isSharedMode, setIsSharedMode] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -230,31 +265,34 @@ export default function FriendshipCompatibilityPage() {
   // 사용자 프로필 기반 초기화
   useEffect(() => {
     if (isLoaded && userProfile) {
-      const birthdate = userProfile.birthdate || "";
-      const birthtime = userProfile.birthtime || "";
+      const userData = mapUserProfileToFormData(userProfile);
+      if (userData) {
+        // 사용자 데이터로 폼 업데이트
+        setFormData((prevData) => ({
+          ...prevData,
+          person1: {
+            ...prevData.person1,
+            name: userData.name,
+            gender: userData.gender,
+            birthdate: userData.birthdate,
+            birthtime: userData.birthtime,
+          },
+        }));
 
-      if (birthdate) {
-        const parts = birthdate.split("-");
-        if (parts.length === 3) {
-          setBirthYear1(parts[0]);
-          setBirthMonth1(String(parseInt(parts[1])));
-          setBirthDay1(String(parseInt(parts[2])));
+        // 생년월일 분리하여 설정
+        if (userData.birthdate) {
+          const parts = userData.birthdate.split("-");
+          if (parts.length === 3) {
+            setBirthYear1(parts[0]);
+            setBirthMonth1(String(parseInt(parts[1])));
+            setBirthDay1(String(parseInt(parts[2])));
+          }
         }
-      }
 
-      setFormData((prevData) => ({
-        ...prevData,
-        person1: {
-          ...prevData.person1,
-          name: userProfile.displayName || "",
-          gender: userProfile.gender === "male" ? "남" : "여",
-          birthdate,
-          birthtime,
-        },
-      }));
-
-      if (birthtime) {
-        setKoreanBirthTime1(findClosestBirthTime(birthtime));
+        // 시간 설정
+        if (userData.birthtime) {
+          setKoreanBirthTime1(findClosestBirthTime(userData.birthtime));
+        }
       }
     }
   }, [isLoaded, userProfile]);
@@ -547,7 +585,7 @@ export default function FriendshipCompatibilityPage() {
             {/* 첫 번째 사람 정보 */}
             <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
               <h3 className="text-lg font-medium text-purple-900 mb-4">
-                첫 번째 사람 정보
+                첫 번째 사람 정보 {userProfile ? "(내 정보)" : ""}
               </h3>
 
               <div className="mb-4">
@@ -868,8 +906,6 @@ export default function FriendshipCompatibilityPage() {
           onClose={() => setShowShareModal(false)}
           onCopyLink={copyToClipboard}
           onShareKakao={shareToKakao}
-          title="친구 궁합 공유하기"
-          description="작성 중인 친구 궁합 정보를 공유해보세요."
         />
       )}
     </div>

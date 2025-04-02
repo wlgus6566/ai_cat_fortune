@@ -779,9 +779,9 @@ export default function HomePage() {
                   <BookHeart className="h-8 w-8 text-[#6366f1]" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-1">
-                  사주로 보는
+                  AI 사주
                   <br />
-                  궁합
+                  사랑궁합
                 </h3>
                 <p className="text-[#6366f1] text-sm font-medium">
                   내 짝은 어디에?
@@ -794,15 +794,19 @@ export default function HomePage() {
           <SwiperSlide>
             {/* 두 번째 카드 */}
             <div className="bg-[#E6F7ED] rounded-2xl p-6 relative overflow-hidden">
-              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <MessageCircleHeart className="h-8 w-8 text-[#10B981]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">
-                나를 좋아하는 그 사람
-              </h3>
-              <p className="text-[#10B981] text-sm font-medium">
-                무슨 마음이지?
-              </p>
+              <Link href="/friendship-compatibility">
+                <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                  <MessageCircleHeart className="h-8 w-8 text-[#10B981]" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-1">
+                  AI 사주
+                  <br />
+                  친구 궁합
+                </h3>
+                <p className="text-[#10B981] text-sm font-medium">
+                  케미 확인하기
+                </p>
+              </Link>
             </div>
           </SwiperSlide>
           <SwiperSlide>
