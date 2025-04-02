@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -12,6 +12,8 @@ import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
 import { UserProfile } from "@/app/type/types";
+import Lottie from "lottie-react";
+import Link from "next/link";
 
 // 생년월일 및 시간 관련 타입 정의
 type CalendarType = "양력" | "음력";
@@ -153,6 +155,9 @@ export default function FriendshipCompatibilityPage() {
     },
   });
 
+  // 페이지 단계 상태 (1: 첫 번째 사람 정보, 2: 두 번째 사람 정보, 3: 결과)
+  const [step, setStep] = useState(1);
+
   // Person1 추가 상태
   const [birthYear1, setBirthYear1] = useState("");
   const [birthMonth1, setBirthMonth1] = useState("");
@@ -239,6 +244,39 @@ export default function FriendshipCompatibilityPage() {
   const [isSharedMode, setIsSharedMode] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  // Lottie 애니메이션 객체 참조
+  const chatAnimationRef = useRef(null);
+  const profileAnimationRef = useRef(null);
+  const talismanAnimationRef = useRef(null);
+
+  // Lottie 애니메이션 데이터 상태
+  const [chatAnimationData, setChatAnimationData] = useState(null);
+  const [profileAnimationData, setProfileAnimationData] = useState(null);
+  const [talismanAnimationData, setTalismanAnimationData] = useState(null);
+
+  // Lottie 애니메이션 데이터 로드
+  useEffect(() => {
+    const loadAnimationData = async () => {
+      try {
+        const chatResponse = await fetch("/lottie/chat-animation.json");
+        const chatData = await chatResponse.json();
+        setChatAnimationData(chatData);
+
+        const profileResponse = await fetch("/lottie/profile-animation.json");
+        const profileData = await profileResponse.json();
+        setProfileAnimationData(profileData);
+
+        const talismanResponse = await fetch("/lottie/talisman-animation.json");
+        const talismanData = await talismanResponse.json();
+        setTalismanAnimationData(talismanData);
+      } catch (error) {
+        console.error("Failed to load Lottie animations:", error);
+      }
+    };
+
+    loadAnimationData();
+  }, []);
 
   // 카카오 SDK 초기화
   useEffect(() => {
@@ -398,30 +436,31 @@ export default function FriendshipCompatibilityPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 사람1 유효성 검사
-    const person1NameValidation = validateName(formData.person1.name);
-    if (!person1NameValidation.isValid) {
-      setError(person1NameValidation.errorMessage);
-      toast.error(person1NameValidation.errorMessage);
+    // 데이터 검증
+    const validationResult = validateFormData();
+    if (!validationResult.isValid) {
+      setError(validationResult.errorMessage);
+      toast.error(validationResult.errorMessage);
       return;
     }
 
-    // 사람2 유효성 검사
-    const person2NameValidation = validateName(formData.person2.name);
-    if (!person2NameValidation.isValid) {
-      setError(person2NameValidation.errorMessage);
-      toast.error(person2NameValidation.errorMessage);
-      return;
-    }
+    // 친구 궁합 데이터 저장
+    setState({
+      person1: {
+        ...formData.person1,
+      },
+      person2: {
+        ...formData.person2,
+      },
+    });
 
-    // 생년월일 필수 입력 체크
-    if (!formData.person1.birthdate || !formData.person2.birthdate) {
-      setError("생년월일을 모두 입력해주세요.");
-      toast.error("생년월일을 모두 입력해주세요.");
-      return;
-    }
+    // 에러 상태 초기화
+    setError("");
 
-    setState(formData);
+    // 단계를 3으로 변경 (결과 단계)
+    setStep(3);
+
+    // 결과 페이지로 이동
     router.push("/friendship-compatibility/result");
   };
 
@@ -509,7 +548,7 @@ export default function FriendshipCompatibilityPage() {
 
   return (
     <div className="min-h-screen pb-20 bg-purple-50">
-      <PageHeader title="친구 궁합" />
+      <PageHeader title="2025 친구 궁합" />
       <Toaster position="top-center" />
       <div className="max-w-xl mx-auto px-4 pt-6">
         <AnimatePresence>
@@ -552,18 +591,6 @@ export default function FriendshipCompatibilityPage() {
         </AnimatePresence>
 
         <div className="bg-white rounded-2xl p-6 border border-purple-200 shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-purple-900">
-              친구 궁합 확인하기
-            </h2>
-            <button
-              onClick={handleShareClick}
-              className="p-2 text-purple-500 hover:text-purple-700 transition-colors"
-            >
-              <Share2 size={20} />
-            </button>
-          </div>
-
           <div className="flex justify-center mb-6">
             <div className="relative w-32 h-32">
               <Image
@@ -577,8 +604,6 @@ export default function FriendshipCompatibilityPage() {
 
           <p className="text-center text-purple-700 mb-6">
             친구와의 케미를 확인해볼까냥? 🐱✨
-            <br />
-            생년월일 정보를 입력하면 고양이 점성술사가 친구 궁합을 봐드려요!
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -892,7 +917,14 @@ export default function FriendshipCompatibilityPage() {
             >
               친구 궁합 확인하기
             </motion.button>
-
+            <button
+              type="button"
+              onClick={handleShareClick}
+              className="w-full mt-4 px-6 py-3 rounded-xl bg-white border border-[#990dfa] text-[#990dfa] font-medium hover:bg-[#F9F5FF] transition-colors flex items-center justify-center"
+            >
+              <Share2 className="h-5 w-5 mr-2" />
+              공유하고 궁합보기
+            </button>
             <p className="text-center text-purple-500 text-xs mt-4">
               생년월일과 시간 정보는 정확한 궁합 분석을 위해 사용됩니다.
             </p>
@@ -907,6 +939,130 @@ export default function FriendshipCompatibilityPage() {
           onCopyLink={copyToClipboard}
           onShareKakao={shareToKakao}
         />
+      )}
+
+      {/* 퀵 메뉴 영역 */}
+      {step === 3 && (
+        <div className="flex justify-center mt-8 pt-4 mb-8">
+          <div className="grid grid-cols-3 gap-4 w-full max-w-md">
+            <motion.div
+              className="col-span-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              <Link href="/chat">
+                <div className="bg-[#F9F5FF] rounded-2xl p-4 flex flex-col items-center hover:bg-[#F0EAFF] transition-colors">
+                  <div className="mb-2 text-[#990dfa] w-12 h-12 flex items-center justify-center">
+                    {chatAnimationData ? (
+                      <Lottie
+                        animationData={chatAnimationData}
+                        lottieRef={chatAnimationRef}
+                        style={{ width: 48, height: 48 }}
+                      />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#3B2E7E] text-center">
+                    궁합챗
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
+
+            <motion.div
+              className="col-span-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              <Link href="/profile">
+                <div className="bg-[#F9F5FF] rounded-2xl p-4 flex flex-col items-center hover:bg-[#F0EAFF] transition-colors">
+                  <div className="mb-2 text-[#990dfa] w-12 h-12 flex items-center justify-center">
+                    {profileAnimationData ? (
+                      <Lottie
+                        animationData={profileAnimationData}
+                        lottieRef={profileAnimationRef}
+                        style={{ width: 48, height: 48 }}
+                      />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#3B2E7E] text-center">
+                    내 정보
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
+
+            <motion.div
+              className="col-span-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+            >
+              <Link href="/talisman-gallery">
+                <div className="bg-[#F9F5FF] rounded-2xl p-4 flex flex-col items-center hover:bg-[#F0EAFF] transition-colors">
+                  <div className="mb-2 text-[#990dfa] w-12 h-12 flex items-center justify-center">
+                    {talismanAnimationData ? (
+                      <Lottie
+                        animationData={talismanAnimationData}
+                        lottieRef={talismanAnimationRef}
+                        style={{ width: 48, height: 48 }}
+                      />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 10V3L4 14h7v7l9-11h-7z"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#3B2E7E] text-center">
+                    부적
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
       )}
     </div>
   );
