@@ -19,8 +19,12 @@ export default function Home() {
     if (isAuthenticated) {
       console.log("사용자 인증됨, 프로필 완성 여부:", isProfileComplete);
 
-      // 수정: 프로필 완성 여부와 상관없이 fortune 페이지로 리디렉션
-      router.push("/fortune");
+      // 프로필 완성 여부에 따라 적절한 페이지로 리디렉션
+      if (isProfileComplete) {
+        router.push("/fortune");
+      } else {
+        router.push("/setup");
+      }
     } else if (status === "unauthenticated") {
       // 인증되지 않은 경우 로그인 페이지로 이동
       console.log("인증되지 않은 사용자, 로그인 페이지로 이동");

@@ -7,7 +7,8 @@ import { useUser } from "@/app/contexts/UserContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 // 언어 변경을 위한 로컬 스토리지 키
 const LANGUAGE_PREFERENCE_KEY = "language_preference";
@@ -17,12 +18,16 @@ const DARK_MODE_KEY = "dark_mode_enabled";
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const router = useRouter();
-  const { logout } = useUser();
+  const { logout, clearUserProfile, isAuthenticated } = useUser();
 
   // 현재 선택된 언어 상태
   const [selectedLanguage, setSelectedLanguage] = useState<string>("ko");
   // 다크모드 상태
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  // 회원탈퇴 모달 상태
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  // 회원탈퇴 진행 중 상태
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   // 컴포넌트 로드 시 로컬 스토리지에서 설정 가져오기
   useEffect(() => {
@@ -73,6 +78,45 @@ export default function SettingsPage() {
       router.push("/");
     } catch (error) {
       console.error("로그아웃 중 오류가 발생했습니다:", error);
+    }
+  };
+
+  // 회원탈퇴 모달 열기
+  const openWithdrawModal = () => {
+    setShowWithdrawModal(true);
+  };
+
+  // 회원탈퇴 모달 닫기
+  const closeWithdrawModal = () => {
+    setShowWithdrawModal(false);
+  };
+
+  // 회원탈퇴 처리
+  const handleWithdrawal = async () => {
+    try {
+      setIsWithdrawing(true);
+
+      // 인증된 사용자인 경우
+      if (isAuthenticated) {
+        // 1. 프로필 데이터 삭제
+        await clearUserProfile();
+
+        // 2. NextAuth 로그아웃 (세션 삭제)
+        await signOut({ redirect: false });
+      } else {
+        // 인증되지 않은 사용자의 경우 로컬 데이터만 삭제
+        await clearUserProfile();
+      }
+
+      // 모달 닫기
+      closeWithdrawModal();
+
+      // 홈페이지로 이동
+      router.push("/");
+    } catch (error) {
+      console.error("회원탈퇴 중 오류가 발생했습니다:", error);
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -213,12 +257,74 @@ export default function SettingsPage() {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="pt-2"
           >
-            <button className="w-full py-3 px-5 text-gray-500 hover:text-gray-700 text-sm font-medium rounded-xl transition-colors">
+            <button
+              onClick={openWithdrawModal}
+              className="w-full py-3 px-5 text-gray-500 hover:text-gray-700 text-sm font-medium rounded-xl transition-colors"
+            >
               회원 탈퇴
             </button>
           </motion.div>
         </div>
       </div>
+
+      {/* 회원탈퇴 확인 모달 */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-5"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-300">
+                회원 탈퇴
+              </h3>
+              <button
+                onClick={closeWithdrawModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                정말로 탈퇴하시겠습니까? 모든 데이터가 삭제되며 이 작업은 되돌릴
+                수 없습니다.
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>모든 프로필 정보가 삭제됩니다</li>
+                <li>운세 기록이 모두 삭제됩니다</li>
+                <li>설정 정보가 초기화됩니다</li>
+              </ul>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={closeWithdrawModal}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                disabled={isWithdrawing}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleWithdrawal}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center"
+                disabled={isWithdrawing}
+              >
+                {isWithdrawing ? (
+                  <>
+                    <span className="h-4 w-4 border-2 border-white rounded-full border-t-transparent animate-spin mr-2"></span>
+                    처리 중...
+                  </>
+                ) : (
+                  "탈퇴하기"
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

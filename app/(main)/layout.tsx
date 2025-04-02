@@ -61,6 +61,16 @@ export default function MainLayout({
     if (isLoaded) {
       // 초기 로드 상태를 false로 변경
       setIsInitialLoad(false);
+
+      // 프로필이 완성되지 않았고, setup 페이지에 있지 않은 경우 리디렉션
+      if (
+        !isProfileComplete &&
+        !pathname.includes("/setup") &&
+        !pathname.includes("/auth/")
+      ) {
+        console.log("프로필이 완성되지 않아 setup 페이지로 이동합니다.");
+        router.push("/setup");
+      }
     }
   }, [isProfileComplete, router, isLoaded, pathname]);
 
@@ -79,7 +89,7 @@ export default function MainLayout({
   return (
     <TalismanProvider>
       <div className="flex flex-col h-screen pb-16">
-        <div className="absolute top-0 left-0 h-50 w-full bg-gradient-to-b from-[#e6d0ff] to-[#F9F9F9] "></div>
+        <div className="absolute top-0 left-0 h-[200px] w-full bg-gradient-to-b from-[#e6d0ff] to-[#F9F9F9] "></div>
         <main className="flex-grow relative z-1">{children}</main>
 
         {isProfileComplete && (

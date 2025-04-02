@@ -64,9 +64,9 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log("[Redirect Callback]", { url, baseUrl });
 
-      // 로그인 성공 후 기본 리다이렉트를 fortune 페이지로 변경
+      // 로그인 성공 후 기본 리다이렉트를 홈페이지로 변경
       if (url === baseUrl || url === `${baseUrl}/`) {
-        return `${baseUrl}/fortune`;
+        return baseUrl;
       }
 
       // 안전한 URL로 리다이렉션
@@ -76,7 +76,7 @@ export const authOptions: NextAuthOptions = {
         return url;
       }
 
-      return `${baseUrl}/fortune`;
+      return baseUrl;
     },
     async signIn({ user, account, profile }) {
       console.log("[SignIn Callback] 시작", {

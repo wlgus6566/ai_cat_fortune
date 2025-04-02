@@ -202,6 +202,14 @@ export default function HomePage() {
   const searchParams = useSearchParams();
   const shouldShowFortune = searchParams.get("showFortune") === "true";
 
+  // 프로필 완성 여부에 따라 setup 페이지로 리디렉션
+  useEffect(() => {
+    if (isProfileComplete === false) {
+      console.log("프로필이 완성되지 않아 setup 페이지로 이동합니다.");
+      router.push("/auth/setup");
+    }
+  }, [isProfileComplete, router]);
+
   // 오늘의 운세 데이터 가져오기
   const fetchDailyFortune = useCallback(async () => {
     if (isApiCallInProgress || !userProfile || loading) {
@@ -434,7 +442,19 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
       >
-        <div className="max-w-[70%] pl-5">
+        <motion.div
+          className="w-[100px] h-[100px] relative "
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Image
+            src="/new_cat_magic.png"
+            alt="마법사 고양이"
+            fill
+            className="w-full h-full object-contain"
+          />
+        </motion.div>
+        <div className="flex-1 pl-10 text-left">
           <h1 className="text-2xl font-bold text-[#3B2E7E] mb-1 font-heading">
             {t("headerTitle")}
           </h1>
@@ -471,18 +491,6 @@ export default function HomePage() {
             </div>
           )} */}
         </div>
-        <motion.div
-          className="w-30 h-30 relative "
-          animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Image
-            src="/new_cat.png"
-            alt="마법사 고양이"
-            fill
-            className="w-full h-full object-contain"
-          />
-        </motion.div>
       </motion.div>
 
       {/* 에러 표시 */}
