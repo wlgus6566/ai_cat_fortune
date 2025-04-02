@@ -15,6 +15,23 @@ import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
 
+// 생년월일 및 시간 관련 타입 정의
+type CalendarType = "양력" | "음력";
+type BirthTime =
+  | "자시(23:00-01:00)"
+  | "축시(01:00-03:00)"
+  | "인시(03:00-05:00)"
+  | "묘시(05:00-07:00)"
+  | "진시(07:00-09:00)"
+  | "사시(09:00-11:00)"
+  | "오시(11:00-13:00)"
+  | "미시(13:00-15:00)"
+  | "신시(15:00-17:00)"
+  | "유시(17:00-19:00)"
+  | "술시(19:00-21:00)"
+  | "해시(21:00-23:00)"
+  | "모름";
+
 // 카카오 SDK 타입 정의
 declare global {
   interface Window {
@@ -49,6 +66,43 @@ interface KakaoShareOptions {
   }[];
 }
 
+// 이름 유효성 검사 함수
+const validateName = (
+  name: string
+): { isValid: boolean; errorMessage: string } => {
+  // 빈 값 체크
+  if (!name.trim()) {
+    return { isValid: false, errorMessage: "이름을 입력해주세요." };
+  }
+
+  // 길이 체크 (2글자 이상)
+  if (name.trim().length < 2) {
+    return { isValid: false, errorMessage: "이름은 2글자 이상이어야 합니다." };
+  }
+
+  // 한글/영문만 허용 (자음, 모음 단독 사용 불가)
+  const koreanRegex = /^[가-힣a-zA-Z\s]+$/;
+  if (!koreanRegex.test(name)) {
+    return {
+      isValid: false,
+      errorMessage:
+        "이름은 한글 또는 영문만 입력 가능합니다. (자음, 모음 단독 사용 불가)",
+    };
+  }
+
+  // 한글 자음/모음만 있는지 체크
+  const koreanSingleCharRegex = /[ㄱ-ㅎㅏ-ㅣ]/;
+  if (koreanSingleCharRegex.test(name)) {
+    return {
+      isValid: false,
+      errorMessage:
+        "완성된 한글만 입력 가능합니다. (자음, 모음 단독 사용 불가)",
+    };
+  }
+
+  return { isValid: true, errorMessage: "" };
+};
+
 export default function CompatibilityPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -68,6 +122,113 @@ export default function CompatibilityPage() {
       birthtime: "",
     },
   });
+
+  // Person1 추가 상태
+  const [birthYear1, setBirthYear1] = useState("");
+  const [birthMonth1, setBirthMonth1] = useState("");
+  const [birthDay1, setBirthDay1] = useState("");
+  const [calendarType1, setCalendarType1] = useState<CalendarType>("양력");
+  const [koreanBirthTime1, setKoreanBirthTime1] = useState<BirthTime>("모름");
+
+  // Person2 추가 상태
+  const [birthYear2, setBirthYear2] = useState("");
+  const [birthMonth2, setBirthMonth2] = useState("");
+  const [birthDay2, setBirthDay2] = useState("");
+  const [calendarType2, setCalendarType2] = useState<CalendarType>("양력");
+  const [koreanBirthTime2, setKoreanBirthTime2] = useState<BirthTime>("모름");
+
+  // 연도 옵션 생성 (1930년부터 현재까지)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from(
+    { length: currentYear - 1930 + 1 },
+    (_, i) => 1930 + i
+  ).reverse();
+
+  // 월 옵션
+  const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  // 일 옵션 (월에 따라 동적으로 변경)
+  const getDaysInMonth = (year: string, month: string) => {
+    if (!year || !month) return 31;
+    const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+    return daysInMonth;
+  };
+
+  // Person1 일 옵션
+  const dayOptions1 = Array.from(
+    { length: getDaysInMonth(birthYear1, birthMonth1) },
+    (_, i) => i + 1
+  );
+
+  // Person2 일 옵션
+  const dayOptions2 = Array.from(
+    { length: getDaysInMonth(birthYear2, birthMonth2) },
+    (_, i) => i + 1
+  );
+
+  // 시간 옵션 (select options로 변경하여 더 이상 직접 사용하지 않음)
+  // 시간대 문자열에서 시간 값 추출 (예: "자시(23:00-01:00)" -> "23:00")
+  const extractTimeFromBirthTime = (birthTime: BirthTime): string => {
+    if (birthTime === "모름") return "12:00"; // 기본값
+
+    const timeMatch = birthTime.match(/\((\d{2}):00-\d{2}:00\)/);
+    if (timeMatch) {
+      return `${timeMatch[1]}:00`;
+    }
+
+    return "12:00"; // 매치 실패 시 기본값
+  };
+
+  // 시간 값에서 가장 가까운 시간대 찾기 (예: "23:00" -> "자시(23:00-01:00)")
+  const findClosestBirthTime = (time: string): BirthTime => {
+    if (!time || time === "") return "모름";
+
+    const hour = parseInt(time.split(":")[0]);
+
+    // 시간에 따른 시간대 매핑
+    if (hour >= 23 || hour < 1) return "자시(23:00-01:00)";
+    if (hour >= 1 && hour < 3) return "축시(01:00-03:00)";
+    if (hour >= 3 && hour < 5) return "인시(03:00-05:00)";
+    if (hour >= 5 && hour < 7) return "묘시(05:00-07:00)";
+    if (hour >= 7 && hour < 9) return "진시(07:00-09:00)";
+    if (hour >= 9 && hour < 11) return "사시(09:00-11:00)";
+    if (hour >= 11 && hour < 13) return "오시(11:00-13:00)";
+    if (hour >= 13 && hour < 15) return "미시(13:00-15:00)";
+    if (hour >= 15 && hour < 17) return "신시(15:00-17:00)";
+    if (hour >= 17 && hour < 19) return "유시(17:00-19:00)";
+    if (hour >= 19 && hour < 21) return "술시(19:00-21:00)";
+    if (hour >= 21 && hour < 23) return "해시(21:00-23:00)";
+
+    return "모름";
+  };
+
+  // birthdate에서 년, 월, 일 추출 (예: "2023-01-15" -> {year: "2023", month: "1", day: "15"})
+  const extractDateParts = (birthdate: string) => {
+    if (!birthdate) return { year: "", month: "", day: "" };
+
+    const parts = birthdate.split("-");
+    if (parts.length !== 3) return { year: "", month: "", day: "" };
+
+    return {
+      year: parts[0],
+      month: String(parseInt(parts[1])), // 앞의 0 제거
+      day: String(parseInt(parts[2])),
+    };
+  };
+
+  // 년, 월, 일을 birthdate 형식으로 변환 (예: {year: "2023", month: "1", day: "15"} -> "2023-01-15")
+  const formatBirthdate = (
+    year: string,
+    month: string,
+    day: string
+  ): string => {
+    if (!year || !month || !day) return "";
+
+    return `${year}-${String(parseInt(month)).padStart(2, "0")}-${String(
+      parseInt(day)
+    ).padStart(2, "0")}`;
+  };
+
   const [error, setError] = useState("");
   const [isSharedMode, setIsSharedMode] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
@@ -194,6 +355,88 @@ export default function CompatibilityPage() {
     }
   }, [userProfile, isLoaded, isSharedMode]);
 
+  // formData 변경 시 추가 상태 업데이트
+  useEffect(() => {
+    // Person1 데이터 처리
+    const {
+      year: year1,
+      month: month1,
+      day: day1,
+    } = extractDateParts(formData.person1.birthdate);
+    setBirthYear1(year1);
+    setBirthMonth1(month1);
+    setBirthDay1(day1);
+
+    // Person1 시간 처리
+    const koreanTime1 = findClosestBirthTime(formData.person1.birthtime);
+    setKoreanBirthTime1(koreanTime1);
+
+    // Person2 데이터 처리
+    const {
+      year: year2,
+      month: month2,
+      day: day2,
+    } = extractDateParts(formData.person2.birthdate);
+    setBirthYear2(year2);
+    setBirthMonth2(month2);
+    setBirthDay2(day2);
+
+    // Person2 시간 처리
+    const koreanTime2 = findClosestBirthTime(formData.person2.birthtime);
+    setKoreanBirthTime2(koreanTime2);
+  }, [formData]);
+
+  // 추가 상태 변경 시 formData 업데이트
+  const updatePerson1FormData = () => {
+    const formattedBirthdate = formatBirthdate(
+      birthYear1,
+      birthMonth1,
+      birthDay1
+    );
+    const formattedBirthtime = extractTimeFromBirthTime(koreanBirthTime1);
+
+    setFormData((prev) => ({
+      ...prev,
+      person1: {
+        ...prev.person1,
+        birthdate: formattedBirthdate,
+        birthtime: formattedBirthtime,
+      },
+    }));
+  };
+
+  const updatePerson2FormData = () => {
+    const formattedBirthdate = formatBirthdate(
+      birthYear2,
+      birthMonth2,
+      birthDay2
+    );
+    const formattedBirthtime = extractTimeFromBirthTime(koreanBirthTime2);
+
+    setFormData((prev) => ({
+      ...prev,
+      person2: {
+        ...prev.person2,
+        birthdate: formattedBirthdate,
+        birthtime: formattedBirthtime,
+      },
+    }));
+  };
+
+  // Person1 상태 변경 시 formData 업데이트
+  useEffect(() => {
+    if (birthYear1 && birthMonth1 && birthDay1) {
+      updatePerson1FormData();
+    }
+  }, [birthYear1, birthMonth1, birthDay1, koreanBirthTime1]);
+
+  // Person2 상태 변경 시 formData 업데이트
+  useEffect(() => {
+    if (birthYear2 && birthMonth2 && birthDay2) {
+      updatePerson2FormData();
+    }
+  }, [birthYear2, birthMonth2, birthDay2, koreanBirthTime2]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -232,6 +475,15 @@ export default function CompatibilityPage() {
         [field]: value,
       },
     }));
+
+    // 필드에 따른 추가 상태 업데이트
+    if (field === "gender") {
+      if (person === "person1") {
+        // 성별은 이미 "남"/"여" 형식으로 들어옴
+      } else if (person === "person2") {
+        // 성별은 이미 "남"/"여" 형식으로 들어옴
+      }
+    }
   };
 
   // 공유 링크 생성 함수
@@ -365,7 +617,7 @@ export default function CompatibilityPage() {
         )}
       </AnimatePresence>
 
-      <div className="container max-w-md mx-auto px-4 py-6 relative">
+      <div className="container max-w-md mx-auto px-4 py-6 relative pb-24">
         {/* 메인 컨텐츠 */}
         <motion.div
           className="bg-white rounded-2xl shadow-lg p-6 mb-8"
@@ -427,7 +679,7 @@ export default function CompatibilityPage() {
                       onChange={(e) =>
                         handleInputChange("person1", "name", e.target.value)
                       }
-                      placeholder="이름"
+                      placeholder="이름 (2글자 이상, 한글/영문만)"
                       readOnly={isSharedMode}
                       className={`w-full px-4 py-2 rounded-xl border ${
                         isSharedMode
@@ -435,6 +687,12 @@ export default function CompatibilityPage() {
                           : "border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
                       }`}
                     />
+                    {!validateName(formData.person1.name).isValid &&
+                      formData.person1.name && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {validateName(formData.person1.name).errorMessage}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -481,48 +739,161 @@ export default function CompatibilityPage() {
                     <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
                       생년월일
                     </label>
-                    <input
-                      type="date"
-                      value={formData.person1.birthdate}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "person1",
-                          "birthdate",
-                          e.target.value
-                        )
-                      }
-                      readOnly={isSharedMode}
-                      className={`w-full px-4 py-2 rounded-xl border ${
-                        isSharedMode
-                          ? "bg-gray-100 cursor-not-allowed"
-                          : "border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                      }`}
-                    />
+                    {!isSharedMode ? (
+                      <div className="flex space-x-2">
+                        <select
+                          value={birthYear1}
+                          onChange={(e) => {
+                            setBirthYear1(e.target.value);
+                          }}
+                          className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                          disabled={isSharedMode}
+                        >
+                          <option value="">연도</option>
+                          {yearOptions.map((year) => (
+                            <option key={year} value={year.toString()}>
+                              {year}년
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={birthMonth1}
+                          onChange={(e) => {
+                            setBirthMonth1(e.target.value);
+                          }}
+                          className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                          disabled={isSharedMode}
+                        >
+                          <option value="">월</option>
+                          {monthOptions.map((month) => (
+                            <option key={month} value={month.toString()}>
+                              {month}월
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={birthDay1}
+                          onChange={(e) => {
+                            setBirthDay1(e.target.value);
+                          }}
+                          className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                          disabled={isSharedMode}
+                        >
+                          <option value="">일</option>
+                          {dayOptions1.map((day) => (
+                            <option key={day} value={day.toString()}>
+                              {day}일
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <input
+                        type="date"
+                        value={formData.person1.birthdate}
+                        readOnly={true}
+                        className="w-full px-4 py-2 rounded-xl border bg-gray-100 cursor-not-allowed"
+                      />
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      양력/음력
+                    </label>
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={() => setCalendarType1("양력")}
+                        disabled={isSharedMode}
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          calendarType1 === "양력"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        } ${
+                          isSharedMode ? "opacity-70 cursor-not-allowed" : ""
+                        }`}
+                      >
+                        양력
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCalendarType1("음력")}
+                        disabled={isSharedMode}
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          calendarType1 === "음력"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        } ${
+                          isSharedMode ? "opacity-70 cursor-not-allowed" : ""
+                        }`}
+                      >
+                        음력
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
                       태어난 시간
                     </label>
-                    <input
-                      type="time"
-                      value={formData.person1.birthtime}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "person1",
-                          "birthtime",
-                          e.target.value
-                        )
-                      }
-                      readOnly={isSharedMode}
-                      className={`w-full px-4 py-2 rounded-xl border ${
-                        isSharedMode
-                          ? "bg-gray-100 cursor-not-allowed"
-                          : "border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                      }`}
-                    />
+                    {!isSharedMode ? (
+                      <select
+                        value={koreanBirthTime1}
+                        onChange={(e) =>
+                          setKoreanBirthTime1(e.target.value as BirthTime)
+                        }
+                        className="w-full p-3 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                        disabled={isSharedMode}
+                      >
+                        <option value="모름">모름</option>
+                        <option value="자시(23:00-01:00)">
+                          자시 (23:00-01:00)
+                        </option>
+                        <option value="축시(01:00-03:00)">
+                          축시 (01:00-03:00)
+                        </option>
+                        <option value="인시(03:00-05:00)">
+                          인시 (03:00-05:00)
+                        </option>
+                        <option value="묘시(05:00-07:00)">
+                          묘시 (05:00-07:00)
+                        </option>
+                        <option value="진시(07:00-09:00)">
+                          진시 (07:00-09:00)
+                        </option>
+                        <option value="사시(09:00-11:00)">
+                          사시 (09:00-11:00)
+                        </option>
+                        <option value="오시(11:00-13:00)">
+                          오시 (11:00-13:00)
+                        </option>
+                        <option value="미시(13:00-15:00)">
+                          미시 (13:00-15:00)
+                        </option>
+                        <option value="신시(15:00-17:00)">
+                          신시 (15:00-17:00)
+                        </option>
+                        <option value="유시(17:00-19:00)">
+                          유시 (17:00-19:00)
+                        </option>
+                        <option value="술시(19:00-21:00)">
+                          술시 (19:00-21:00)
+                        </option>
+                        <option value="해시(21:00-23:00)">
+                          해시 (21:00-23:00)
+                        </option>
+                      </select>
+                    ) : (
+                      <input
+                        type="time"
+                        value={formData.person1.birthtime}
+                        readOnly={true}
+                        className="w-full px-4 py-2 rounded-xl border bg-gray-100 cursor-not-allowed"
+                      />
+                    )}
                     <p className="text-xs text-gray-500 mt-1">
-                      정확한 시간을 모르시면 12:00으로 입력해주세요.
+                      정확한 시간을 모르시면 &quot;모름&quot;으로 입력해주세요.
                     </p>
                   </div>
                 </div>
@@ -549,9 +920,15 @@ export default function CompatibilityPage() {
                       onChange={(e) =>
                         handleInputChange("person2", "name", e.target.value)
                       }
-                      placeholder="이름"
+                      placeholder="이름 (2글자 이상, 한글/영문만)"
                       className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
                     />
+                    {!validateName(formData.person2.name).isValid &&
+                      formData.person2.name && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {validateName(formData.person2.name).errorMessage}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -592,38 +969,133 @@ export default function CompatibilityPage() {
                     <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
                       생년월일
                     </label>
-                    <input
-                      type="date"
-                      value={formData.person2.birthdate}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "person2",
-                          "birthdate",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                    />
+                    <div className="flex space-x-2">
+                      <select
+                        value={birthYear2}
+                        onChange={(e) => {
+                          setBirthYear2(e.target.value);
+                        }}
+                        className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                      >
+                        <option value="">연도</option>
+                        {yearOptions.map((year) => (
+                          <option key={year} value={year.toString()}>
+                            {year}년
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={birthMonth2}
+                        onChange={(e) => {
+                          setBirthMonth2(e.target.value);
+                        }}
+                        className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                      >
+                        <option value="">월</option>
+                        {monthOptions.map((month) => (
+                          <option key={month} value={month.toString()}>
+                            {month}월
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={birthDay2}
+                        onChange={(e) => {
+                          setBirthDay2(e.target.value);
+                        }}
+                        className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                      >
+                        <option value="">일</option>
+                        {dayOptions2.map((day) => (
+                          <option key={day} value={day.toString()}>
+                            {day}일
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                      양력/음력
+                    </label>
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={() => setCalendarType2("양력")}
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          calendarType2 === "양력"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        }`}
+                      >
+                        양력
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCalendarType2("음력")}
+                        className={`flex-1 py-2 px-4 rounded-xl border ${
+                          calendarType2 === "음력"
+                            ? "bg-[#990dfa] text-white border-[#990dfa]"
+                            : "border-[#E9E4F0] text-[#3B2E7E]"
+                        }`}
+                      >
+                        음력
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
                       태어난 시간
                     </label>
-                    <input
-                      type="time"
-                      value={formData.person2.birthtime}
+                    <select
+                      value={koreanBirthTime2}
                       onChange={(e) =>
-                        handleInputChange(
-                          "person2",
-                          "birthtime",
-                          e.target.value
-                        )
+                        setKoreanBirthTime2(e.target.value as BirthTime)
                       }
-                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                    />
+                      className="w-full p-3 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                    >
+                      <option value="모름">모름</option>
+                      <option value="자시(23:00-01:00)">
+                        자시 (23:00-01:00)
+                      </option>
+                      <option value="축시(01:00-03:00)">
+                        축시 (01:00-03:00)
+                      </option>
+                      <option value="인시(03:00-05:00)">
+                        인시 (03:00-05:00)
+                      </option>
+                      <option value="묘시(05:00-07:00)">
+                        묘시 (05:00-07:00)
+                      </option>
+                      <option value="진시(07:00-09:00)">
+                        진시 (07:00-09:00)
+                      </option>
+                      <option value="사시(09:00-11:00)">
+                        사시 (09:00-11:00)
+                      </option>
+                      <option value="오시(11:00-13:00)">
+                        오시 (11:00-13:00)
+                      </option>
+                      <option value="미시(13:00-15:00)">
+                        미시 (13:00-15:00)
+                      </option>
+                      <option value="신시(15:00-17:00)">
+                        신시 (15:00-17:00)
+                      </option>
+                      <option value="유시(17:00-19:00)">
+                        유시 (17:00-19:00)
+                      </option>
+                      <option value="술시(19:00-21:00)">
+                        술시 (19:00-21:00)
+                      </option>
+                      <option value="해시(21:00-23:00)">
+                        해시 (21:00-23:00)
+                      </option>
+                    </select>
                     <p className="text-xs text-gray-500 mt-1">
-                      정확한 시간을 모르시면 12:00으로 입력해주세요.
+                      정확한 시간을 모르시면 &quot;모름&quot;으로 입력해주세요.
                     </p>
                   </div>
                 </div>

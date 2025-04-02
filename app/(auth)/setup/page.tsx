@@ -436,7 +436,7 @@ function SetupContent() {
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
         {/* 진행 표시기 */}
         <div className="mb-6">
-          <div className="flex justify-between mb-2">
+          {/* <div className="flex justify-between mb-2">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
@@ -449,7 +449,7 @@ function SetupContent() {
                 {index + 1}
               </div>
             ))}
-          </div>
+          </div> */}
           <div className="relative h-2 bg-gray-200 rounded-full">
             <div
               className="absolute top-0 left-0 h-2 bg-purple-500 rounded-full"
@@ -473,7 +473,7 @@ function SetupContent() {
           <button
             type="button"
             onClick={handleBack}
-            className={`px-4 py-2 rounded-lg ${
+            className={`px-4 py-2 rounded-lg border border-purple-500 ${
               step === 0
                 ? "text-gray-400 cursor-not-allowed"
                 : "text-gray-700 hover:bg-gray-100"
