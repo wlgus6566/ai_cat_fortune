@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import React from "react";
-
+import Image from "next/image";
 interface CategoryPopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -77,8 +77,15 @@ const CategoryPopup: React.FC<CategoryPopupProps> = ({
           </div>
 
           {/* 조언 */}
-          <div className="bg-yellow-50 dark:bg-gray-700 p-4 rounded-lg border border-yellow-200 dark:border-gray-600">
-            <p className="text-gray-800 dark:text-gray-200 text-md">
+          <div className="relative bg-yellow-50 dark:bg-gray-700 p-4 rounded-lg border border-yellow-200 dark:border-gray-600">
+            <Image
+              src={"/new_cat_thumb.png"}
+              alt="부적"
+              width={70}
+              height={70}
+              className="object-contain absolute left-0 bottom-0"
+            />
+            <p className="pl-[60px] text-gray-800 dark:text-gray-200 text-md">
               💬 &quot;
               {category.talisman}&quot;
             </p>

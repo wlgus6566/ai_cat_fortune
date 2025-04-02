@@ -120,18 +120,31 @@ export default function FortuneChat({
   // 환영 메시지 배열 - useMemo로 감싸서 의존성 배열 경고 해결
   const welcomeMessages = useMemo(
     () => [
-      `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
-      "너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!",
-      "내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖",
-      "어떤 고민이 있나냥! 말해봐라냥! 😽",
+      {
+        text: `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
+      },
+      { text: "너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!" },
+      { text: "내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖" },
+      { text: "어떤 고민이 있나냥! 말해봐라냥! 😽" },
+      { imageUrl: "/new_cat_close_eyes.png" }, // 이미지만 있는 메시지로 분리
     ],
     [userName]
   );
 
   // 타이핑 효과를 위한 함수
   const addMessageWithTypingEffect = useCallback(
-    (text: string, delay: number = 1000, typingDelay: number = 1200) => {
+    (
+      messageObj: { text?: string; imageUrl?: string },
+      delay: number = 1000,
+      typingDelay: number = 1200
+    ) => {
       return new Promise<void>((resolve) => {
+        // 문자열 또는 객체를 처리할 수 있도록 변환
+        const text =
+          typeof messageObj === "string" ? messageObj : messageObj.text || "";
+        const imageUrl =
+          typeof messageObj === "object" ? messageObj.imageUrl : undefined;
+
         // 먼저 타이핑 중인 메시지 추가
         const typingId = uuidv4();
         const typingMessage: ChatMessageType = {
@@ -155,7 +168,9 @@ export default function FortuneChat({
           // 일정 시간 후 실제 메시지로 교체
           setTypingMessageId(null);
           setMessages((prev) =>
-            prev.map((msg) => (msg.id === typingId ? { ...msg, text } : msg))
+            prev.map((msg) =>
+              msg.id === typingId ? { ...msg, text, imageUrl } : msg
+            )
           );
           scrollToBottom();
 
@@ -219,7 +234,7 @@ export default function FortuneChat({
 
     try {
       // 부적 생성 진행 중 메시지 추가
-      const processingMessage = "행운의 부적을 만들고 있다냥..🧧";
+      const processingMessage = { text: "행운의 부적을 만들고 있다냥..🧧" };
       await addMessageWithTypingEffect(processingMessage, 500, 800);
 
       console.log("부적 생성 요청 전송:", {
@@ -264,7 +279,9 @@ export default function FortuneChat({
       setTranslatedPhrase(translatedPhrase);
 
       // 부적 생성 완료 메시지
-      const successMessage = "행운의 부적이 만들어다냥! 지금 확인보라옹~🐾";
+      const successMessage = {
+        text: "행운의 부적이 만들어다냥! 지금 확인보라옹~🐾",
+      };
       await addMessageWithTypingEffect(successMessage, 500, 800);
 
       // 팝업 표시 (Context API 사용)
@@ -288,7 +305,9 @@ export default function FortuneChat({
       );
 
       // 에러 메시지 추가
-      const errorMessage = "부적 생성에 실패했어요. 다시 시도해주세요.";
+      const errorMessage = {
+        text: "부적 생성에 실패했어요. 다시 시도해주세요.",
+      };
       await addMessageWithTypingEffect(errorMessage, 500, 800);
     } finally {
       setIsGeneratingTalisman(false);
@@ -322,7 +341,11 @@ export default function FortuneChat({
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // 로딩 메시지 추가 (타이핑 효과 적용)
-    await addMessageWithTypingEffect("고민을 살펴보고 있어요...", 500, 1000);
+    await addMessageWithTypingEffect(
+      { text: "고민을 살펴보고 있어요..." },
+      500,
+      1000
+    );
 
     try {
       // OpenAI API 호출 - 직접 입력 모드 (사용자 정보 포함)
@@ -345,13 +368,13 @@ export default function FortuneChat({
       const data = await response.json();
       const fortuneText = data.fortune;
 
-      // 운세 메시지 추가
+      // 운세 메시지를 먼저 표시 (고양이 이모티콘 추가)
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
           id: uuidv4(),
           sender: "system",
-          text: fortuneText,
+          text: fortuneText + " 😽", // 고양이 이모티콘 추가
         },
       ]);
       scrollToBottom();
@@ -413,7 +436,11 @@ export default function FortuneChat({
         setInputMode("DIRECT_INPUT");
         setCurrentStep("DIRECT_INPUT");
         setCurrentOptions([]);
-        addMessageWithTypingEffect("자유롭게 이야기해주라냥!", 0, 1000);
+        addMessageWithTypingEffect(
+          { text: "자유롭게 이야기해주라냥!" },
+          0,
+          1000
+        );
       } else if (option === "다시 상담하기") {
         resetChat();
       } else {
@@ -448,7 +475,9 @@ export default function FortuneChat({
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // 세부 고민 메시지 추가 (타이핑 효과 적용)
-    const responseText = `${concern}에 관한 고민이구냥. 좀 더 구체적으로 알려달라냥!`;
+    const responseText = {
+      text: `${concern}에 관한 고민이구냥. 좀 더 구체적으로 알려달라냥!`,
+    };
     await addMessageWithTypingEffect(responseText, 800, 1500);
 
     // 1단계 세부 고민 옵션 제공
@@ -466,7 +495,9 @@ export default function FortuneChat({
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // 2단계 세부 고민 메시지 추가
-    const responseText = `${option}에 대해 더 구체적인 상황을 알려달라냥!`;
+    const responseText = {
+      text: `${option}에 대해 더 구체적인 상황을 알려달라냥!`,
+    };
     await addMessageWithTypingEffect(responseText, 800, 1200);
 
     // 2단계 세부 고민 옵션 제공
@@ -488,7 +519,9 @@ export default function FortuneChat({
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // 3단계 세부 고민 메시지 추가
-    const responseText = `${option}에 대해 마지막으로 좀 더 자세히 알려달라냥!`;
+    const responseText = {
+      text: `${option}에 대해 마지막으로 좀 더 자세히 알려달라냥!`,
+    };
     await addMessageWithTypingEffect(responseText, 800, 1200);
 
     // 3단계 세부 고민 옵션 제공
@@ -517,7 +550,11 @@ export default function FortuneChat({
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // 로딩 메시지 추가
-    await addMessageWithTypingEffect("운세를 살펴보고 있어요...", 1000, 1200);
+    await addMessageWithTypingEffect(
+      { text: "운세를 살펴보고 있어요..." },
+      1000,
+      1200
+    );
 
     try {
       // OpenAI API 호출 (사용자 정보 포함)
@@ -543,13 +580,13 @@ export default function FortuneChat({
       const data = await response.json();
       const fortuneText = data.fortune;
 
-      // 운세 메시지를 먼저 표시
+      // 운세 메시지를 먼저 표시 (고양이 이모티콘 추가)
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
           id: uuidv4(),
           sender: "system",
-          text: fortuneText,
+          text: fortuneText + " 😽", // 고양이 이모티콘 추가
         },
       ]);
       scrollToBottom();

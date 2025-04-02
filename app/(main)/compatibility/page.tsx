@@ -535,8 +535,8 @@ export default function CompatibilityPage() {
     window.Kakao.Share.sendDefault({
       objectType: "feed",
       content: {
-        title: "궁합 테스트",
-        description: `${formData.person1.name}님과의 궁합을 확인해보라냥!🐾`,
+        title: "궁합 테스트💑",
+        description: `${formData.person1.name}님과의 궁합을 확인해보라냥!💑 `,
         imageUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/share.png`,
         link: {
           mobileWebUrl: shareUrl,

@@ -1,25 +1,29 @@
-import { ChatMessage as ChatMessageType } from '../type/types';
-import Image from 'next/image';
-import { useState } from 'react';
+import { ChatMessage as ChatMessageType } from "../type/types";
+import Image from "next/image";
 
 interface ChatMessageProps {
   message: ChatMessageType;
   isTyping?: boolean;
 }
 
-export default function ChatMessage({ message, isTyping = false }: ChatMessageProps) {
-  const isSystem = message.sender === 'system';
-  const [imageLoading, setImageLoading] = useState(true);
-  
+export default function ChatMessage({
+  message,
+  isTyping = false,
+}: ChatMessageProps) {
+  const isSystem = message.sender === "system";
+  const isImageOnly = message.imageUrl && !message.text?.trim();
+
   return (
-    <div className={`mb-4 flex ${isSystem ? 'justify-start' : 'justify-end'}`}>
-      <div 
+    <div className={`mb-4 flex ${isSystem ? "justify-start" : "justify-end"}`}>
+      <div
         className={`
           relative max-w-[80%] p-3 rounded-lg 
-          ${isSystem 
-            ? 'bg-purple-100 rounded-bl-none' 
-            : 'bg-blue-100 rounded-br-none text-right'
+          ${
+            isSystem
+              ? "bg-purple-100 rounded-bl-none"
+              : "bg-blue-100 rounded-br-none text-right"
           }
+          ${isImageOnly ? "px-0 py-0 bg-transparent" : ""}
         `}
       >
         {isTyping ? (
@@ -30,24 +34,24 @@ export default function ChatMessage({ message, isTyping = false }: ChatMessagePr
           </div>
         ) : (
           <>
-            <p className="relative z-10 text-sm md:text-base">{message.text}</p>
-            
+            {message.text && (
+              <p className="relative z-10 text-sm md:text-base">
+                {message.text}
+              </p>
+            )}
+
             {message.imageUrl && (
-              <div className="mt-3 overflow-hidden rounded-lg">
-                <div className="relative h-48 w-full">
+              <div
+                className={`${message.text ? "mt-2" : ""} flex justify-center`}
+              >
+                <div className="relative w-50 h-50">
                   <Image
                     src={message.imageUrl}
-                    alt="행운의 부적 이미지"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    className="rounded-lg"
-                    onLoadingComplete={() => setImageLoading(false)}
+                    alt="고양이 이모티콘"
+                    width={100}
+                    height={100}
+                    className="object-contain"
                   />
-                  {imageLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-red-50">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-200 border-t-red-600"></div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -56,4 +60,4 @@ export default function ChatMessage({ message, isTyping = false }: ChatMessagePr
       </div>
     </div>
   );
-} 
+}

@@ -203,6 +203,34 @@ export default function CompatibilityResultPage() {
   const [loadingStage, setLoadingStage] = useState(1); // 3단계 로딩 (1: 초기, 2: 분석중, 3: 완료)
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // 로딩 단계에 따른 이미지 반환 함수
+  const getLoadingImage = () => {
+    switch (loadingStage) {
+      case 1:
+        return "/new_cat_magic.png";
+      case 2:
+        return "/new_cat_book.png";
+      case 3:
+        return "/new_cat_love.png";
+      default:
+        return "/new_cat_magic.png";
+    }
+  };
+
+  // 로딩 단계에 따른 메시지 반환 함수
+  const getLoadingMessage = () => {
+    switch (loadingStage) {
+      case 1:
+        return "사주 살펴보는 중이야옹…🔍🐱";
+      case 2:
+        return "궁합 마무리 중이야옹…📜🐾";
+      case 3:
+        return "운명 정리하는 중…💌🔮";
+      default:
+        return "사주 살펴보는 중이야옹…🔍🐱";
+    }
+  };
+
   // 카카오 SDK 초기화
   useEffect(() => {
     // 카카오 SDK 스크립트 로드
@@ -265,8 +293,11 @@ export default function CompatibilityResultPage() {
         // 추가 시간 후 로딩 완료
         setTimeout(() => {
           setLoadingStage(3);
-          setLoading(false);
-        }, 2000);
+          // 3단계 로딩 화면을 충분히 보여주기 위해 시간 지연
+          setTimeout(() => {
+            setLoading(false);
+          }, 2000);
+        }, 1000);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -422,9 +453,9 @@ export default function CompatibilityResultPage() {
     return "⟷"; // 중립 관계
   };
 
-  if (loading) {
+  if (loading && !compatibilityData?.magicTitle) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] font-gothic flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-r from-purple-600/50 to-blue-600/50 font-gothic flex flex-col items-center justify-center p-6 relative overflow-hidden">
         {/* Toaster for notifications */}
         <Toaster position="top-center" />
 
@@ -453,9 +484,8 @@ export default function CompatibilityResultPage() {
             },
           }}
         >
-          <div className="absolute inset-0 bg-purple-500 rounded-full opacity-20 blur-xl"></div>
           <Image
-            src="/new_cat_magic.png"
+            src={getLoadingImage()}
             alt="로딩중"
             width={80}
             height={120}
@@ -464,24 +494,16 @@ export default function CompatibilityResultPage() {
         </motion.div>
 
         <motion.h2
-          className="text-xl font-dodamdodam font-bold mb-6 text-center"
-          animate={{
-            scale: [1, 1.05, 1],
-            textShadow: [
-              "0 0 8px rgba(255,255,255,0.5)",
-              "0 0 16px rgba(255,255,255,0.8)",
-              "0 0 8px rgba(255,255,255,0.5)",
-            ],
-          }}
+          className="text-lg font-gothic font-bold mb-6 text-center text-white"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          key={loadingStage} // 메시지 변경시 애니메이션 다시 실행
           transition={{
-            duration: 2,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
+            duration: 0.5,
+            ease: "easeOut",
           }}
         >
-          {loadingStage === 1
-            ? "사주 정보를 확인하고 있어요..."
-            : "두 사람의 인연을 분석중입니다..."}
+          {getLoadingMessage()}
         </motion.h2>
       </div>
     );
@@ -577,8 +599,8 @@ export default function CompatibilityResultPage() {
         >
           {/* 상단 요소: 제목 및 테마 */}
           <motion.div variants={slideInUp} className="text-center my-8">
-            <h1 className="text-2xl font-bold mb-2 font-gothic">
-              {compatibilityData?.magicTitle || "별빛 아래 운명의 실타래"}
+            <h1 className="text-2xl font-bold mb-4 px-8 font-gothic word-break-keep">
+              {compatibilityData?.magicTitle || "너와 나, 우주가 허락한 궁합"}
             </h1>
             <p className="text-lg opacity-90 bg-white/10 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
               <span className="font-semibold">
@@ -647,24 +669,26 @@ export default function CompatibilityResultPage() {
                   color="#FF6B9E"
                   backgroundColor="rgba(255, 255, 255, 0.2)"
                 />
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                   <span className="text-3xl font-bold text-white">
                     {compatibilityData?.score || 83}
                   </span>
-                  <span className="block text-sm text-pink-200">점</span>
+                  <span className="block text-sm text-pink-200 mt-2 ml-2">
+                    점
+                  </span>
                 </div>
               </div>
             </div>
 
             <p className="text-center font-medium text-xl text-white">
               {compatibilityData?.summary ||
-                "함께 있을수록 더 빛나는 인연이야, 냥~"}
+                "함께 있을수록 더 빛나는 인연이다냥~"}
             </p>
           </motion.div>
 
           {/* 음양오행 분석 섹션 - 별도 섹션으로 추출 */}
-          <motion.div variants={slideInUp} className="mb-8">
-            <div className="text-center mb-6">
+          <motion.div variants={slideInUp} className="mb-24">
+            <div className="text-left mb-6">
               <h2 className="text-2xl font-bold inline-block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
                 음양오행 분석
               </h2>
@@ -682,7 +706,7 @@ export default function CompatibilityResultPage() {
               {/* 두 사람의 오행 정보 */}
               <div className="flex flex-col md:flex-row gap-4 relative z-10">
                 {/* 첫 번째 사람 카드 */}
-                <div className="flex-1 bg-white/10 rounded-xl p-5 border border-white/20 relative overflow-hidden">
+                <div className="flex-1 bg-white/5 rounded-xl p-5 border border-white/20 relative overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center bg-indigo-600/40 text-xl">
                       {getElementEmoji(
@@ -748,7 +772,7 @@ export default function CompatibilityResultPage() {
                 </div>
 
                 {/* 모바일에서 표시되는 관계 표시 */}
-                <div className="md:hidden flex justify-center items-center py-2">
+                {/* <div className="md:hidden flex justify-center items-center py-2">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center">
                     <div className="text-xl">
                       {getCompatibilitySymbol(
@@ -759,7 +783,7 @@ export default function CompatibilityResultPage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* 두 번째 사람 카드 */}
                 <div className="flex-1 bg-white/10 rounded-xl p-5 border border-white/20 relative overflow-hidden">
@@ -820,7 +844,7 @@ export default function CompatibilityResultPage() {
                     <span className="mr-2">✨</span> 상성 분석
                   </h3>
                   <div className="bg-white/20 rounded-full px-3 py-1 text-sm">
-                    궁합점수:{" "}
+                    점수:{" "}
                     <span className="font-bold">
                       {compatibilityData?.details?.yinYangAnalysis
                         ?.compatibility?.compatibilityScore || 91}

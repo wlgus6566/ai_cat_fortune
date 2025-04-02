@@ -399,7 +399,7 @@ export default function ProfilePage() {
                   >
                     <div className="flex items-center">
                       <span className="w-8 h-8 mr-3 flex items-center justify-center">
-                        💬
+                        📖
                       </span>
                       <span className="text-[#3B2E7E]">
                         {t("settings.menu.chatArchive")}
@@ -421,15 +421,15 @@ export default function ProfilePage() {
                 </div>
                 <div className="border-t border-[#990dfa]/10">
                   <Link
-                    href="/ai-profile"
+                    href="/compatibility"
                     className="flex items-center justify-between p-4 hover:bg-[#EAE1F4]/30 transition-colors"
                   >
                     <div className="flex items-center">
                       <span className="w-8 h-8 mr-3 flex items-center justify-center">
-                        🤖
+                        💑
                       </span>
                       <span className="text-[#3B2E7E]">
-                        {t("settings.menu.aiProfile")}
+                        {t("settings.menu.compatibility")}
                       </span>
                     </div>
                     <svg
