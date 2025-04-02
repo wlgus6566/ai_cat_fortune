@@ -562,7 +562,9 @@ export default function CompatibilityResultPage() {
           >
             <ArrowLeft className="h-6 w-6 text-white" />
           </button>
-          <h1 className="text-xl font-semibold text-white ml-2">궁합 결과</h1>
+          <h1 className="text-xl font-semibold text-white ml-2 font-gothic">
+            궁합 결과
+          </h1>
         </div>
       </div>
       <div className="container max-w-md mx-auto px-4 py-6 relative z-10 pb-28">
@@ -574,8 +576,8 @@ export default function CompatibilityResultPage() {
           className="space-y-6"
         >
           {/* 상단 요소: 제목 및 테마 */}
-          <motion.div variants={slideInUp} className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">
+          <motion.div variants={slideInUp} className="text-center my-8">
+            <h1 className="text-2xl font-bold mb-2 font-gothic">
               {compatibilityData?.magicTitle || "별빛 아래 운명의 실타래"}
             </h1>
             <p className="text-lg opacity-90 bg-white/10 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
@@ -595,7 +597,7 @@ export default function CompatibilityResultPage() {
             }}
           >
             <div className="flex items-center justify-center mb-6">
-              <div className="mr-4 text-lg">
+              <div className="mr-4 text-2xl">
                 <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-pink-200 to-pink-100">
                   {state.person1.name}
                 </span>
@@ -613,7 +615,7 @@ export default function CompatibilityResultPage() {
               >
                 <Heart className="w-8 h-8 text-white fill-white" />
               </motion.div>
-              <div className="ml-4 text-lg">
+              <div className="ml-4 text-2xl">
                 <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-pink-100 to-pink-200">
                   {state.person2.name}
                 </span>
@@ -660,197 +662,198 @@ export default function CompatibilityResultPage() {
             </p>
           </motion.div>
 
-          {/* 궁합 세부 카드 */}
-          <motion.div variants={slideInUp} className="space-y-4">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Star className="h-5 w-5 text-yellow-300 mr-2 fill-yellow-300" />
-              세부 분석
-            </h2>
-            {/* 음양오행 분석 */}
-            <CategoryCard
-              title="음양오행 분석"
-              score={
-                compatibilityData?.details?.yinYangAnalysis?.compatibility
-                  ?.compatibilityScore || 91
-              }
-              delay={0.5}
-              icon={
-                <svg
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
-              }
-              color="rgba(129, 140, 248, 0.8)"
-            >
-              <div className="space-y-4">
-                {/* 음양오행 소개 */}
-                <div className="bg-white/30 p-4 rounded-lg text-center">
-                  <p className="text-sm italic">
-                    ✨ 음양오행은 우주의 모든 만물이 다섯 가지 기운(목/木,
-                    화/火, 토/土, 금/金, 수/水)으로 이루어져 있다는 동양
-                    철학입니다. 두 사람의 기운이 어떻게 상호작용하는지
-                    알아보세요! ✨
-                  </p>
-                </div>
+          {/* 음양오행 분석 섹션 - 별도 섹션으로 추출 */}
+          <motion.div variants={slideInUp} className="mb-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold inline-block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+                음양오행 분석
+              </h2>
+              <p className="text-sm text-white/80 mt-2 max-w-md mx-auto">
+                음양오행은 우주와 만물의 기운을 설명하는 동양 철학으로, 두
+                사람의 에너지가 어떻게 상호작용하는지 보여줍니다
+              </p>
+            </div>
 
-                {/* Person1 정보 패널 */}
-                <div className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 p-4 rounded-lg border border-white/20 shadow-inner">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-3">
-                      <span className="text-white text-xl">🌿</span>
+            <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden relative">
+              {/* 배경 장식 */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+
+              {/* 두 사람의 오행 정보 */}
+              <div className="flex flex-col md:flex-row gap-4 relative z-10">
+                {/* 첫 번째 사람 카드 */}
+                <div className="flex-1 bg-white/10 rounded-xl p-5 border border-white/20 relative overflow-hidden">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-indigo-600/40 text-xl">
+                      {getElementEmoji(
+                        compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.element
+                      )}
                     </div>
-                    <h4 className="font-medium text-lg">
+                    <h3 className="text-xl font-semibold">
                       {state.person1.name}
-                    </h4>
+                    </h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="bg-white/20 p-2 rounded-lg text-center">
-                      <p className="text-xs opacity-80">오행</p>
-                      <p className="text-lg font-semibold">
+
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <span className="block text-xs opacity-70">오행</span>
+                      <span className="block text-lg font-bold">
                         {getElementEmoji(
                           compatibilityData?.details?.yinYangAnalysis?.user
                             ?.element
                         )}{" "}
                         {compatibilityData?.details?.yinYangAnalysis?.user
                           ?.element || "목"}
-                      </p>
+                      </span>
                     </div>
-                    <div className="bg-white/20 p-2 rounded-lg text-center">
-                      <p className="text-xs opacity-80">음양</p>
-                      <p className="text-lg font-semibold">
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <span className="block text-xs opacity-70">음양</span>
+                      <span className="block text-lg font-bold">
                         {compatibilityData?.details?.yinYangAnalysis?.user
                           ?.yinYang === "음"
                           ? "☽"
                           : "☀️"}{" "}
                         {compatibilityData?.details?.yinYangAnalysis?.user
                           ?.yinYang || "양"}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <div className="bg-white/20 p-3 rounded-lg">
-                    <p className="text-sm">
+
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <p className="italic text-sm">
+                      &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.user
                           ?.description
                       }
+                      &rdquo;
                     </p>
                   </div>
                 </div>
 
-                {/* 중앙 연결 화살표 */}
-                <div className="flex justify-center items-center relative py-1">
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-12 bg-white/30"></div>
-                  <div className="absolute w-10 h-10 bg-pink-500/30 backdrop-blur-sm rounded-full flex items-center justify-center z-10 border border-white/30 shadow-lg">
-                    <span className="text-lg">💫</span>
+                {/* 중앙 상생/상극 관계 표시 */}
+                <div className="hidden md:flex flex-col items-center justify-center relative min-w-[100px]">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center z-10">
+                    <div className="text-2xl">
+                      {getCompatibilitySymbol(
+                        compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.element,
+                        compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.element
+                      )}
+                    </div>
+                  </div>
+                  <div className="absolute w-[2px] h-full bg-gradient-to-b from-indigo-500/20 via-purple-500/40 to-pink-500/20"></div>
+                </div>
+
+                {/* 모바일에서 표시되는 관계 표시 */}
+                <div className="md:hidden flex justify-center items-center py-2">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center">
+                    <div className="text-xl">
+                      {getCompatibilitySymbol(
+                        compatibilityData?.details?.yinYangAnalysis?.user
+                          ?.element,
+                        compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.element
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Person2 정보 패널 */}
-                <div className="bg-gradient-to-r from-pink-500/30 to-orange-500/30 p-4 rounded-lg border border-white/20 shadow-inner">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center mr-3">
-                      <span className="text-white text-xl">🔥</span>
+                {/* 두 번째 사람 카드 */}
+                <div className="flex-1 bg-white/10 rounded-xl p-5 border border-white/20 relative overflow-hidden">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-pink-600/40 text-xl">
+                      {getElementEmoji(
+                        compatibilityData?.details?.yinYangAnalysis?.partner
+                          ?.element
+                      )}
                     </div>
-                    <h4 className="font-medium text-lg">
+                    <h3 className="text-xl font-semibold">
                       {state.person2.name}
-                    </h4>
+                    </h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="bg-white/20 p-2 rounded-lg text-center">
-                      <p className="text-xs opacity-80">오행</p>
-                      <p className="text-lg font-semibold">
+
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <span className="block text-xs opacity-70">오행</span>
+                      <span className="block text-lg font-bold">
                         {getElementEmoji(
                           compatibilityData?.details?.yinYangAnalysis?.partner
                             ?.element
                         )}{" "}
                         {compatibilityData?.details?.yinYangAnalysis?.partner
                           ?.element || "화"}
-                      </p>
+                      </span>
                     </div>
-                    <div className="bg-white/20 p-2 rounded-lg text-center">
-                      <p className="text-xs opacity-80">음양</p>
-                      <p className="text-lg font-semibold">
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <span className="block text-xs opacity-70">음양</span>
+                      <span className="block text-lg font-bold">
                         {compatibilityData?.details?.yinYangAnalysis?.partner
                           ?.yinYang === "음"
                           ? "☽"
                           : "☀️"}{" "}
                         {compatibilityData?.details?.yinYangAnalysis?.partner
                           ?.yinYang || "양"}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <div className="bg-white/20 p-3 rounded-lg">
-                    <p className="text-sm">
+
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <p className="italic text-sm">
+                      &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.partner
                           ?.description
                       }
-                    </p>
-                  </div>
-                </div>
-
-                {/* 상성 분석 패널 */}
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-600/20 p-5 rounded-lg border border-white/30 mt-4 shadow-inner">
-                  <h4 className="font-medium mb-3 text-center text-lg flex items-center justify-center">
-                    <span className="mr-2">✨</span> 두 사람의 상성{" "}
-                    <span className="ml-2">✨</span>
-                  </h4>
-
-                  <div className="flex justify-center items-center my-4">
-                    <div className="w-16 h-16 rounded-full bg-indigo-600/30 flex items-center justify-center">
-                      {getElementEmoji(
-                        compatibilityData?.details?.yinYangAnalysis?.user
-                          ?.element
-                      )}
-                    </div>
-                    <div className="w-24 h-1 bg-white/30 mx-1 relative">
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">
-                        {getCompatibilitySymbol(
-                          compatibilityData?.details?.yinYangAnalysis?.user
-                            ?.element,
-                          compatibilityData?.details?.yinYangAnalysis?.partner
-                            ?.element
-                        )}
-                      </div>
-                    </div>
-                    <div className="w-16 h-16 rounded-full bg-pink-600/30 flex items-center justify-center">
-                      {getElementEmoji(
-                        compatibilityData?.details?.yinYangAnalysis?.partner
-                          ?.element
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="bg-white/20 p-4 rounded-lg mb-3">
-                    <p className="text-sm mb-3">
-                      {
-                        compatibilityData?.details?.yinYangAnalysis
-                          ?.compatibility?.description
-                      }
-                    </p>
-                  </div>
-
-                  <div className="bg-white/30 p-4 rounded-lg text-center">
-                    <p className="text-sm font-medium flex items-center justify-center">
-                      <span className="mr-2">🐾</span>
-                      {
-                        compatibilityData?.details?.yinYangAnalysis
-                          ?.compatibility?.catComment
-                      }
+                      &rdquo;
                     </p>
                   </div>
                 </div>
               </div>
-            </CategoryCard>
+
+              {/* 상성 분석 결과 */}
+              <div className="mt-6 p-5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-xl border border-white/20">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <span className="mr-2">✨</span> 상성 분석
+                  </h3>
+                  <div className="bg-white/20 rounded-full px-3 py-1 text-sm">
+                    궁합점수:{" "}
+                    <span className="font-bold">
+                      {compatibilityData?.details?.yinYangAnalysis
+                        ?.compatibility?.compatibilityScore || 91}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="mb-4 text-sm">
+                  {
+                    compatibilityData?.details?.yinYangAnalysis?.compatibility
+                      ?.description
+                  }
+                </p>
+
+                <div className="bg-white/10 rounded-lg p-4 flex items-center">
+                  <span className="text-lg mr-2">🐾</span>
+                  <p className="text-sm italic">
+                    {
+                      compatibilityData?.details?.yinYangAnalysis?.compatibility
+                        ?.catComment
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* 세부 분석 카드들 */}
+          <motion.div variants={slideInUp} className="space-y-4">
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <Star className="h-5 w-5 text-yellow-300 mr-2 fill-yellow-300" />
+              세부 분석
+            </h2>
             {/* 성격 궁합 */}
             <CategoryCard
               title="성격 궁합"
