@@ -1,12 +1,10 @@
 import { Nanum_Gothic, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
-import { UserProvider } from "./contexts/UserContext";
 import { NextIntlClientProvider } from "next-intl";
 import { messages } from "./i18n";
 import { Providers } from "./providers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { CompatibilityProvider } from "./context/CompatibilityContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,9 +43,7 @@ export default function RootLayout({
       >
         <Providers>
           <NextIntlClientProvider locale="ko" messages={messages["ko"]}>
-            <UserProvider>
-              <CompatibilityProvider>{children}</CompatibilityProvider>
-            </UserProvider>
+            {children}
           </NextIntlClientProvider>
         </Providers>
       </body>
