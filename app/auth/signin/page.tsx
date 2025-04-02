@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
-export default function SignInPage() {
+// 로그인 내용을 담은 컴포넌트
+function SignInContent() {
   const t = useTranslations("auth");
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -58,7 +59,7 @@ export default function SignInPage() {
       </div>
 
       {/* 로그인 버튼 */}
-      <div className="mb-20 relative w-full z-100 flex flex-col items-center gap-4 px-8">
+      <div className="mb-20 relative w-full max-w-md z-100 flex flex-col items-center gap-4 px-8">
         <button
           onClick={() => handleOAuthSignIn("google")}
           disabled={isLoading}
@@ -136,5 +137,20 @@ export default function SignInPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen w-full items-center justify-center">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-purple-500 rounded-full animate-spin"></div>
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }

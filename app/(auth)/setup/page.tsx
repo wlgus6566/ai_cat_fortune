@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@/app/contexts/UserContext";
@@ -43,7 +43,8 @@ const validateName = (
   return { isValid: true, errorMessage: "" };
 };
 
-export default function SetupPage() {
+// 검색 파라미터를 사용하는 컴포넌트
+function SetupContent() {
   const { isProfileComplete, createUserProfile } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -431,54 +432,81 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-purple-50 to-white">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden border border-purple-100">
-        <header className="bg-gradient-to-r from-purple-600 to-purple-500 text-white p-4 text-center">
-          <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
-            <span className="text-3xl">🔮</span> AI 사주 상담냥이
-          </h1>
-          <p className="text-sm opacity-80 mt-1">프로필 설정</p>
-        </header>
-
-        <div className="p-6 space-y-6">
-          {/* 프로그레스 바 */}
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
+        {/* 진행 표시기 */}
+        <div className="mb-6">
+          <div className="flex justify-between mb-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                  index <= step
+                    ? "border-purple-500 bg-purple-500 text-white"
+                    : "border-gray-300 text-gray-400"
+                }`}
+              >
+                {index + 1}
+              </div>
+            ))}
+          </div>
+          <div className="relative h-2 bg-gray-200 rounded-full">
             <div
-              className="bg-purple-600 h-2.5 rounded-full"
-              style={{ width: `${(step + 1) * 25}%` }}
+              className="absolute top-0 left-0 h-2 bg-purple-500 rounded-full"
+              style={{ width: `${(step / 3) * 100}%` }}
             ></div>
           </div>
+        </div>
 
-          {/* 단계별 폼 */}
-          {renderStep()}
-
-          {/* 에러 메시지 */}
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-          {/* 이전/다음 버튼 */}
-          <div className="flex justify-between">
-            {step > 0 ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="py-2 px-4 rounded-lg border border-purple-300 text-purple-700"
-              >
-                이전
-              </button>
-            ) : (
-              <div></div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleNext}
-              className="py-2 px-6 rounded-lg bg-purple-600 text-white"
-            >
-              {step === 3 ? "완료" : "다음"}
-            </button>
+        {/* 오류 메시지 */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg">
+            {error}
           </div>
+        )}
+
+        {/* 단계별 내용 */}
+        <div className="mb-6">{renderStep()}</div>
+
+        {/* 단계별 네비게이션 버튼 */}
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={handleBack}
+            className={`px-4 py-2 rounded-lg ${
+              step === 0
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+            disabled={step === 0}
+          >
+            이전
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            {step === 3 ? "완료" : "다음"}
+          </button>
         </div>
       </div>
     </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function SetupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4">
+          로딩 중...
+        </div>
+      }
+    >
+      <SetupContent />
+    </Suspense>
   );
 }

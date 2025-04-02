@@ -55,7 +55,19 @@ export default function ProfilePage() {
           "/images/talisman2.png",
           "/images/talisman3.png",
         ];
-        setTalismans(sampleTalismans.map((url) => ({ publicUrl: url })));
+
+        // Talisman 타입에 맞춰 완전한 객체 생성
+        setTalismans(
+          sampleTalismans.map((url, index) => ({
+            id: `sample-${index}`,
+            userId: userProfile?.id || "guest",
+            publicUrl: url,
+            storagePath: url,
+            fileName: `talisman-${index}.png`,
+            generatedBy: "sample",
+            createdAt: new Date().toISOString(),
+          }))
+        );
       }
     };
 

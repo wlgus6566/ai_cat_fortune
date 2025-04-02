@@ -8,8 +8,9 @@ import {
 
 // GET: 특정 상담 내역 조회
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -21,7 +22,7 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    const id = context.params.id;
     if (!id) {
       return NextResponse.json(
         { error: "상담 ID가 필요합니다." },
@@ -58,8 +59,9 @@ export async function GET(
 
 // DELETE: 특정 상담 내역 삭제
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -72,7 +74,7 @@ export async function DELETE(
     }
 
     const userId = session.user.id;
-    const { id } = params;
+    const id = context.params.id;
 
     if (!id) {
       return NextResponse.json(

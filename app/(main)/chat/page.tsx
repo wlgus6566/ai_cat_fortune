@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import FortuneChat from "@/app/components/FortuneChat";
+import { UserProfile } from "@/app/type/types";
 
 export default function ChatPage() {
   const { userProfile, isProfileComplete } = useUser();
@@ -31,6 +32,18 @@ export default function ChatPage() {
     );
   }
 
+  // userProfile이 null인 경우 기본값 제공
+  const defaultProfile: UserProfile = {
+    id: "guest",
+    name: "사용자",
+    gender: null,
+    birthDate: "",
+    calendarType: null,
+    birthTime: "모름",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
   return (
     <div className="bg-gray-50">
       <header className="bg-white border-b border-gray-200 py-4 px-4 text-center shadow-sm">
@@ -42,7 +55,7 @@ export default function ChatPage() {
         {/* FortuneChat 컴포넌트 불러오기 */}
         <FortuneChat
           userName={userProfile?.name || "사용자"}
-          userProfile={userProfile}
+          userProfile={userProfile || defaultProfile}
         />
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import TalismanPopup from "./TalismanPopup";
+import { useTranslations } from "next-intl";
 
 interface UserTalismansProps {
   userId: string;
@@ -14,6 +15,7 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const t = useTranslations();
 
   useEffect(() => {
     if (!userId) return;

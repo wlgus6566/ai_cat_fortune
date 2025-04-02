@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@/app/contexts/UserContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import ConsultationDetail from "@/app/components/ConsultationDetail";
 import { SelectConsultation } from "@/db/schema";
-import { use } from "react";
 
 // 상담 내역 타입 정의
 interface ConsultationWithTalisman extends SelectConsultation {
@@ -17,14 +16,9 @@ interface ConsultationWithTalisman extends SelectConsultation {
   } | null;
 }
 
-interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export default function ConsultationDetailPage({ params }: PageProps) {
-  const { id } = use(params);
+export default function ConsultationDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   const { isProfileComplete } = useUser();
   const router = useRouter();
   const [consultation, setConsultation] =
@@ -58,7 +52,7 @@ export default function ConsultationDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     // 프로필이 완성된 상태에서만 상담 내역 불러오기
-    if (isProfileComplete) {
+    if (isProfileComplete && id) {
       fetchConsultation();
     }
   }, [id, isProfileComplete, fetchConsultation]);
