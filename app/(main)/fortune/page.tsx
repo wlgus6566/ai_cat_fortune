@@ -206,7 +206,7 @@ export default function HomePage() {
   useEffect(() => {
     if (isProfileComplete === false) {
       console.log("프로필이 완성되지 않아 setup 페이지로 이동합니다.");
-      router.push("/auth/setup");
+      router.push("/setup");
     }
   }, [isProfileComplete, router]);
 
