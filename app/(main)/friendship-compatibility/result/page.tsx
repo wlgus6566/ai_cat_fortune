@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -374,8 +374,8 @@ export default function FriendshipCompatibilityResultPage() {
     // ... existing code ...
   }, [state, router]);
 
-  // 결과 저장 함수
-  const saveFriendCompatibilityResult = async () => {
+  // 결과 저장 함수를 useCallback으로 감싸기
+  const saveFriendCompatibilityResult = useCallback(async () => {
     if (!friendCompatibilityData || !state.person1.name || !state.person2.name)
       return;
 
@@ -416,14 +416,14 @@ export default function FriendshipCompatibilityResultPage() {
     } catch (error) {
       console.error("결과 저장 중 오류:", error);
     }
-  };
+  }, [friendCompatibilityData, state.person1, state.person2]);
 
   // 결과가 로드될 때 저장 로직 실행
   useEffect(() => {
     if (friendCompatibilityData && !loading && !error) {
       saveFriendCompatibilityResult();
     }
-  }, [friendCompatibilityData, loading, error]);
+  }, [friendCompatibilityData, loading, error, saveFriendCompatibilityResult]);
 
   // 카카오 공유 함수
   const shareToKakao = () => {

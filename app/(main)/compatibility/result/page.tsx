@@ -1,16 +1,17 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
 import type { CompatibilityResult } from "@/app/lib/openai";
 import CircularProgress from "@/app/components/CircularProgress";
-import { Heart, Star, Sparkles, ArrowLeft } from "lucide-react";
+import { Heart, Star, Sparkles } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 import ShareModal from "@/app/components/ShareModal";
+import PageHeader from "@/app/components/PageHeader";
 
 // 카카오 SDK 타입 정의
 declare global {
@@ -202,6 +203,7 @@ export default function CompatibilityResultPage() {
   const [error, setError] = useState("");
   const [loadingStage, setLoadingStage] = useState(1); // 3단계 로딩 (1: 초기, 2: 분석중, 3: 완료)
   const [showShareModal, setShowShareModal] = useState(false);
+  const [resultSaved, setResultSaved] = useState(false);
 
   // 로딩 단계에 따른 이미지 반환 함수
   const getLoadingImage = () => {
@@ -315,54 +317,48 @@ export default function CompatibilityResultPage() {
     };
   }, [state, router]);
 
-  // 결과 저장 함수
-  const saveCompatibilityResult = async () => {
-    if (!compatibilityData || !state.person1.name || !state.person2.name)
-      return;
+  // Callback으로 감싸서 메모이제이션
+  const saveCompatibilityResult = useCallback(async () => {
+    if (!compatibilityData || resultSaved) return;
 
     try {
-      // 데이터 준비 - 순환 참조 제거를 위해 JSON 변환 처리
-      const safeResultData = JSON.parse(JSON.stringify(compatibilityData));
-
-      console.log("저장 요청 데이터:", {
-        resultType: "love",
-        person1: state.person1,
-        person2: state.person2,
-      });
-
+      setResultSaved(true);
       const response = await fetch("/api/compatibility-results", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // 쿠키 포함 설정
         body: JSON.stringify({
           resultType: "love",
-          resultData: safeResultData,
-          person1: state.person1,
-          person2: state.person2,
+          resultData: compatibilityData,
+          person1Name: state.person1.name,
+          person1Birthdate: state.person1.birthdate,
+          person1Gender: state.person1.gender,
+          person1Birthtime: state.person1.birthtime,
+          person2Name: state.person2.name,
+          person2Birthdate: state.person2.birthdate,
+          person2Gender: state.person2.gender,
+          person2Birthtime: state.person2.birthtime,
+          totalScore: compatibilityData.totalScore,
         }),
       });
 
-      const responseData = await response.json();
-
       if (!response.ok) {
-        console.error("궁합 결과 저장 실패:", responseData);
-        return;
+        throw new Error("결과 저장에 실패했습니다.");
       }
 
-      console.log("궁합 결과가 저장되었습니다:", responseData);
+      console.log("결과가 성공적으로 저장되었습니다.");
     } catch (error) {
-      console.error("결과 저장 중 오류:", error);
+      console.error("결과 저장 중 오류 발생:", error);
     }
-  };
+  }, [compatibilityData, resultSaved, state.person1, state.person2]);
 
   // 결과가 로드될 때 저장 로직 실행
   useEffect(() => {
     if (compatibilityData && !loading && !error) {
       saveCompatibilityResult();
     }
-  }, [compatibilityData, loading, error]);
+  }, [compatibilityData, loading, error, saveCompatibilityResult]);
 
   // 현재 URL 생성
   const generateShareUrl = () => {
@@ -625,19 +621,7 @@ export default function CompatibilityResultPage() {
         />
       </div>
       {/* 커스텀 헤더 */}
-      <div className="sticky top-0 z-10 backdrop-blur-md bg-[#3B2E7E]/50 border-b border-white/10">
-        <div className="container mx-auto px-4 py-4 flex items-center">
-          <button
-            onClick={() => router.push("/compatibility")}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors"
-          >
-            <ArrowLeft className="h-6 w-6 text-white" />
-          </button>
-          <h1 className="text-xl font-semibold text-white ml-2 font-gothic">
-            궁합 결과
-          </h1>
-        </div>
-      </div>
+      <PageHeader title="궁합 결과" />
       <div className="container max-w-md mx-auto px-4 py-6 relative z-10 pb-28">
         {/* 결과 컨테이너 */}
         <motion.div

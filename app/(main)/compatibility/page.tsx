@@ -106,7 +106,7 @@ const validateName = (
 export default function CompatibilityPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { userProfile, isLoaded } = useUser();
+  const { userProfile, isLoaded, isProfileComplete } = useUser();
   const { setState } = useCompatibility();
   const [formData, setFormData] = useState({
     person1: {
@@ -123,11 +123,14 @@ export default function CompatibilityPage() {
     },
   });
 
-  // Person1 추가 상태
+  // Person1 추가 상태 (필요는 없지만 의존성 유지를 위해 남겨둠)
   const [birthYear1, setBirthYear1] = useState("");
   const [birthMonth1, setBirthMonth1] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [birthDay1, setBirthDay1] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [calendarType1, setCalendarType1] = useState<CalendarType>("양력");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [koreanBirthTime1, setKoreanBirthTime1] = useState<BirthTime>("모름");
 
   // Person2 추가 상태
@@ -154,7 +157,8 @@ export default function CompatibilityPage() {
     return daysInMonth;
   };
 
-  // Person1 일 옵션
+  // Person1 일 옵션 - 린터 경고 해결
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dayOptions1 = Array.from(
     { length: getDaysInMonth(birthYear1, birthMonth1) },
     (_, i) => i + 1
@@ -230,7 +234,9 @@ export default function CompatibilityPage() {
   };
 
   const [error, setError] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSharedMode, setIsSharedMode] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -293,7 +299,7 @@ export default function CompatibilityPage() {
 
   // 사용자 프로필 정보로 폼 데이터 초기화
   useEffect(() => {
-    if (userProfile && isLoaded && !isSharedMode) {
+    if (userProfile && isLoaded) {
       // gender 형식 변환 ("남성"/"여성" -> "남"/"여")
       const gender =
         userProfile.gender === "남성"
@@ -314,7 +320,7 @@ export default function CompatibilityPage() {
         }
       }
 
-      // formData 업데이트
+      // person1 데이터 설정
       setFormData((prev) => ({
         ...prev,
         person1: {
@@ -324,56 +330,25 @@ export default function CompatibilityPage() {
           birthtime: birthtime,
         },
       }));
-    } else if (isSharedMode && userProfile && isLoaded) {
-      // 공유 모드에서는 로그인 사용자 정보를 두 번째 사람으로 설정
-      const gender =
-        userProfile.gender === "남성"
-          ? "남"
-          : userProfile.gender === "여성"
-          ? "여"
-          : "남";
 
-      let birthtime = "12:00";
-      if (userProfile.birthTime && userProfile.birthTime !== "모름") {
-        const timeMatch = userProfile.birthTime.match(
-          /\((\d{2}):00-\d{2}:00\)/
-        );
-        if (timeMatch) {
-          birthtime = `${timeMatch[1]}:00`;
+      // person1 생년월일 및 시간 설정 (참조 유지를 위해)
+      if (userProfile.birthDate) {
+        const parts = userProfile.birthDate.split("-");
+        if (parts.length === 3) {
+          setBirthYear1(parts[0]);
+          setBirthMonth1(String(parseInt(parts[1])));
+          setBirthDay1(String(parseInt(parts[2])));
         }
       }
 
-      setFormData((prev) => ({
-        ...prev,
-        person2: {
-          name: userProfile.name || "",
-          birthdate: userProfile.birthDate || "",
-          gender: gender as "남" | "여",
-          birthtime: birthtime,
-        },
-      }));
+      // person1 시간 설정
+      if (userProfile.birthTime) {
+        setKoreanBirthTime1(userProfile.birthTime);
+      }
     }
-  }, [userProfile, isLoaded, isSharedMode]);
+  }, [userProfile, isLoaded]);
 
   // formData 변경 시 추가 상태 업데이트
-  const updatePerson1FormData = () => {
-    const formattedBirthdate = formatBirthdate(
-      birthYear1,
-      birthMonth1,
-      birthDay1
-    );
-    const formattedBirthtime = extractTimeFromBirthTime(koreanBirthTime1);
-
-    setFormData((prev) => ({
-      ...prev,
-      person1: {
-        ...prev.person1,
-        birthdate: formattedBirthdate,
-        birthtime: formattedBirthtime,
-      },
-    }));
-  };
-
   const updatePerson2FormData = () => {
     const formattedBirthdate = formatBirthdate(
       birthYear2,
@@ -394,11 +369,6 @@ export default function CompatibilityPage() {
 
   // 생년월일 또는 시간 변경 시 폼 데이터 업데이트
   useEffect(() => {
-    updatePerson1FormData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [birthYear1, birthMonth1, birthDay1, koreanBirthTime1]);
-
-  useEffect(() => {
     updatePerson2FormData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [birthYear2, birthMonth2, birthDay2, koreanBirthTime2]);
@@ -406,19 +376,21 @@ export default function CompatibilityPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 유효성 검사
-    if (!formData.person1.name || !formData.person2.name) {
-      setError("두 사람의 이름을 모두 입력해주세요.");
+    // 사용자 정보가 없는 경우
+    if (!userProfile || !isProfileComplete) {
+      toast.error("프로필 설정에서 내 정보를 먼저 입력해주세요.");
+      router.push("/profile/setup");
       return;
     }
 
-    if (!formData.person1.birthdate || !formData.person2.birthdate) {
-      setError("두 사람의 생년월일을 모두 선택해주세요.");
+    // 상대방 정보 유효성 검사
+    if (!formData.person2.name) {
+      setError("두 번째 사람의 이름을 입력해주세요.");
       return;
     }
 
-    if (!formData.person1.birthtime || !formData.person2.birthtime) {
-      setError("두 사람의 태어난 시간을 모두 선택해주세요.");
+    if (!formData.person2.birthdate) {
+      setError("두 번째 사람의 생년월일을 선택해주세요.");
       return;
     }
 
@@ -607,496 +579,308 @@ export default function CompatibilityPage() {
             사주로 보는 너와 나의 궁합
           </motion.h2>
 
-          {error && (
+          {!isLoaded ? (
+            <motion.div
+              className="flex justify-center p-10"
+              variants={itemVariants}
+            >
+              <div className="animate-spin h-8 w-8 border-4 border-[#990dfa] rounded-full border-t-transparent"></div>
+            </motion.div>
+          ) : !userProfile || !isProfileComplete ? (
             <motion.div
               className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 text-red-700 rounded"
               variants={itemVariants}
             >
-              {error}
-            </motion.div>
-          )}
-
-          {shareGuideVisible && isSharedMode && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-blue-700 rounded"
-            >
-              <p className="font-medium">공유된 링크로 접속하셨습니다!</p>
-              <p className="text-sm">
-                첫 번째 사람의 정보는 이미 입력되어 있습니다. 당신의 정보만
-                입력하면 궁합을 확인할 수 있어요.
+              <p className="font-medium">프로필 정보가 필요합니다!</p>
+              <p className="text-sm mb-4">
+                정확한 궁합 분석을 위해 프로필 설정에서 내 정보를 먼저
+                입력해주세요.
               </p>
-            </motion.div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <motion.div className="space-y-6" variants={itemVariants}>
-              {/* 첫 번째 사람 정보 */}
-              <div className="p-4 bg-[#F9F5FF] rounded-xl">
-                <h3 className="font-semibold text-[#3B2E7E] mb-4">
-                  첫 번째 사람{" "}
-                  {isSharedMode && (
-                    <span className="text-sm text-[#990dfa]">
-                      (공유된 정보)
-                    </span>
-                  )}
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      이름
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.person1.name}
-                      onChange={(e) =>
-                        handleInputChange("person1", "name", e.target.value)
-                      }
-                      placeholder="이름 (2글자 이상, 한글/영문만)"
-                      readOnly={isSharedMode}
-                      className={`w-full px-4 py-2 rounded-xl border ${
-                        isSharedMode
-                          ? "bg-gray-100 cursor-not-allowed"
-                          : "border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                      }`}
-                    />
-                    {!validateName(formData.person1.name).isValid &&
-                      formData.person1.name && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {validateName(formData.person1.name).errorMessage}
-                        </p>
-                      )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      성별
-                    </label>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleInputChange("person1", "gender", "남")
-                        }
-                        disabled={isSharedMode}
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          formData.person1.gender === "남"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        } ${
-                          isSharedMode ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        남성
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleInputChange("person1", "gender", "여")
-                        }
-                        disabled={isSharedMode}
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          formData.person1.gender === "여"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        } ${
-                          isSharedMode ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        여성
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      생년월일
-                    </label>
-                    {!isSharedMode ? (
-                      <div className="flex space-x-2">
-                        <select
-                          value={birthYear1}
-                          onChange={(e) => {
-                            setBirthYear1(e.target.value);
-                          }}
-                          className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
-                          disabled={isSharedMode}
-                        >
-                          <option value="">연도</option>
-                          {yearOptions.map((year) => (
-                            <option key={year} value={year.toString()}>
-                              {year}년
-                            </option>
-                          ))}
-                        </select>
-                        <select
-                          value={birthMonth1}
-                          onChange={(e) => {
-                            setBirthMonth1(e.target.value);
-                          }}
-                          className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
-                          disabled={isSharedMode}
-                        >
-                          <option value="">월</option>
-                          {monthOptions.map((month) => (
-                            <option key={month} value={month.toString()}>
-                              {month}월
-                            </option>
-                          ))}
-                        </select>
-                        <select
-                          value={birthDay1}
-                          onChange={(e) => {
-                            setBirthDay1(e.target.value);
-                          }}
-                          className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
-                          disabled={isSharedMode}
-                        >
-                          <option value="">일</option>
-                          {dayOptions1.map((day) => (
-                            <option key={day} value={day.toString()}>
-                              {day}일
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : (
-                      <input
-                        type="date"
-                        value={formData.person1.birthdate}
-                        readOnly={true}
-                        className="w-full px-4 py-2 rounded-xl border bg-gray-100 cursor-not-allowed"
-                      />
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      양력/음력
-                    </label>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => setCalendarType1("양력")}
-                        disabled={isSharedMode}
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          calendarType1 === "양력"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        } ${
-                          isSharedMode ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        양력
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCalendarType1("음력")}
-                        disabled={isSharedMode}
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          calendarType1 === "음력"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        } ${
-                          isSharedMode ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        음력
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      태어난 시간
-                    </label>
-                    {!isSharedMode ? (
-                      <select
-                        value={koreanBirthTime1}
-                        onChange={(e) =>
-                          setKoreanBirthTime1(e.target.value as BirthTime)
-                        }
-                        className="w-full p-3 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                        disabled={isSharedMode}
-                      >
-                        <option value="모름">모름</option>
-                        <option value="자시(23:00-01:00)">
-                          자시 (23:00-01:00)
-                        </option>
-                        <option value="축시(01:00-03:00)">
-                          축시 (01:00-03:00)
-                        </option>
-                        <option value="인시(03:00-05:00)">
-                          인시 (03:00-05:00)
-                        </option>
-                        <option value="묘시(05:00-07:00)">
-                          묘시 (05:00-07:00)
-                        </option>
-                        <option value="진시(07:00-09:00)">
-                          진시 (07:00-09:00)
-                        </option>
-                        <option value="사시(09:00-11:00)">
-                          사시 (09:00-11:00)
-                        </option>
-                        <option value="오시(11:00-13:00)">
-                          오시 (11:00-13:00)
-                        </option>
-                        <option value="미시(13:00-15:00)">
-                          미시 (13:00-15:00)
-                        </option>
-                        <option value="신시(15:00-17:00)">
-                          신시 (15:00-17:00)
-                        </option>
-                        <option value="유시(17:00-19:00)">
-                          유시 (17:00-19:00)
-                        </option>
-                        <option value="술시(19:00-21:00)">
-                          술시 (19:00-21:00)
-                        </option>
-                        <option value="해시(21:00-23:00)">
-                          해시 (21:00-23:00)
-                        </option>
-                      </select>
-                    ) : (
-                      <input
-                        type="time"
-                        value={formData.person1.birthtime}
-                        readOnly={true}
-                        className="w-full px-4 py-2 rounded-xl border bg-gray-100 cursor-not-allowed"
-                      />
-                    )}
-                    <p className="text-xs text-gray-500 mt-1">
-                      정확한 시간을 모르시면 &quot;모름&quot;으로 입력해주세요.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 두 번째 사람 정보 */}
-              <div className="p-4 bg-[#F9F5FF] rounded-xl">
-                <h3 className="font-semibold text-[#3B2E7E] mb-4">
-                  두 번째 사람{" "}
-                  {isSharedMode && (
-                    <span className="text-sm text-[#990dfa]">
-                      (당신의 정보)
-                    </span>
-                  )}
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      이름
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.person2.name}
-                      onChange={(e) =>
-                        handleInputChange("person2", "name", e.target.value)
-                      }
-                      placeholder="이름 (2글자 이상, 한글/영문만)"
-                      className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                    />
-                    {!validateName(formData.person2.name).isValid &&
-                      formData.person2.name && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {validateName(formData.person2.name).errorMessage}
-                        </p>
-                      )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      성별
-                    </label>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleInputChange("person2", "gender", "남")
-                        }
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          formData.person2.gender === "남"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        }`}
-                      >
-                        남성
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleInputChange("person2", "gender", "여")
-                        }
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          formData.person2.gender === "여"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        }`}
-                      >
-                        여성
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      생년월일
-                    </label>
-                    <div className="flex space-x-2">
-                      <select
-                        value={birthYear2}
-                        onChange={(e) => {
-                          setBirthYear2(e.target.value);
-                        }}
-                        className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
-                      >
-                        <option value="">연도</option>
-                        {yearOptions.map((year) => (
-                          <option key={year} value={year.toString()}>
-                            {year}년
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={birthMonth2}
-                        onChange={(e) => {
-                          setBirthMonth2(e.target.value);
-                        }}
-                        className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
-                      >
-                        <option value="">월</option>
-                        {monthOptions.map((month) => (
-                          <option key={month} value={month.toString()}>
-                            {month}월
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={birthDay2}
-                        onChange={(e) => {
-                          setBirthDay2(e.target.value);
-                        }}
-                        className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
-                      >
-                        <option value="">일</option>
-                        {dayOptions2.map((day) => (
-                          <option key={day} value={day.toString()}>
-                            {day}일
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      양력/음력
-                    </label>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => setCalendarType2("양력")}
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          calendarType2 === "양력"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        }`}
-                      >
-                        양력
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCalendarType2("음력")}
-                        className={`flex-1 py-2 px-4 rounded-xl border ${
-                          calendarType2 === "음력"
-                            ? "bg-[#990dfa] text-white border-[#990dfa]"
-                            : "border-[#E9E4F0] text-[#3B2E7E]"
-                        }`}
-                      >
-                        음력
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
-                      태어난 시간
-                    </label>
-                    <select
-                      value={koreanBirthTime2}
-                      onChange={(e) =>
-                        setKoreanBirthTime2(e.target.value as BirthTime)
-                      }
-                      className="w-full p-3 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
-                    >
-                      <option value="모름">모름</option>
-                      <option value="자시(23:00-01:00)">
-                        자시 (23:00-01:00)
-                      </option>
-                      <option value="축시(01:00-03:00)">
-                        축시 (01:00-03:00)
-                      </option>
-                      <option value="인시(03:00-05:00)">
-                        인시 (03:00-05:00)
-                      </option>
-                      <option value="묘시(05:00-07:00)">
-                        묘시 (05:00-07:00)
-                      </option>
-                      <option value="진시(07:00-09:00)">
-                        진시 (07:00-09:00)
-                      </option>
-                      <option value="사시(09:00-11:00)">
-                        사시 (09:00-11:00)
-                      </option>
-                      <option value="오시(11:00-13:00)">
-                        오시 (11:00-13:00)
-                      </option>
-                      <option value="미시(13:00-15:00)">
-                        미시 (13:00-15:00)
-                      </option>
-                      <option value="신시(15:00-17:00)">
-                        신시 (15:00-17:00)
-                      </option>
-                      <option value="유시(17:00-19:00)">
-                        유시 (17:00-19:00)
-                      </option>
-                      <option value="술시(19:00-21:00)">
-                        술시 (19:00-21:00)
-                      </option>
-                      <option value="해시(21:00-23:00)">
-                        해시 (21:00-23:00)
-                      </option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      정확한 시간을 모르시면 &quot;모름&quot;으로 입력해주세요.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div className="mt-8" variants={itemVariants}>
               <button
-                type="submit"
-                className="w-full px-6 py-3 rounded-xl bg-[#990dfa] text-white font-medium hover:bg-[#8A0AE0] transition-colors"
+                onClick={() => router.push("/profile/setup")}
+                className="w-full px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
               >
-                {isSharedMode ? "공유된 궁합 확인하기" : "궁합 확인하기"}
+                프로필 설정하러 가기
               </button>
-
-              {!isSharedMode && (
-                <button
-                  type="button"
-                  onClick={handleShareClick}
-                  className="w-full mt-4 px-6 py-3 rounded-xl bg-white border border-[#990dfa] text-[#990dfa] font-medium hover:bg-[#F9F5FF] transition-colors flex items-center justify-center"
-                >
-                  <Share2 className="h-5 w-5 mr-2" />
-                  공유하고 궁합보기
-                </button>
-              )}
             </motion.div>
-          </form>
+          ) : (
+            <>
+              {error && (
+                <motion.div
+                  className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 text-red-700 rounded"
+                  variants={itemVariants}
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              <motion.div
+                variants={itemVariants}
+                className="mb-6 p-4 bg-[#F9F5FF] rounded-xl border border-[#E9E4F0]"
+              >
+                <h3 className="font-semibold text-[#3B2E7E] mb-2">내 정보</h3>
+                <div className="flex items-center space-x-4">
+                  <div className="bg-[#990dfa]/10 p-3 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-[#990dfa]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium text-[#3B2E7E]">
+                      {userProfile?.name}
+                    </div>
+                    <div className="text-sm text-[#6E6491]">
+                      {userProfile?.birthDate
+                        ? new Date(userProfile.birthDate).toLocaleDateString(
+                            "ko-KR",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )
+                        : "생년월일 없음"}
+                      {userProfile?.gender ? ` · ${userProfile.gender}` : ""}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 text-xs text-[#6E6491] text-right">
+                  <button
+                    onClick={() => router.push("/profile/edit")}
+                    className="text-[#990dfa] underline bg-transparent border-none"
+                  >
+                    프로필 수정하기
+                  </button>
+                </div>
+              </motion.div>
+
+              <form onSubmit={handleSubmit}>
+                <motion.div className="space-y-6" variants={itemVariants}>
+                  {/* 두 번째 사람 정보 */}
+                  <div className="p-4 bg-[#F9F5FF] rounded-xl">
+                    <h3 className="font-semibold text-[#3B2E7E] mb-4">
+                      상대방 정보
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                          이름
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.person2.name}
+                          onChange={(e) =>
+                            handleInputChange("person2", "name", e.target.value)
+                          }
+                          placeholder="이름 (2글자 이상, 한글/영문만)"
+                          className="w-full px-4 py-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                        />
+                        {!validateName(formData.person2.name).isValid &&
+                          formData.person2.name && (
+                            <p className="text-red-500 text-xs mt-1">
+                              {validateName(formData.person2.name).errorMessage}
+                            </p>
+                          )}
+                      </div>
+
+                      <div>
+                        <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                          성별
+                        </label>
+                        <div className="flex space-x-4">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleInputChange("person2", "gender", "남")
+                            }
+                            className={`flex-1 py-2 px-4 rounded-xl border ${
+                              formData.person2.gender === "남"
+                                ? "bg-[#990dfa] text-white border-[#990dfa]"
+                                : "border-[#E9E4F0] text-[#3B2E7E]"
+                            }`}
+                          >
+                            남성
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleInputChange("person2", "gender", "여")
+                            }
+                            className={`flex-1 py-2 px-4 rounded-xl border ${
+                              formData.person2.gender === "여"
+                                ? "bg-[#990dfa] text-white border-[#990dfa]"
+                                : "border-[#E9E4F0] text-[#3B2E7E]"
+                            }`}
+                          >
+                            여성
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                          생년월일
+                        </label>
+                        <div className="flex space-x-2">
+                          <select
+                            value={birthYear2}
+                            onChange={(e) => {
+                              setBirthYear2(e.target.value);
+                            }}
+                            className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                          >
+                            <option value="">연도</option>
+                            {yearOptions.map((year) => (
+                              <option key={year} value={year.toString()}>
+                                {year}년
+                              </option>
+                            ))}
+                          </select>
+                          <select
+                            value={birthMonth2}
+                            onChange={(e) => {
+                              setBirthMonth2(e.target.value);
+                            }}
+                            className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                          >
+                            <option value="">월</option>
+                            {monthOptions.map((month) => (
+                              <option key={month} value={month.toString()}>
+                                {month}월
+                              </option>
+                            ))}
+                          </select>
+                          <select
+                            value={birthDay2}
+                            onChange={(e) => {
+                              setBirthDay2(e.target.value);
+                            }}
+                            className="flex-1 p-2 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa]"
+                          >
+                            <option value="">일</option>
+                            {dayOptions2.map((day) => (
+                              <option key={day} value={day.toString()}>
+                                {day}일
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                          양력/음력
+                        </label>
+                        <div className="flex space-x-4">
+                          <button
+                            type="button"
+                            onClick={() => setCalendarType2("양력")}
+                            className={`flex-1 py-2 px-4 rounded-xl border ${
+                              calendarType2 === "양력"
+                                ? "bg-[#990dfa] text-white border-[#990dfa]"
+                                : "border-[#E9E4F0] text-[#3B2E7E]"
+                            }`}
+                          >
+                            양력
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCalendarType2("음력")}
+                            className={`flex-1 py-2 px-4 rounded-xl border ${
+                              calendarType2 === "음력"
+                                ? "bg-[#990dfa] text-white border-[#990dfa]"
+                                : "border-[#E9E4F0] text-[#3B2E7E]"
+                            }`}
+                          >
+                            음력
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[#3B2E7E] text-sm font-medium mb-1">
+                          태어난 시간
+                        </label>
+                        <select
+                          value={koreanBirthTime2}
+                          onChange={(e) =>
+                            setKoreanBirthTime2(e.target.value as BirthTime)
+                          }
+                          className="w-full p-3 rounded-xl border border-[#E9E4F0] focus:outline-none focus:ring-2 focus:ring-[#990dfa] focus:border-transparent"
+                        >
+                          <option value="모름">모름</option>
+                          <option value="자시(23:00-01:00)">
+                            자시 (23:00-01:00)
+                          </option>
+                          <option value="축시(01:00-03:00)">
+                            축시 (01:00-03:00)
+                          </option>
+                          <option value="인시(03:00-05:00)">
+                            인시 (03:00-05:00)
+                          </option>
+                          <option value="묘시(05:00-07:00)">
+                            묘시 (05:00-07:00)
+                          </option>
+                          <option value="진시(07:00-09:00)">
+                            진시 (07:00-09:00)
+                          </option>
+                          <option value="사시(09:00-11:00)">
+                            사시 (09:00-11:00)
+                          </option>
+                          <option value="오시(11:00-13:00)">
+                            오시 (11:00-13:00)
+                          </option>
+                          <option value="미시(13:00-15:00)">
+                            미시 (13:00-15:00)
+                          </option>
+                          <option value="신시(15:00-17:00)">
+                            신시 (15:00-17:00)
+                          </option>
+                          <option value="유시(17:00-19:00)">
+                            유시 (17:00-19:00)
+                          </option>
+                          <option value="술시(19:00-21:00)">
+                            술시 (19:00-21:00)
+                          </option>
+                          <option value="해시(21:00-23:00)">
+                            해시 (21:00-23:00)
+                          </option>
+                        </select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          정확한 시간을 모르시면 &quot;모름&quot;으로
+                          입력해주세요.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div className="mt-8" variants={itemVariants}>
+                  <button
+                    type="submit"
+                    className="w-full px-6 py-3 rounded-xl bg-[#990dfa] text-white font-medium hover:bg-[#8A0AE0] transition-colors"
+                  >
+                    궁합 확인하기
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleShareClick}
+                    className="w-full mt-4 px-6 py-3 rounded-xl bg-white border border-[#990dfa] text-[#990dfa] font-medium hover:bg-[#F9F5FF] transition-colors flex items-center justify-center"
+                  >
+                    <Share2 className="h-5 w-5 mr-2" />
+                    공유하고 궁합보기
+                  </button>
+                </motion.div>
+              </form>
+            </>
+          )}
         </motion.div>
 
         {/* 하단 설명 */}
@@ -1105,9 +889,9 @@ export default function CompatibilityPage() {
           variants={itemVariants}
         >
           <p>
-            {isSharedMode
-              ? "공유된 정보로 궁합을 확인해보세요. 당신의 정보만 입력하시면 됩니다."
-              : "사주 정보를 바탕으로 두 사람의 궁합을 분석해드립니다.\n정확한 정보를 입력할수록 더 정확한 결과를 얻을 수 있어요."}
+            사주 정보를 바탕으로 두 사람의 궁합을 분석해드립니다.
+            <br />
+            정확한 정보를 입력할수록 더 정확한 결과를 얻을 수 있어요.
           </p>
         </motion.div>
       </div>

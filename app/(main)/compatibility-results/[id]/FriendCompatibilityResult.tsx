@@ -217,7 +217,9 @@ const getScoreNickname = (score: number) => {
 
 export default function FriendCompatibilityResult({
   data,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   person1,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   person2,
 }: FriendCompatibilityResultProps) {
   // UI 컴포넌트 렌더링 (기존 친구 궁합 결과 페이지 UI 사용)

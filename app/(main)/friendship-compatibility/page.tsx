@@ -135,7 +135,7 @@ const mapUserProfileToFormData = (userProfile: UserProfile | null) => {
 export default function FriendshipCompatibilityPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { userProfile, isLoaded } = useUser();
+  const { userProfile, isLoaded, isProfileComplete } = useUser();
   const { setState } = useFriendCompatibility();
   const [formData, setFormData] = useState({
     person1: {
@@ -152,7 +152,7 @@ export default function FriendshipCompatibilityPage() {
     },
   });
 
-  // Person1 추가 상태
+  // Person1 추가 상태 (필요는 없지만 의존성 유지를 위해 남겨둠)
   const [birthYear1, setBirthYear1] = useState("");
   const [birthMonth1, setBirthMonth1] = useState("");
   const [birthDay1, setBirthDay1] = useState("");
@@ -182,6 +182,7 @@ export default function FriendshipCompatibilityPage() {
   };
 
   // Person1 일 옵션
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dayOptions1 = Array.from(
     { length: getDaysInMonth(birthYear1, birthMonth1) },
     (_, i) => i + 1
@@ -397,6 +398,13 @@ export default function FriendshipCompatibilityPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 사용자 정보가 없는 경우
+    if (!userProfile || !isProfileComplete) {
+      toast.error("프로필 설정에서 내 정보를 먼저 입력해주세요.");
+      router.push("/profile/setup");
+      return;
+    }
+
     // 데이터 검증
     const validationResult = validateFormData();
     if (!validationResult.isValid) {
@@ -506,21 +514,18 @@ export default function FriendshipCompatibilityPage() {
 
   // 폼 데이터 유효성 검사 함수
   const validateFormData = (): { isValid: boolean; errorMessage: string } => {
-    // 사람1 유효성 검사
-    const person1NameValidation = validateName(formData.person1.name);
-    if (!person1NameValidation.isValid) {
-      return person1NameValidation;
-    }
-
-    // 사람2 유효성 검사
+    // 상대방 정보만 검증
     const person2NameValidation = validateName(formData.person2.name);
     if (!person2NameValidation.isValid) {
       return person2NameValidation;
     }
 
     // 생년월일 필수 입력 체크
-    if (!formData.person1.birthdate || !formData.person2.birthdate) {
-      return { isValid: false, errorMessage: "생년월일을 모두 입력해주세요." };
+    if (!formData.person2.birthdate) {
+      return {
+        isValid: false,
+        errorMessage: "상대방의 생년월일을 입력해주세요.",
+      };
     }
 
     return { isValid: true, errorMessage: "" };
@@ -603,321 +608,241 @@ export default function FriendshipCompatibilityPage() {
             생년월일 정보를 입력하면 고양이 점성술사가 친구 궁합을 봐드려요!
           </p>
 
-          <form onSubmit={handleSubmit}>
-            {/* 첫 번째 사람 정보 */}
-            <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
-              <h3 className="text-lg font-medium text-purple-900 mb-4">
-                첫 번째 사람 정보 {userProfile ? "(내 정보)" : ""}
-              </h3>
-
-              <div className="mb-4">
-                <label
-                  htmlFor="person1-name"
-                  className="block text-sm font-medium text-purple-700 mb-1"
-                >
-                  이름
-                </label>
-                <input
-                  type="text"
-                  id="person1-name"
-                  value={formData.person1.name}
-                  onChange={(e) =>
-                    handleInputChange("person1", "name", e.target.value)
-                  }
-                  placeholder="이름을 입력하세요"
-                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
-                />
-              </div>
-
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-sm font-medium text-purple-700">
-                    성별
-                  </label>
-                </div>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      checked={formData.person1.gender === "남"}
-                      onChange={() =>
-                        handleInputChange("person1", "gender", "남")
-                      }
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
-                        formData.person1.gender === "남"
-                          ? "bg-purple-600 text-white"
-                          : "bg-white border border-purple-300 text-purple-700"
-                      }`}
-                    >
-                      남성
-                    </div>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      checked={formData.person1.gender === "여"}
-                      onChange={() =>
-                        handleInputChange("person1", "gender", "여")
-                      }
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
-                        formData.person1.gender === "여"
-                          ? "bg-purple-600 text-white"
-                          : "bg-white border border-purple-300 text-purple-700"
-                      }`}
-                    >
-                      여성
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-700 mb-1">
-                  생년월일
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={birthYear1}
-                    onChange={(e) => setBirthYear1(e.target.value)}
-                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="">년</option>
-                    {yearOptions.map((year) => (
-                      <option key={year} value={year}>
-                        {year}년
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={birthMonth1}
-                    onChange={(e) => setBirthMonth1(e.target.value)}
-                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="">월</option>
-                    {monthOptions.map((month) => (
-                      <option key={month} value={month}>
-                        {month}월
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={birthDay1}
-                    onChange={(e) => setBirthDay1(e.target.value)}
-                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="">일</option>
-                    {dayOptions1.map((day) => (
-                      <option key={day} value={day}>
-                        {day}일
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-700 mb-1">
-                  태어난 시간
-                </label>
-                <select
-                  value={koreanBirthTime1}
-                  onChange={(e) =>
-                    setKoreanBirthTime1(e.target.value as BirthTime)
-                  }
-                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                >
-                  <option value="모름">모름</option>
-                  <option value="자시(23:00-01:00)">자시(23:00-01:00)</option>
-                  <option value="축시(01:00-03:00)">축시(01:00-03:00)</option>
-                  <option value="인시(03:00-05:00)">인시(03:00-05:00)</option>
-                  <option value="묘시(05:00-07:00)">묘시(05:00-07:00)</option>
-                  <option value="진시(07:00-09:00)">진시(07:00-09:00)</option>
-                  <option value="사시(09:00-11:00)">사시(09:00-11:00)</option>
-                  <option value="오시(11:00-13:00)">오시(11:00-13:00)</option>
-                  <option value="미시(13:00-15:00)">미시(13:00-15:00)</option>
-                  <option value="신시(15:00-17:00)">신시(15:00-17:00)</option>
-                  <option value="유시(17:00-19:00)">유시(17:00-19:00)</option>
-                  <option value="술시(19:00-21:00)">술시(19:00-21:00)</option>
-                  <option value="해시(21:00-23:00)">해시(21:00-23:00)</option>
-                </select>
-                <p className="text-xs text-purple-500 mt-1">
-                  모를 경우 &apos;모름&apos;을 선택하세요
-                </p>
-              </div>
+          {!isLoaded ? (
+            <div className="flex justify-center p-10">
+              <div className="animate-spin h-8 w-8 border-4 border-purple-500 rounded-full border-t-transparent"></div>
             </div>
-
-            {/* 두 번째 사람 정보 */}
-            <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
-              <h3 className="text-lg font-medium text-purple-900 mb-4">
-                두 번째 사람 정보
-              </h3>
-
-              <div className="mb-4">
-                <label
-                  htmlFor="person2-name"
-                  className="block text-sm font-medium text-purple-700 mb-1"
-                >
-                  이름
-                </label>
-                <input
-                  type="text"
-                  id="person2-name"
-                  value={formData.person2.name}
-                  onChange={(e) =>
-                    handleInputChange("person2", "name", e.target.value)
-                  }
-                  placeholder="이름을 입력하세요"
-                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
-                />
-              </div>
-
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-sm font-medium text-purple-700">
-                    성별
-                  </label>
-                </div>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      checked={formData.person2.gender === "남"}
-                      onChange={() =>
-                        handleInputChange("person2", "gender", "남")
-                      }
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
-                        formData.person2.gender === "남"
-                          ? "bg-purple-600 text-white"
-                          : "bg-white border border-purple-300 text-purple-700"
-                      }`}
-                    >
-                      남성
-                    </div>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      checked={formData.person2.gender === "여"}
-                      onChange={() =>
-                        handleInputChange("person2", "gender", "여")
-                      }
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
-                        formData.person2.gender === "여"
-                          ? "bg-purple-600 text-white"
-                          : "bg-white border border-purple-300 text-purple-700"
-                      }`}
-                    >
-                      여성
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-700 mb-1">
-                  생년월일
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={birthYear2}
-                    onChange={(e) => setBirthYear2(e.target.value)}
-                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="">년</option>
-                    {yearOptions.map((year) => (
-                      <option key={year} value={year}>
-                        {year}년
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={birthMonth2}
-                    onChange={(e) => setBirthMonth2(e.target.value)}
-                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="">월</option>
-                    {monthOptions.map((month) => (
-                      <option key={month} value={month}>
-                        {month}월
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={birthDay2}
-                    onChange={(e) => setBirthDay2(e.target.value)}
-                    className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="">일</option>
-                    {dayOptions2.map((day) => (
-                      <option key={day} value={day}>
-                        {day}일
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-purple-700 mb-1">
-                  태어난 시간
-                </label>
-                <select
-                  value={koreanBirthTime2}
-                  onChange={(e) =>
-                    setKoreanBirthTime2(e.target.value as BirthTime)
-                  }
-                  className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                >
-                  <option value="모름">모름</option>
-                  <option value="자시(23:00-01:00)">자시(23:00-01:00)</option>
-                  <option value="축시(01:00-03:00)">축시(01:00-03:00)</option>
-                  <option value="인시(03:00-05:00)">인시(03:00-05:00)</option>
-                  <option value="묘시(05:00-07:00)">묘시(05:00-07:00)</option>
-                  <option value="진시(07:00-09:00)">진시(07:00-09:00)</option>
-                  <option value="사시(09:00-11:00)">사시(09:00-11:00)</option>
-                  <option value="오시(11:00-13:00)">오시(11:00-13:00)</option>
-                  <option value="미시(13:00-15:00)">미시(13:00-15:00)</option>
-                  <option value="신시(15:00-17:00)">신시(15:00-17:00)</option>
-                  <option value="유시(17:00-19:00)">유시(17:00-19:00)</option>
-                  <option value="술시(19:00-21:00)">술시(19:00-21:00)</option>
-                  <option value="해시(21:00-23:00)">해시(21:00-23:00)</option>
-                </select>
-                <p className="text-xs text-purple-500 mt-1">
-                  모를 경우 &apos;모름&apos;을 선택하세요
-                </p>
-              </div>
+          ) : !userProfile || !isProfileComplete ? (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg text-red-700">
+              <p className="font-medium">프로필 정보가 필요합니다!</p>
+              <p className="text-sm mb-4">
+                정확한 궁합 분석을 위해 프로필 설정에서 내 정보를 먼저
+                입력해주세요.
+              </p>
+              <button
+                onClick={() => router.push("/profile/setup")}
+                className="w-full px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
+              >
+                프로필 설정하러 가기
+              </button>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              {/* 내 정보 표시 */}
+              <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+                <h3 className="text-lg font-medium text-purple-900 mb-4">
+                  내 정보
+                </h3>
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
-                {error}
+                <div className="flex items-center space-x-4 mb-3">
+                  <div className="bg-purple-200 p-3 rounded-full">
+                    <svg
+                      className="w-6 h-6 text-purple-700"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium text-purple-900">
+                      {userProfile.name}
+                    </div>
+                    <div className="text-sm text-purple-700">
+                      {userProfile.birthDate
+                        ? new Date(userProfile.birthDate).toLocaleDateString(
+                            "ko-KR",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )
+                        : "생년월일 없음"}
+                      {userProfile.gender ? ` · ${userProfile.gender}` : ""}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/profile/setup")}
+                    className="text-xs text-purple-600 hover:underline"
+                  >
+                    프로필 수정하기
+                  </button>
+                </div>
               </div>
-            )}
 
-            <motion.button
-              type="submit"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
-            >
-              친구 궁합 확인하기
-            </motion.button>
-            <p className="text-center text-purple-500 text-xs mt-4">
-              생년월일과 시간 정보는 정확한 궁합 분석을 위해 사용됩니다.
-            </p>
-          </form>
+              {/* 두 번째 사람(상대방) 정보 */}
+              <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+                <h3 className="text-lg font-medium text-purple-900 mb-4">
+                  상대방 정보
+                </h3>
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="person2-name"
+                    className="block text-sm font-medium text-purple-700 mb-1"
+                  >
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    id="person2-name"
+                    value={formData.person2.name}
+                    onChange={(e) =>
+                      handleInputChange("person2", "name", e.target.value)
+                    }
+                    placeholder="이름을 입력하세요"
+                    className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-sm font-medium text-purple-700">
+                      성별
+                    </label>
+                  </div>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={formData.person2.gender === "남"}
+                        onChange={() =>
+                          handleInputChange("person2", "gender", "남")
+                        }
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
+                          formData.person2.gender === "남"
+                            ? "bg-purple-600 text-white"
+                            : "bg-white border border-purple-300 text-purple-700"
+                        }`}
+                      >
+                        남성
+                      </div>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={formData.person2.gender === "여"}
+                        onChange={() =>
+                          handleInputChange("person2", "gender", "여")
+                        }
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
+                          formData.person2.gender === "여"
+                            ? "bg-purple-600 text-white"
+                            : "bg-white border border-purple-300 text-purple-700"
+                        }`}
+                      >
+                        여성
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-purple-700 mb-1">
+                    생년월일
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={birthYear2}
+                      onChange={(e) => setBirthYear2(e.target.value)}
+                      className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                    >
+                      <option value="">년</option>
+                      {yearOptions.map((year) => (
+                        <option key={year} value={year}>
+                          {year}년
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={birthMonth2}
+                      onChange={(e) => setBirthMonth2(e.target.value)}
+                      className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                    >
+                      <option value="">월</option>
+                      {monthOptions.map((month) => (
+                        <option key={month} value={month}>
+                          {month}월
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={birthDay2}
+                      onChange={(e) => setBirthDay2(e.target.value)}
+                      className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                    >
+                      <option value="">일</option>
+                      {dayOptions2.map((day) => (
+                        <option key={day} value={day}>
+                          {day}일
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-purple-700 mb-1">
+                    태어난 시간
+                  </label>
+                  <select
+                    value={koreanBirthTime2}
+                    onChange={(e) =>
+                      setKoreanBirthTime2(e.target.value as BirthTime)
+                    }
+                    className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                  >
+                    <option value="모름">모름</option>
+                    <option value="자시(23:00-01:00)">자시(23:00-01:00)</option>
+                    <option value="축시(01:00-03:00)">축시(01:00-03:00)</option>
+                    <option value="인시(03:00-05:00)">인시(03:00-05:00)</option>
+                    <option value="묘시(05:00-07:00)">묘시(05:00-07:00)</option>
+                    <option value="진시(07:00-09:00)">진시(07:00-09:00)</option>
+                    <option value="사시(09:00-11:00)">사시(09:00-11:00)</option>
+                    <option value="오시(11:00-13:00)">오시(11:00-13:00)</option>
+                    <option value="미시(13:00-15:00)">미시(13:00-15:00)</option>
+                    <option value="신시(15:00-17:00)">신시(15:00-17:00)</option>
+                    <option value="유시(17:00-19:00)">유시(17:00-19:00)</option>
+                    <option value="술시(19:00-21:00)">술시(19:00-21:00)</option>
+                    <option value="해시(21:00-23:00)">해시(21:00-23:00)</option>
+                  </select>
+                  <p className="text-xs text-purple-500 mt-1">
+                    모를 경우 &apos;모름&apos;을 선택하세요
+                  </p>
+                </div>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
+              >
+                친구 궁합 확인하기
+              </motion.button>
+              <p className="text-center text-purple-500 text-xs mt-4">
+                생년월일과 시간 정보는 정확한 궁합 분석을 위해 사용됩니다.
+              </p>
+            </form>
+          )}
         </div>
 
         {showShareModal && (

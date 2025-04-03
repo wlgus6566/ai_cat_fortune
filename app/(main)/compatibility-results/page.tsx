@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -24,11 +24,7 @@ export default function CompatibilityResultsPage() {
   const [filter, setFilter] = useState<"all" | "love" | "friend">("all");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchResults();
-  }, [filter]);
-
-  async function fetchResults() {
+  const fetchResults = useCallback(async () => {
     try {
       setLoading(true);
       const queryParam = filter !== "all" ? `?type=${filter}` : "";
@@ -46,7 +42,11 @@ export default function CompatibilityResultsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter]);
+
+  useEffect(() => {
+    fetchResults();
+  }, [fetchResults]);
 
   async function handleDelete(id: number, e: React.MouseEvent) {
     e.preventDefault();

@@ -56,7 +56,7 @@ export default function PageHeader({
       {showBackButton && (
         <button
           onClick={handleBackClick}
-          className="absolute left-4 top-1/2 transform border-none -translate-y-1/2 p-2 text-gray-700 hover:text-gray-900"
+          className="absolute bg-transparent left-4 top-1/2 transform border-none -translate-y-1/2 p-2 text-gray-700 hover:text-gray-900"
           aria-label="뒤로가기"
         >
           <ChevronLeft className="h-6 w-6" />
