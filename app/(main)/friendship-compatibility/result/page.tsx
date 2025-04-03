@@ -483,7 +483,7 @@ export default function FriendshipCompatibilityResultPage() {
       ) : error ? (
         // 에러 화면
         <div className="flex flex-col items-center justify-center flex-grow p-6 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">{error}</h2>
+          <h2 className="text-xl font-bold text-white mb-4">{error}</h2>
           <button
             onClick={() => router.push("/friendship-compatibility")}
             className="mt-6 px-6 py-3 rounded-full bg-white/20 text-white font-medium hover:bg-white/30 transition-colors flex items-center"
@@ -541,7 +541,7 @@ export default function FriendshipCompatibilityResultPage() {
                         .nickname
                     }
                   </h1>
-                  <p className="text-yellow-200 text-lg mb-4 italic">
+                  <p className="text-white text-lg mb-4">
                     {
                       getScoreNickname(friendCompatibilityData.totalScore)
                         .catComment
@@ -595,7 +595,7 @@ export default function FriendshipCompatibilityResultPage() {
               </h2>
 
               {/* 두 사람 정보 카드 */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex gap-4 mb-6">
                 {/* 첫 번째 사람 카드 */}
                 <div className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20">
                   <div className="text-center">
@@ -611,12 +611,12 @@ export default function FriendshipCompatibilityResultPage() {
                         }
                       </span>
                     </div>
-                    <p className="text-white text-sm mb-1">
+                    {/* <p className="text-white text-sm mb-1">
                       {friendCompatibilityData.elements.user.element}
                     </p>
                     <p className="text-white text-sm mb-1">
                       ({friendCompatibilityData.elements.user.yinYang})
-                    </p>
+                    </p> */}
                     <p className="text-white/80 text-sm mt-2">
                       {friendCompatibilityData.elements.user.description}
                     </p>
@@ -624,11 +624,11 @@ export default function FriendshipCompatibilityResultPage() {
                 </div>
 
                 {/* 관계 화살표 */}
-                <div className="flex items-center justify-center">
+                {/* <div className="flex items-center justify-center">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                     <span className="text-white">💫</span>
                   </div>
-                </div>
+                </div> */}
 
                 {/* 두 번째 사람 카드 */}
                 <div className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20">
@@ -645,12 +645,12 @@ export default function FriendshipCompatibilityResultPage() {
                         }
                       </span>
                     </div>
-                    <p className="text-white text-sm mb-1">
+                    {/* <p className="text-white text-sm mb-1">
                       {friendCompatibilityData.elements.partner.element}
                     </p>
                     <p className="text-white text-sm mb-1">
                       ({friendCompatibilityData.elements.partner.yinYang})
-                    </p>
+                    </p> */}
                     <p className="text-white/80 text-sm mt-2">
                       {friendCompatibilityData.elements.partner.description}
                     </p>
