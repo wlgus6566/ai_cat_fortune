@@ -12,11 +12,10 @@ import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
 import { UserProfile } from "@/app/type/types";
-import Lottie from "lottie-react";
 import Link from "next/link";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
 // 생년월일 및 시간 관련 타입 정의
-type CalendarType = "양력" | "음력";
 type BirthTime =
   | "자시(23:00-01:00)"
   | "축시(01:00-03:00)"
@@ -155,23 +154,16 @@ export default function FriendshipCompatibilityPage() {
     },
   });
 
-  // 페이지 단계 상태 (1: 첫 번째 사람 정보, 2: 두 번째 사람 정보, 3: 결과)
-  const [step, setStep] = useState(1);
-
   // Person1 추가 상태
   const [birthYear1, setBirthYear1] = useState("");
   const [birthMonth1, setBirthMonth1] = useState("");
   const [birthDay1, setBirthDay1] = useState("");
-  // eslint-disable-next-line no-unused-vars
-  const [calendarType1, setCalendarType1] = useState<CalendarType>("양력");
   const [koreanBirthTime1, setKoreanBirthTime1] = useState<BirthTime>("모름");
 
   // Person2 추가 상태
   const [birthYear2, setBirthYear2] = useState("");
   const [birthMonth2, setBirthMonth2] = useState("");
   const [birthDay2, setBirthDay2] = useState("");
-  // eslint-disable-next-line no-unused-vars
-  const [calendarType2, setCalendarType2] = useState<CalendarType>("양력");
   const [koreanBirthTime2, setKoreanBirthTime2] = useState<BirthTime>("모름");
 
   // 연도 옵션 생성 (1930년부터 현재까지)
@@ -240,24 +232,27 @@ export default function FriendshipCompatibilityPage() {
   };
 
   const [error, setError] = useState("");
-  // eslint-disable-next-line no-unused-vars
   const [isSharedMode, setIsSharedMode] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Lottie 애니메이션 객체 참조
-  const chatAnimationRef = useRef(null);
-  const profileAnimationRef = useRef(null);
-  const talismanAnimationRef = useRef(null);
+  // Lottie 애니메이션 상태 및 레퍼런스
+  const [chatAnimationData, setChatAnimationData] = useState<object | null>(
+    null
+  );
+  const [profileAnimationData, setProfileAnimationData] = useState<
+    object | null
+  >(null);
+  const [talismanAnimationData, setTalismanAnimationData] = useState<
+    object | null
+  >(null);
+  const chatAnimationRef = useRef<LottieRefCurrentProps>(null);
+  const profileAnimationRef = useRef<LottieRefCurrentProps>(null);
+  const talismanAnimationRef = useRef<LottieRefCurrentProps>(null);
 
-  // Lottie 애니메이션 데이터 상태
-  const [chatAnimationData, setChatAnimationData] = useState(null);
-  const [profileAnimationData, setProfileAnimationData] = useState(null);
-  const [talismanAnimationData, setTalismanAnimationData] = useState(null);
-
-  // Lottie 애니메이션 데이터 로드
+  // Lottie 애니메이션 로딩
   useEffect(() => {
-    const loadAnimationData = async () => {
+    const loadAnimations = async () => {
       try {
         const chatResponse = await fetch("/lottie/chat-animation.json");
         const chatData = await chatResponse.json();
@@ -275,7 +270,7 @@ export default function FriendshipCompatibilityPage() {
       }
     };
 
-    loadAnimationData();
+    loadAnimations();
   }, []);
 
   // 카카오 SDK 초기화
@@ -372,6 +367,9 @@ export default function FriendshipCompatibilityPage() {
         if (data.person2.birthtime) {
           setKoreanBirthTime2(findClosestBirthTime(data.person2.birthtime));
         }
+
+        // 공유 모드에서는 공유 안내 표시
+        setShareGuideVisible(true);
       } catch (error) {
         console.error("공유 데이터 파싱 에러:", error);
         toast.error("잘못된 공유 링크입니다.");
@@ -456,9 +454,6 @@ export default function FriendshipCompatibilityPage() {
 
     // 에러 상태 초기화
     setError("");
-
-    // 단계를 3으로 변경 (결과 단계)
-    setStep(3);
 
     // 결과 페이지로 이동
     router.push("/friendship-compatibility/result");
@@ -546,9 +541,31 @@ export default function FriendshipCompatibilityPage() {
     setShowShareModal(true);
   };
 
+  // 폼 데이터 유효성 검사 함수
+  const validateFormData = (): { isValid: boolean; errorMessage: string } => {
+    // 사람1 유효성 검사
+    const person1NameValidation = validateName(formData.person1.name);
+    if (!person1NameValidation.isValid) {
+      return person1NameValidation;
+    }
+
+    // 사람2 유효성 검사
+    const person2NameValidation = validateName(formData.person2.name);
+    if (!person2NameValidation.isValid) {
+      return person2NameValidation;
+    }
+
+    // 생년월일 필수 입력 체크
+    if (!formData.person1.birthdate || !formData.person2.birthdate) {
+      return { isValid: false, errorMessage: "생년월일을 모두 입력해주세요." };
+    }
+
+    return { isValid: true, errorMessage: "" };
+  };
+
   return (
     <div className="min-h-screen pb-20 bg-purple-50">
-      <PageHeader title="2025 친구 궁합" />
+      <PageHeader title="친구 궁합" />
       <Toaster position="top-center" />
       <div className="max-w-xl mx-auto px-4 pt-6">
         <AnimatePresence>
@@ -560,11 +577,14 @@ export default function FriendshipCompatibilityPage() {
               className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-purple-400/20"
             >
               <h3 className="text-lg font-medium text-purple-800 mb-2">
-                친구 궁합 링크 공유하기
+                {isSharedMode
+                  ? "친구 궁합 정보가 공유되었어요"
+                  : "친구 궁합 링크 공유하기"}
               </h3>
               <p className="text-sm text-purple-700 mb-4">
-                현재 작성 중인 친구 궁합 정보를 공유할 수 있어요. 궁합을 보고
-                싶은 친구에게 링크를 보내세요!
+                {isSharedMode
+                  ? "공유받은 친구 궁합 정보로 궁합을 확인해보세요. 정보를 수정할 수도 있어요."
+                  : "현재 작성 중인 친구 궁합 정보를 공유할 수 있어요. 궁합을 보고 싶은 친구에게 링크를 보내세요!"}
               </p>
               <div className="flex gap-2">
                 <button
@@ -591,6 +611,18 @@ export default function FriendshipCompatibilityPage() {
         </AnimatePresence>
 
         <div className="bg-white rounded-2xl p-6 border border-purple-200 shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-purple-900">
+              친구 궁합 확인하기
+            </h2>
+            <button
+              onClick={handleShareClick}
+              className="p-2 text-purple-500 hover:text-purple-700 transition-colors"
+            >
+              <Share2 size={20} />
+            </button>
+          </div>
+
           <div className="flex justify-center mb-6">
             <div className="relative w-32 h-32">
               <Image
@@ -604,6 +636,8 @@ export default function FriendshipCompatibilityPage() {
 
           <p className="text-center text-purple-700 mb-6">
             친구와의 케미를 확인해볼까냥? 🐱✨
+            <br />
+            생년월일 정보를 입력하면 고양이 점성술사가 친구 궁합을 봐드려요!
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -917,43 +951,48 @@ export default function FriendshipCompatibilityPage() {
             >
               친구 궁합 확인하기
             </motion.button>
-            <button
-              type="button"
-              onClick={handleShareClick}
-              className="w-full mt-4 px-6 py-3 rounded-xl bg-white border border-[#990dfa] text-[#990dfa] font-medium hover:bg-[#F9F5FF] transition-colors flex items-center justify-center"
-            >
-              <Share2 className="h-5 w-5 mr-2" />
-              공유하고 궁합보기
-            </button>
             <p className="text-center text-purple-500 text-xs mt-4">
               생년월일과 시간 정보는 정확한 궁합 분석을 위해 사용됩니다.
             </p>
           </form>
         </div>
-      </div>
 
-      {showShareModal && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          onCopyLink={copyToClipboard}
-          onShareKakao={shareToKakao}
-        />
-      )}
+        {showShareModal && (
+          <ShareModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            onCopyLink={copyToClipboard}
+            onShareKakao={shareToKakao}
+          />
+        )}
 
-      {/* 퀵 메뉴 영역 */}
-      {step === 3 && (
-        <div className="flex justify-center mt-8 pt-4 mb-8">
-          <div className="grid grid-cols-3 gap-4 w-full max-w-md">
+        {/* 빠른 메뉴 섹션 */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-8 mb-16"
+        >
+          <h3 className="text-lg font-bold text-[#3B2E7E] mb-4 font-heading">
+            빠른 메뉴
+          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <motion.div
-              className="col-span-1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
             >
               <Link href="/chat">
-                <div className="bg-[#F9F5FF] rounded-2xl p-4 flex flex-col items-center hover:bg-[#F0EAFF] transition-colors">
-                  <div className="mb-2 text-[#990dfa] w-12 h-12 flex items-center justify-center">
+                <motion.div
+                  className="card-magic p-5 h-full cursor-pointer"
+                  whileHover={{
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
                     {chatAnimationData ? (
                       <Lottie
                         animationData={chatAnimationData}
@@ -977,22 +1016,32 @@ export default function FriendshipCompatibilityPage() {
                       </svg>
                     )}
                   </div>
-                  <span className="text-xs text-[#3B2E7E] text-center">
-                    궁합챗
-                  </span>
-                </div>
+                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
+                    운세 상담
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    포춘냥이와 운세 기반 고민 상담
+                  </p>
+                </motion.div>
               </Link>
             </motion.div>
 
             <motion.div
-              className="col-span-1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
             >
               <Link href="/profile">
-                <div className="bg-[#F9F5FF] rounded-2xl p-4 flex flex-col items-center hover:bg-[#F0EAFF] transition-colors">
-                  <div className="mb-2 text-[#990dfa] w-12 h-12 flex items-center justify-center">
+                <motion.div
+                  className="card-magic p-5 h-full cursor-pointer"
+                  whileHover={{
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
                     {profileAnimationData ? (
                       <Lottie
                         animationData={profileAnimationData}
@@ -1016,22 +1065,30 @@ export default function FriendshipCompatibilityPage() {
                       </svg>
                     )}
                   </div>
-                  <span className="text-xs text-[#3B2E7E] text-center">
-                    내 정보
-                  </span>
-                </div>
+                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
+                    내 프로필
+                  </h4>
+                  <p className="text-sm text-gray-600">프로필 확인 및 수정</p>
+                </motion.div>
               </Link>
             </motion.div>
 
             <motion.div
-              className="col-span-1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
             >
               <Link href="/talisman-gallery">
-                <div className="bg-[#F9F5FF] rounded-2xl p-4 flex flex-col items-center hover:bg-[#F0EAFF] transition-colors">
-                  <div className="mb-2 text-[#990dfa] w-12 h-12 flex items-center justify-center">
+                <motion.div
+                  className="card-magic p-5 h-full cursor-pointer"
+                  whileHover={{
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
                     {talismanAnimationData ? (
                       <Lottie
                         animationData={talismanAnimationData}
@@ -1055,15 +1112,18 @@ export default function FriendshipCompatibilityPage() {
                       </svg>
                     )}
                   </div>
-                  <span className="text-xs text-[#3B2E7E] text-center">
-                    부적
-                  </span>
-                </div>
+                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
+                    나의 부적 갤러리
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    상담 후 생성된 행운의 부적 모음
+                  </p>
+                </motion.div>
               </Link>
             </motion.div>
           </div>
-        </div>
-      )}
+        </motion.section>
+      </div>
     </div>
   );
 }
