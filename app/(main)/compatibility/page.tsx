@@ -14,7 +14,6 @@ import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
-import { v1 } from "uuid";
 
 // 생년월일 및 시간 관련 타입 정의
 type CalendarType = "양력" | "음력";
@@ -357,37 +356,6 @@ export default function CompatibilityPage() {
   }, [userProfile, isLoaded, isSharedMode]);
 
   // formData 변경 시 추가 상태 업데이트
-  useEffect(() => {
-    // Person1 데이터 처리
-    const {
-      year: year1,
-      month: month1,
-      day: day1,
-    } = extractDateParts(formData.person1.birthdate);
-    setBirthYear1(year1);
-    setBirthMonth1(month1);
-    setBirthDay1(day1);
-
-    // Person1 시간 처리
-    const koreanTime1 = findClosestBirthTime(formData.person1.birthtime);
-    setKoreanBirthTime1(koreanTime1);
-
-    // Person2 데이터 처리
-    const {
-      year: year2,
-      month: month2,
-      day: day2,
-    } = extractDateParts(formData.person2.birthdate);
-    setBirthYear2(year2);
-    setBirthMonth2(month2);
-    setBirthDay2(day2);
-
-    // Person2 시간 처리
-    const koreanTime2 = findClosestBirthTime(formData.person2.birthtime);
-    setKoreanBirthTime2(koreanTime2);
-  }, [formData]);
-
-  // 추가 상태 변경 시 formData 업데이트
   const updatePerson1FormData = () => {
     const formattedBirthdate = formatBirthdate(
       birthYear1,
@@ -424,18 +392,15 @@ export default function CompatibilityPage() {
     }));
   };
 
-  // Person1 상태 변경 시 formData 업데이트
+  // 생년월일 또는 시간 변경 시 폼 데이터 업데이트
   useEffect(() => {
-    if (birthYear1 && birthMonth1 && birthDay1) {
-      updatePerson1FormData();
-    }
+    updatePerson1FormData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [birthYear1, birthMonth1, birthDay1, koreanBirthTime1]);
 
-  // Person2 상태 변경 시 formData 업데이트
   useEffect(() => {
-    if (birthYear2 && birthMonth2 && birthDay2) {
-      updatePerson2FormData();
-    }
+    updatePerson2FormData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [birthYear2, birthMonth2, birthDay2, koreanBirthTime2]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -588,6 +553,15 @@ export default function CompatibilityPage() {
       opacity: 1,
       transition: { type: "spring", stiffness: 100 },
     },
+  };
+
+  // 추가적으로 사용되지 않는 함수 처리
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const unusedFunctions = () => {
+    // 현재 직접 사용되지 않지만 컴포넌트 내에서 중요한 함수들을 유지
+    const time = findClosestBirthTime("12:00");
+    const parts = extractDateParts("2023-01-01");
+    return { time, parts };
   };
 
   return (

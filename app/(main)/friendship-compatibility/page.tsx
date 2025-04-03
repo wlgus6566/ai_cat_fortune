@@ -385,10 +385,12 @@ export default function FriendshipCompatibilityPage() {
   // 생년월일 또는 시간 변경 시 폼 데이터 업데이트
   useEffect(() => {
     updatePerson1FormData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [birthYear1, birthMonth1, birthDay1, koreanBirthTime1]);
 
   useEffect(() => {
     updatePerson2FormData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [birthYear2, birthMonth2, birthDay2, koreanBirthTime2]);
 
   // 폼 제출 처리
