@@ -1,0 +1,114 @@
+/* ===== RESET CSS ===== */
+
+/* Box sizing 리셋 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* margin, padding 초기화 */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+dl,
+dd,
+ol,
+ul,
+figure,
+hr,
+fieldset,
+legend {
+  margin: 0;
+  padding: 0;
+}
+
+/* 기본 font 스타일 정리 */
+body {
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background-color: #fff;
+  color: #111;
+}
+
+/* list-style 제거 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* a 태그 기본 스타일 제거 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 이미지: 반응형 기본 세팅 */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* form 관련 요소 초기화 */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* 버튼 기본 스타일 */
+button {
+  cursor: pointer;
+  background-color: transparent;
+}
+
+/* textarea: 리사이즈 조절 */
+textarea {
+  resize: vertical;
+}
+
+/* 테이블 기본 초기화 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* strong 태그 기본 bold 유지 */
+strong {
+  font-weight: bold;
+}
+
+/* input: autofill 스타일 제거 (특히 사파리) */
+input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: #111 !important;
+}
+
+/* selection 스타일도 통일감 있게 */
+::selection {
+  background-color: #a78bfa; /* 보라색 */
+  color: white;
+}

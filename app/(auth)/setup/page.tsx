@@ -66,7 +66,7 @@ function SetupContent() {
   // 프로필이 이미 완성된 경우 메인 페이지로 리다이렉트
   useEffect(() => {
     if (isProfileComplete) {
-      router.push(callbackUrl);
+      //router.push(callbackUrl);
     }
   }, [isProfileComplete, router, callbackUrl]);
 
@@ -220,7 +220,7 @@ function SetupContent() {
         ? `${callbackUrl}?showFortune=true`
         : callbackUrl;
 
-    router.push(destinationUrl);
+    //router.push(destinationUrl);
   };
 
   // 단계별 컴포넌트 렌더링

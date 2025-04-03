@@ -457,7 +457,7 @@ export default function CompatibilityResultPage() {
     return (
       <div className="min-h-screen bg-gradient-to-r from-purple-600/50 to-blue-600/50 font-gothic flex flex-col items-center justify-center p-6 relative overflow-hidden">
         {/* Toaster for notifications */}
-        <Toaster position="top-center" />
+        <Toaster position="bottom-center" />
 
         {/* Share Modal */}
         <AnimatePresence>

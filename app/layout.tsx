@@ -1,5 +1,5 @@
 import { Nanum_Gothic, Noto_Sans_KR } from "next/font/google";
-import "./globals.css";
+import "./style/globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { messages } from "./i18n";
 import { Providers } from "./providers";

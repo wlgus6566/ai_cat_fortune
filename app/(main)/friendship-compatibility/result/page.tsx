@@ -71,17 +71,6 @@ const containerVariants = {
 };
 
 // 별 애니메이션
-const starVariants = {
-  animate: (i: number) => ({
-    scale: [1, 1.2, 1],
-    opacity: [0.7, 1, 0.7],
-    transition: {
-      duration: 3,
-      repeat: Number.POSITIVE_INFINITY,
-      delay: i * 0.3,
-    },
-  }),
-};
 
 interface CategoryCardProps {
   title: string;
@@ -98,16 +87,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   children,
   delay = 0,
   icon,
-  color = "rgba(255, 107, 158, 0.8)",
+  color = "rgba(153, 13, 250, 0.8)",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <motion.div
-      className="mb-4 rounded-2xl overflow-hidden backdrop-blur-md shadow-lg border border-white/20"
-      style={{
-        background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
-      }}
+      className="mb-4 rounded-2xl overflow-hidden shadow-sm border border-[#e6e6e6] bg-white"
       initial="hidden"
       animate="visible"
       variants={{
@@ -133,20 +119,21 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             className="w-12 h-12 rounded-full flex items-center justify-center mr-3"
             style={{
               background: `linear-gradient(135deg, ${color}, rgba(255, 255, 255, 0.3))`,
+              border: "1px solid rgba(153, 13, 250, 0.2)",
             }}
           >
-            {icon || <span className="text-white font-bold">{score}</span>}
+            {icon || <span className="text-[#3B2E7E] font-bold">{score}</span>}
           </div>
           <div>
-            <h3 className="text-lg font-medium text-white">{title}</h3>
+            <h3 className="text-lg font-medium text-[#3B2E7E]">{title}</h3>
             <div className="flex items-center mt-1">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="relative w-4 h-4 mr-1">
                   <Star
                     className={`w-4 h-4 ${
                       i < Math.round(score / 20)
-                        ? "text-yellow-300 fill-yellow-300"
-                        : "text-gray-400"
+                        ? "text-[#FFD966] fill-[#FFD966]"
+                        : "text-gray-300"
                     }`}
                   />
                 </div>
@@ -156,11 +143,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         </div>
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-            isOpen ? "bg-white/30 rotate-180" : "bg-white/10"
-          }`}
+            isOpen ? "bg-[#F9F5FF] rotate-180" : "bg-[#F9F5FF]"
+          } border border-[#990dfa]/20`}
         >
           <svg
-            className="w-5 h-5 text-white"
+            className="w-5 h-5 text-[#990dfa]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -184,7 +171,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             transition={{ duration: 0.3 }}
             className="px-4 pb-4"
           >
-            <div className="bg-white/10 p-4 rounded-xl text-white border border-white/20">
+            <div className="bg-[#F9F5FF] p-4 rounded-xl text-gray-700 border border-[#e6e6e6]">
               {children}
             </div>
           </motion.div>
@@ -433,7 +420,7 @@ export default function FriendshipCompatibilityResultPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black via-indigo-900 to-blue-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF]">
       <Toaster />
       {showShareModal && (
         <ShareModal
@@ -468,7 +455,7 @@ export default function FriendshipCompatibilityResultPage() {
             />
           </motion.div>
           <motion.h2
-            className="text-lg font-gothic font-bold mb-6 text-center text-white"
+            className="text-lg font-gothic font-bold mb-6 text-center text-[#3B2E7E]"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             key={loadingStage} // 메시지 변경시 애니메이션 다시 실행
@@ -483,10 +470,10 @@ export default function FriendshipCompatibilityResultPage() {
       ) : error ? (
         // 에러 화면
         <div className="flex flex-col items-center justify-center flex-grow p-6 text-center">
-          <h2 className="text-xl font-bold text-white mb-4">{error}</h2>
+          <h2 className="text-xl font-bold text-[#3B2E7E] mb-4">{error}</h2>
           <button
             onClick={() => router.push("/friendship-compatibility")}
-            className="mt-6 px-6 py-3 rounded-full bg-white/20 text-white font-medium hover:bg-white/30 transition-colors flex items-center"
+            className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-[#990dfa] to-[#7609c1] text-white font-medium hover:opacity-90 transition-colors flex items-center"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             다시 입력하기
@@ -508,24 +495,12 @@ export default function FriendshipCompatibilityResultPage() {
 
           {/* 결과 컨텐츠 */}
           <div className="container mx-auto px-4 pb-24 relative">
-            {/* 배경 별 효과 */}
-            {/* {[...Array(10)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute text-white opacity-70"
-                style={{
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
-                  fontSize: `${Math.random() * 10 + 10}px`,
-                }}
-                variants={starVariants}
-                custom={i}
-                animate="animate"
-              >
-                ✨
-              </motion.div>
-            ))} */}
-
+            <Image
+              src="/new_cat_love.png"
+              alt="친구 궁합 결과"
+              width={100}
+              height={100}
+            />
             {/* 닉네임 및 점수 */}
             <motion.div
               className="text-center my-8"
@@ -535,13 +510,13 @@ export default function FriendshipCompatibilityResultPage() {
             >
               {friendCompatibilityData && (
                 <>
-                  <h1 className="text-3xl font-bold text-white mb-2">
+                  <h1 className="text-3xl font-bold text-[#3B2E7E] mb-2">
                     {
                       getScoreNickname(friendCompatibilityData.totalScore)
                         .nickname
                     }
                   </h1>
-                  <p className="text-white text-lg mb-4">
+                  <p className="text-[#990dfa] text-lg mb-4">
                     {
                       getScoreNickname(friendCompatibilityData.totalScore)
                         .catComment
@@ -554,14 +529,14 @@ export default function FriendshipCompatibilityResultPage() {
                   percentage={friendCompatibilityData.totalScore}
                   size={200}
                   strokeWidth={15}
-                  color="#FF6B9E"
-                  backgroundColor="rgba(255, 255, 255, 0.2)"
+                  color="#990dfa"
+                  backgroundColor="rgba(153, 13, 250, 0.1)"
                 />
                 <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                  <span className="text-3xl font-bold text-white">
+                  <span className="text-3xl font-bold text-[#3B2E7E]">
                     {friendCompatibilityData?.totalScore || 83}
                   </span>
-                  <span className="block text-sm text-pink-200 mt-2 ml-2">
+                  <span className="block text-sm text-[#990dfa] mt-2 ml-2">
                     점
                   </span>
                 </div>
@@ -570,7 +545,7 @@ export default function FriendshipCompatibilityResultPage() {
                 {friendCompatibilityData.hashtags.map((tag, i) => (
                   <span
                     key={i}
-                    className="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium"
+                    className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-[#990dfa]/10 to-[#7609c1]/10 border border-[#990dfa]/20 text-[#3B2E7E] text-sm font-medium"
                   >
                     {tag}
                   </span>
@@ -580,29 +555,25 @@ export default function FriendshipCompatibilityResultPage() {
 
             {/* 오행 분석 섹션 */}
             <motion.div
-              className="mb-8 p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/20"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
-              }}
+              className="mb-8 p-4 rounded-2xl shadow-sm border border-[#e6e6e6] bg-white"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-                <Sparkles className="w-5 h-5 mr-2 text-yellow-300" />
+              <h2 className="text-xl font-bold text-[#3B2E7E] mb-4 flex items-center">
+                <Sparkles className="w-5 h-5 mr-2 text-[#990dfa]" />
                 음양오행 분석
               </h2>
 
               {/* 두 사람 정보 카드 */}
               <div className="flex gap-4 mb-6">
                 {/* 첫 번째 사람 카드 */}
-                <div className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20">
+                <div className="flex-1 p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
                   <div className="text-center">
-                    <h3 className="text-lg font-medium text-white mb-2">
+                    <h3 className="text-lg font-medium text-[#3B2E7E] mb-2">
                       {friendCompatibilityData.elements.user.name}
                     </h3>
-                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-3 border border-[#990dfa]/20">
                       <span className="text-2xl">
                         {
                           friendCompatibilityData.elements.user.element.split(
@@ -617,26 +588,19 @@ export default function FriendshipCompatibilityResultPage() {
                     <p className="text-white text-sm mb-1">
                       ({friendCompatibilityData.elements.user.yinYang})
                     </p> */}
-                    <p className="text-white/80 text-sm mt-2">
+                    <p className="text-gray-700 text-sm mt-2">
                       {friendCompatibilityData.elements.user.description}
                     </p>
                   </div>
                 </div>
 
-                {/* 관계 화살표 */}
-                {/* <div className="flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                    <span className="text-white">💫</span>
-                  </div>
-                </div> */}
-
                 {/* 두 번째 사람 카드 */}
-                <div className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20">
+                <div className="flex-1 p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
                   <div className="text-center">
-                    <h3 className="text-lg font-medium text-white mb-2">
+                    <h3 className="text-lg font-medium text-[#3B2E7E] mb-2">
                       {friendCompatibilityData.elements.partner.name}
                     </h3>
-                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-3 border border-[#990dfa]/20">
                       <span className="text-2xl">
                         {
                           friendCompatibilityData.elements.partner.element.split(
@@ -651,7 +615,7 @@ export default function FriendshipCompatibilityResultPage() {
                     <p className="text-white text-sm mb-1">
                       ({friendCompatibilityData.elements.partner.yinYang})
                     </p> */}
-                    <p className="text-white/80 text-sm mt-2">
+                    <p className="text-gray-700 text-sm mt-2">
                       {friendCompatibilityData.elements.partner.description}
                     </p>
                   </div>
@@ -659,8 +623,8 @@ export default function FriendshipCompatibilityResultPage() {
               </div>
 
               {/* 관계 해석 */}
-              <div className="p-4 rounded-xl bg-white/10 border border-white/20">
-                <p className="text-white text-center">
+              <div className="p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
+                <p className="text-gray-700 text-center">
                   {friendCompatibilityData.elements.relationshipInterpretation}
                 </p>
               </div>
@@ -673,8 +637,8 @@ export default function FriendshipCompatibilityResultPage() {
               initial="hidden"
               animate="visible"
             >
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-                <Smile className="w-5 h-5 mr-2 text-yellow-300" />
+              <h2 className="text-xl font-bold text-[#3B2E7E] mb-4 flex items-center">
+                <Smile className="w-5 h-5 mr-2 text-[#990dfa]" />
                 카테고리별 궁합
               </h2>
 
@@ -686,24 +650,22 @@ export default function FriendshipCompatibilityResultPage() {
                   delay={index * 0.1}
                   icon={
                     index === 0 ? (
-                      <Brain className="w-5 h-5 text-white" />
+                      <Brain className="w-5 h-5 text-[#990dfa]" />
                     ) : index === 1 ? (
-                      <Star className="w-5 h-5 text-white" />
+                      <Star className="w-5 h-5 text-[#990dfa]" />
                     ) : index === 2 ? (
-                      <Coffee className="w-5 h-5 text-white" />
+                      <Coffee className="w-5 h-5 text-[#990dfa]" />
                     ) : index === 3 ? (
-                      <Heart className="w-5 h-5 text-white" />
+                      <Heart className="w-5 h-5 text-[#990dfa]" />
                     ) : (
-                      <Zap className="w-5 h-5 text-white" />
+                      <Zap className="w-5 h-5 text-[#990dfa]" />
                     )
                   }
-                  color={`rgba(${180 + index * 20}, ${100 + index * 30}, ${
-                    200 - index * 20
-                  }, 0.8)`}
+                  color={`rgba(153, 13, 250, ${0.1 + index * 0.05})`}
                 >
                   <div>
-                    <p className="text-white mb-3">{category.analysis}</p>
-                    <div className="flex items-start mt-2 text-yellow-200">
+                    <p className="text-gray-700 mb-3">{category.analysis}</p>
+                    <div className="flex items-start mt-2 text-[#990dfa]">
                       <div className="flex-shrink-0 mr-2 mt-1">🐱</div>
                       <p className="italic text-sm">{category.catComment}</p>
                     </div>
@@ -714,45 +676,41 @@ export default function FriendshipCompatibilityResultPage() {
 
             {/* 보너스 섹션 */}
             <motion.div
-              className="mb-8 p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/20"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
-              }}
+              className="mb-8 p-4 rounded-2xl shadow-sm border border-[#e6e6e6] bg-white"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-                <Gift className="w-5 h-5 mr-2 text-yellow-300" />
+              <h2 className="text-xl font-bold text-[#3B2E7E] mb-4 flex items-center">
+                <Gift className="w-5 h-5 mr-2 text-[#990dfa]" />
                 보너스
               </h2>
 
               <div className="flex flex-col md:flex-row gap-4">
                 {/* 행운 아이템 */}
-                <div className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20">
+                <div className="flex-1 p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
                   <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-pink-500/30 flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 rounded-full bg-[#F9F5FF] border border-[#990dfa]/20 flex items-center justify-center mr-3">
                       <span className="text-xl">
                         {friendCompatibilityData.bonus.luckyItem.emoji}
                       </span>
                     </div>
-                    <h3 className="text-lg font-medium text-white">
+                    <h3 className="text-lg font-medium text-[#3B2E7E]">
                       행운 아이템
                     </h3>
                   </div>
-                  <p className="text-white font-medium mb-1">
+                  <p className="text-[#3B2E7E] font-medium mb-1">
                     {friendCompatibilityData.bonus.luckyItem.label}
                   </p>
-                  <p className="text-white/80 text-sm">
+                  <p className="text-gray-700 text-sm">
                     {friendCompatibilityData.bonus.luckyItem.description}
                   </p>
                 </div>
 
                 {/* 추천 활동 */}
-                <div className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20">
+                <div className="flex-1 p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
                   <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-500/30 flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 rounded-full bg-[#F9F5FF] border border-[#990dfa]/20 flex items-center justify-center mr-3">
                       <span className="text-xl">
                         {
                           friendCompatibilityData.bonus.recommendedActivity
@@ -760,14 +718,14 @@ export default function FriendshipCompatibilityResultPage() {
                         }
                       </span>
                     </div>
-                    <h3 className="text-lg font-medium text-white">
+                    <h3 className="text-lg font-medium text-[#3B2E7E]">
                       추천 활동
                     </h3>
                   </div>
-                  <p className="text-white font-medium mb-1">
+                  <p className="text-[#3B2E7E] font-medium mb-1">
                     {friendCompatibilityData.bonus.recommendedActivity.label}
                   </p>
-                  <p className="text-white/80 text-sm">
+                  <p className="text-gray-700 text-sm">
                     {
                       friendCompatibilityData.bonus.recommendedActivity
                         .description
@@ -779,7 +737,7 @@ export default function FriendshipCompatibilityResultPage() {
 
             {/* 고양이 최종 멘트 */}
             <motion.div
-              className="mb-8 p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-center"
+              className="mb-8 p-6 rounded-2xl bg-white shadow-sm border border-[#e6e6e6] text-center magic-bg"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.8 }}
@@ -793,7 +751,7 @@ export default function FriendshipCompatibilityResultPage() {
                   className="object-contain"
                 />
               </div>
-              <p className="text-white text-lg italic whitespace-pre-line">
+              <p className="text-gray-700 text-lg italic whitespace-pre-line">
                 {friendCompatibilityData.finalCatComment}
               </p>
             </motion.div>
@@ -807,7 +765,7 @@ export default function FriendshipCompatibilityResultPage() {
             >
               <button
                 onClick={() => setShowShareModal(true)}
-                className="px-6 py-3 rounded-full bg-pink-500/80 text-white font-medium hover:bg-pink-500 transition-colors flex items-center"
+                className="px-6 py-3 rounded-full bg-gradient-to-r from-[#990dfa] to-[#7609c1] text-white font-medium hover:opacity-90 transition-colors flex items-center"
               >
                 <Share2 className="w-5 h-5 mr-2" />
                 친구와 공유하기
