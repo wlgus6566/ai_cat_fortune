@@ -51,7 +51,7 @@ export default function ChatPage() {
         <p className="text-sm text-gray-600">고민을 편하게 말해보라냥😸</p>
       </header>
 
-      <div className="container mx-auto px-4 py-4 min-h-[calc(100vh-84px)] pb-20 max-w-md">
+      <div className="container mx-auto px-4 py-4 min-h-[calc(100vh-84px)] pb-20 max-w-lg">
         {/* FortuneChat 컴포넌트 불러오기 */}
         <FortuneChat
           userName={userProfile?.name || "사용자"}

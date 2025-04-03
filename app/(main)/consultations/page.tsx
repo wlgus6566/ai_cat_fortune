@@ -54,7 +54,7 @@ export default function ConsultationsPage() {
     <div className="bg-gray-50 min-h-screen">
       <PageHeader title="상담 보관함" />
 
-      <div className="container mx-auto px-4 py-4 max-w-md">
+      <div className="container mx-auto px-4 py-4 pb-20 max-w-md">
         <p className="text-center text-gray-600 text-sm mb-6">
           나의 저장된 상담 내역을 관리해요
         </p>

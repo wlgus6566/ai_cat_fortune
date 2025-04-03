@@ -35,7 +35,7 @@ export default function ChatMessage({
         ) : (
           <>
             {message.text && (
-              <p className="relative z-10 text-sm md:text-base">
+              <p className="relative z-10 text-sm md:text-base whitespace-pre-wrap">
                 {message.text}
               </p>
             )}

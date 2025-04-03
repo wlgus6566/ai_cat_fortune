@@ -12,8 +12,7 @@ import { CONCERN_TYPES, DETAILED_CONCERNS } from "../data";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from "../data.en"; // 영어 데이터 필요 시 사용
 import { useTalisman } from "../contexts/TalismanContext";
-import Lottie, { LottieRefCurrentProps } from "lottie-react";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 
 // 직접 입력창 컴포넌트
 const ChatInput = ({
@@ -120,10 +119,6 @@ export default function FortuneChat({
   const [messageReactions, setMessageReactions] = useState<
     Record<string, string[]>
   >({});
-  const [heartAnimationData, setHeartAnimationData] = useState<object | null>(
-    null
-  );
-  const heartAnimationRef = useRef<LottieRefCurrentProps | null>(null);
   const [savedMessageId, setSavedMessageId] = useState<string | null>(null);
 
   // 채팅창 자동 스크롤
@@ -736,22 +731,6 @@ export default function FortuneChat({
     await resetChat();
   };
 
-  // 하트 리액션 로티 애니메이션 로드
-  useEffect(() => {
-    const loadHeartAnimation = async () => {
-      try {
-        // 하트 애니메이션 로드 (public/lottie/heart.json에 있다고 가정)
-        const heartResponse = await fetch("/lottie/heart.json");
-        const heartData = await heartResponse.json();
-        setHeartAnimationData(heartData);
-      } catch (error) {
-        console.error("Failed to load heart animation:", error);
-      }
-    };
-
-    loadHeartAnimation();
-  }, []);
-
   // 리액션 토글 핸들러
   const handleReaction = (messageId: string, reaction: string) => {
     setMessageReactions((prev) => {
@@ -766,11 +745,6 @@ export default function FortuneChat({
         };
       } else {
         // 반응이 없으면 추가
-        // 하트 애니메이션 참조가 있으면 애니메이션 재생
-        if (heartAnimationRef.current && reaction === "heart") {
-          heartAnimationRef.current.goToAndPlay(0);
-        }
-
         return {
           ...prev,
           [messageId]: [...currentReactions, reaction],
@@ -786,16 +760,31 @@ export default function FortuneChat({
 
     // 저장 성공 메시지 표시
     toast.success(
-      "상담이 간직되었습니다. 상담내용은 상담보관함에서 확인할 수 있습니다.",
+      "상담이 간직되었다냥! 상담내용은 상담보관함에서 확인해보라냥~",
       {
         duration: 3000,
         position: "bottom-center",
+        style: {
+          background: "#f0f9ff",
+          color: "#0369a1",
+          border: "1px solid #38bdf8",
+          padding: "16px",
+          fontSize: "14px",
+          fontWeight: "500",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#0ea5e9",
+          secondary: "#ffffff",
+        },
       }
     );
   };
 
   return (
     <div className="flex flex-col flex-1 min-h-[calc(100vh-200px)]">
+      <Toaster />
       {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto mb-4 p-2">
         {messages.map((message) => (
@@ -825,18 +814,7 @@ export default function FortuneChat({
                   >
                     {messageReactions[message.id]?.includes("heart") ? (
                       <div className="w-8 h-8 flex items-center justify-center text-red-500">
-                        {heartAnimationData ? (
-                          <Lottie
-                            animationData={heartAnimationData}
-                            lottieRef={heartAnimationRef}
-                            style={{ width: 28, height: 28 }}
-                            loop={false}
-                            initialSegment={[0, 60]} // 애니메이션 시작과 끝 프레임
-                            autoplay={false} // 자동 재생 비활성화 (클릭할 때만 재생)
-                          />
-                        ) : (
-                          <span>❤️</span>
-                        )}
+                        <span>❤️</span>
                       </div>
                     ) : (
                       <div className="w-8 h-8 flex items-center justify-center text-gray-400">

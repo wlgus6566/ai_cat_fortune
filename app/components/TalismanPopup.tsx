@@ -98,9 +98,7 @@ export default function TalismanPopup({
         link.click();
         document.body.removeChild(link);
 
-        setSaveMessage(
-          t("saved", { defaultValue: "이미지가 저장되었습니다." })
-        );
+        setSaveMessage("이미지가 저장되었습니다.");
         setTimeout(() => setSaveMessage(null), 3000);
       } else {
         // Fallback for browsers that don't support the download attribute
