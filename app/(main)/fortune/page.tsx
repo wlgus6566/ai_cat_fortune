@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import Link from "next/link";
 import { DailyFortune } from "@/app/lib/openai";
@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import CategoryPopup from "@/app/components/CategoryPopup";
 import { Swiper, SwiperSlide } from "swiper/react";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 //import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -197,7 +198,32 @@ export default function HomePage() {
   const [hasViewedFortune, setHasViewedFortune] = useState(false);
   const t = useTranslations("fortune");
   const router = useRouter();
+  const [loveAnimationData, setLoveAnimationData] = useState<object | null>(
+    null
+  );
+  const [starAnimationData, setStarAnimationData] = useState<object | null>(
+    null
+  );
+  const loveAnimationRef = useRef<LottieRefCurrentProps>(null);
 
+  // Lottie 애니메이션 로딩
+  useEffect(() => {
+    const loadAnimations = async () => {
+      try {
+        const loveResponse = await fetch("/lottie/love_consultation.json");
+        const loveData = await loveResponse.json();
+        setLoveAnimationData(loveData);
+
+        const starResponse = await fetch("/lottie/star_pump.json");
+        const starData = await starResponse.json();
+        setStarAnimationData(starData);
+      } catch (error) {
+        console.error("Failed to load Lottie animations:", error);
+      }
+    };
+
+    loadAnimations();
+  }, []);
   // URL 파라미터 확인을 위한 훅 추가
   const searchParams = useSearchParams();
   const shouldShowFortune = searchParams.get("showFortune") === "true";
@@ -456,7 +482,7 @@ export default function HomePage() {
         </motion.div>
         <div className="flex-1 pl-10 text-left">
           <h1 className="text-2xl font-bold text-[#3B2E7E] mb-1 font-heading">
-            {t("headerTitle")}
+            <span className="text-md mr-2">🔮</span> {t("headerTitle")}
           </h1>
           <p className="text-[#990dfa] text-sm font-medium">
             {userProfile?.name
@@ -518,7 +544,14 @@ export default function HomePage() {
           <div className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] p-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
               <span className="mr-2 flex">
-                <Star className="h-5 w-5 text-[#FFD966]" />
+                {starAnimationData ? (
+                  <Lottie
+                    animationData={starAnimationData}
+                    style={{ width: 35, height: 35 }}
+                  />
+                ) : (
+                  <Star className="h-5 w-5 text-[#FFD966]" />
+                )}
               </span>
               {t("overall")}
             </h3>
@@ -776,7 +809,15 @@ export default function HomePage() {
             <div className="bg-[#F0EAFF] rounded-2xl p-6 relative overflow-hidden">
               <Link href="/compatibility">
                 <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                  <BookHeart className="h-8 w-8 text-[#6366f1]" />
+                  {loveAnimationData ? (
+                    <Lottie
+                      animationData={loveAnimationData}
+                      lottieRef={loveAnimationRef}
+                      style={{ width: 48, height: 48 }}
+                    />
+                  ) : (
+                    <BookHeart className="h-8 w-8 text-[#6366f1]" />
+                  )}
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-1">
                   AI 사주
@@ -799,8 +840,7 @@ export default function HomePage() {
                   <MessageCircleHeart className="h-8 w-8 text-[#10B981]" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-1">
-                  AI 사주
-                  <br />
+                  2025 <br />
                   친구 궁합
                 </h3>
                 <p className="text-[#10B981] text-sm font-medium">
@@ -845,16 +885,20 @@ export default function HomePage() {
 
       {/* 빠른 메뉴 섹션 */}
       <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="mb-16"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="mt-8 mb-16"
       >
         <h3 className="text-lg font-bold text-[#3B2E7E] mb-4 font-heading">
-          {t("quickMenu.title")}
+          빠른 메뉴
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <motion.div variants={itemVariants}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             <Link href="/chat">
               <motion.div
                 className="card-magic p-5 h-full cursor-pointer"
@@ -882,16 +926,20 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                  {t("quickMenu.chat.title")}
+                  운세 상담
                 </h4>
                 <p className="text-sm text-gray-600">
-                  {t("quickMenu.chat.description")}
+                  포춘냥이와 운세 기반 고민 상담
                 </p>
               </motion.div>
             </Link>
           </motion.div>
 
-          <motion.div variants={itemVariants}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             <Link href="/profile">
               <motion.div
                 className="card-magic p-5 h-full cursor-pointer"
@@ -919,16 +967,18 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                  {t("quickMenu.profile.title")}
+                  내 프로필
                 </h4>
-                <p className="text-sm text-gray-600">
-                  {t("quickMenu.profile.description")}
-                </p>
+                <p className="text-sm text-gray-600">프로필 확인 및 수정</p>
               </motion.div>
             </Link>
           </motion.div>
 
-          <motion.div variants={itemVariants}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
             <Link href="/talisman-gallery">
               <motion.div
                 className="card-magic p-5 h-full cursor-pointer"
@@ -956,10 +1006,10 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                  {t("quickMenu.talisman.title")}
+                  나의 부적 갤러리
                 </h4>
                 <p className="text-sm text-gray-600">
-                  {t("quickMenu.talisman.description")}
+                  상담 후 생성된 행운의 부적 모음
                 </p>
               </motion.div>
             </Link>

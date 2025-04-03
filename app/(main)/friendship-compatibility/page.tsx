@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -12,8 +12,6 @@ import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
 import { UserProfile } from "@/app/type/types";
-import Link from "next/link";
-import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
 // 생년월일 및 시간 관련 타입 정의
 type BirthTime =
@@ -235,43 +233,6 @@ export default function FriendshipCompatibilityPage() {
   const [isSharedMode, setIsSharedMode] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-
-  // Lottie 애니메이션 상태 및 레퍼런스
-  const [chatAnimationData, setChatAnimationData] = useState<object | null>(
-    null
-  );
-  const [profileAnimationData, setProfileAnimationData] = useState<
-    object | null
-  >(null);
-  const [talismanAnimationData, setTalismanAnimationData] = useState<
-    object | null
-  >(null);
-  const chatAnimationRef = useRef<LottieRefCurrentProps>(null);
-  const profileAnimationRef = useRef<LottieRefCurrentProps>(null);
-  const talismanAnimationRef = useRef<LottieRefCurrentProps>(null);
-
-  // Lottie 애니메이션 로딩
-  useEffect(() => {
-    const loadAnimations = async () => {
-      try {
-        const chatResponse = await fetch("/lottie/chat-animation.json");
-        const chatData = await chatResponse.json();
-        setChatAnimationData(chatData);
-
-        const profileResponse = await fetch("/lottie/profile-animation.json");
-        const profileData = await profileResponse.json();
-        setProfileAnimationData(profileData);
-
-        const talismanResponse = await fetch("/lottie/talisman-animation.json");
-        const talismanData = await talismanResponse.json();
-        setTalismanAnimationData(talismanData);
-      } catch (error) {
-        console.error("Failed to load Lottie animations:", error);
-      }
-    };
-
-    loadAnimations();
-  }, []);
 
   // 카카오 SDK 초기화
   useEffect(() => {
@@ -965,164 +926,6 @@ export default function FriendshipCompatibilityPage() {
             onShareKakao={shareToKakao}
           />
         )}
-
-        {/* 빠른 메뉴 섹션 */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8 mb-16"
-        >
-          <h3 className="text-lg font-bold text-[#3B2E7E] mb-4 font-heading">
-            빠른 메뉴
-          </h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <Link href="/chat">
-                <motion.div
-                  className="card-magic p-5 h-full cursor-pointer"
-                  whileHover={{
-                    y: -5,
-                    scale: 1.02,
-                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
-                    {chatAnimationData ? (
-                      <Lottie
-                        animationData={chatAnimationData}
-                        lottieRef={chatAnimationRef}
-                        style={{ width: 48, height: 48 }}
-                      />
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                    운세 상담
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    포춘냥이와 운세 기반 고민 상담
-                  </p>
-                </motion.div>
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              <Link href="/profile">
-                <motion.div
-                  className="card-magic p-5 h-full cursor-pointer"
-                  whileHover={{
-                    y: -5,
-                    scale: 1.02,
-                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
-                    {profileAnimationData ? (
-                      <Lottie
-                        animationData={profileAnimationData}
-                        lottieRef={profileAnimationRef}
-                        style={{ width: 48, height: 48 }}
-                      />
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                    내 프로필
-                  </h4>
-                  <p className="text-sm text-gray-600">프로필 확인 및 수정</p>
-                </motion.div>
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-            >
-              <Link href="/talisman-gallery">
-                <motion.div
-                  className="card-magic p-5 h-full cursor-pointer"
-                  whileHover={{
-                    y: -5,
-                    scale: 1.02,
-                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
-                    {talismanAnimationData ? (
-                      <Lottie
-                        animationData={talismanAnimationData}
-                        lottieRef={talismanAnimationRef}
-                        style={{ width: 48, height: 48 }}
-                      />
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                    나의 부적 갤러리
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    상담 후 생성된 행운의 부적 모음
-                  </p>
-                </motion.div>
-              </Link>
-            </motion.div>
-          </div>
-        </motion.section>
       </div>
     </div>
   );
