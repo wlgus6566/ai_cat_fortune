@@ -6,6 +6,7 @@ import {
   timestamp,
   uuid,
   json,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -77,12 +78,33 @@ export const consultationsTable = pgTable("consultations", {
     .$onUpdate(() => new Date()),
 });
 
+// 호환성 결과 테이블
+export const compatibilityResultsTable = pgTable("compatibility_results", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => userProfilesTable.id, { onDelete: "cascade" }),
+  resultType: text("result_type").notNull(), // "love" 또는 "friend"
+  person1Name: text("person1_name").notNull(),
+  person1Birthdate: text("person1_birthdate").notNull(),
+  person1Gender: text("person1_gender").notNull(),
+  person1Birthtime: text("person1_birthtime"),
+  person2Name: text("person2_name").notNull(),
+  person2Birthdate: text("person2_birthdate").notNull(),
+  person2Gender: text("person2_gender").notNull(),
+  person2Birthtime: text("person2_birthtime"),
+  resultData: jsonb("result_data").notNull(),
+  totalScore: integer("total_score").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // 관계 정의
 export const userProfilesRelations = relations(
   userProfilesTable,
   ({ many }) => ({
     talismans: many(talismansTable),
     consultations: many(consultationsTable),
+    compatibilityResults: many(compatibilityResultsTable),
   })
 );
 
@@ -107,6 +129,17 @@ export const consultationsRelations = relations(
     talisman: one(talismansTable, {
       fields: [consultationsTable.talismanId],
       references: [talismansTable.id],
+    }),
+  })
+);
+
+// 호환성 결과 관계 정의
+export const compatibilityResultsRelations = relations(
+  compatibilityResultsTable,
+  ({ one }) => ({
+    userProfile: one(userProfilesTable, {
+      fields: [compatibilityResultsTable.userId],
+      references: [userProfilesTable.id],
     }),
   })
 );

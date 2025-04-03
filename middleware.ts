@@ -24,6 +24,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // API 요청 중 특별한 처리가 필요한 경로
+  if (pathname.startsWith("/api/compatibility-results")) {
+    // compatibility-results API에 대해서는 인증 절차를 따로 처리
+    return NextResponse.next();
+  }
+
   // 홈페이지(/)에 대한 특별 처리
   if (pathname === "/") {
     try {

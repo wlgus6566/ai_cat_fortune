@@ -315,6 +315,55 @@ export default function CompatibilityResultPage() {
     };
   }, [state, router]);
 
+  // 결과 저장 함수
+  const saveCompatibilityResult = async () => {
+    if (!compatibilityData || !state.person1.name || !state.person2.name)
+      return;
+
+    try {
+      // 데이터 준비 - 순환 참조 제거를 위해 JSON 변환 처리
+      const safeResultData = JSON.parse(JSON.stringify(compatibilityData));
+
+      console.log("저장 요청 데이터:", {
+        resultType: "love",
+        person1: state.person1,
+        person2: state.person2,
+      });
+
+      const response = await fetch("/api/compatibility-results", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // 쿠키 포함 설정
+        body: JSON.stringify({
+          resultType: "love",
+          resultData: safeResultData,
+          person1: state.person1,
+          person2: state.person2,
+        }),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error("궁합 결과 저장 실패:", responseData);
+        return;
+      }
+
+      console.log("궁합 결과가 저장되었습니다:", responseData);
+    } catch (error) {
+      console.error("결과 저장 중 오류:", error);
+    }
+  };
+
+  // 결과가 로드될 때 저장 로직 실행
+  useEffect(() => {
+    if (compatibilityData && !loading && !error) {
+      saveCompatibilityResult();
+    }
+  }, [compatibilityData, loading, error]);
+
   // 현재 URL 생성
   const generateShareUrl = () => {
     if (typeof window === "undefined") return "";
