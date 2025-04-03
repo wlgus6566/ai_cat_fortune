@@ -77,7 +77,7 @@ export default function TalismanPopup({
   // 이미지 저장 함수
   const handleSaveImage = async () => {
     try {
-      setSaveMessage(t("saving", { defaultValue: "이미지 저장 중..." }));
+      setSaveMessage("이미지 저장 중...");
 
       // Fetch the image as a blob
       const response = await fetch(imageUrl);

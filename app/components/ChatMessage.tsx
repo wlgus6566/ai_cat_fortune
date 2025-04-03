@@ -44,12 +44,12 @@ export default function ChatMessage({
               <div
                 className={`${message.text ? "mt-2" : ""} flex justify-center`}
               >
-                <div className="relative w-50 h-50">
+                <div className="relative">
                   <Image
                     src={message.imageUrl}
                     alt="고양이 이모티콘"
-                    width={100}
-                    height={100}
+                    width={120}
+                    height={120}
                     className="object-contain"
                   />
                 </div>
