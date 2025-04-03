@@ -66,7 +66,7 @@ function SetupContent() {
   // 프로필이 이미 완성된 경우 메인 페이지로 리다이렉트
   useEffect(() => {
     if (isProfileComplete) {
-      //router.push(callbackUrl);
+      router.push(callbackUrl);
     }
   }, [isProfileComplete, router, callbackUrl]);
 
@@ -220,7 +220,7 @@ function SetupContent() {
         ? `${callbackUrl}?showFortune=true`
         : callbackUrl;
 
-    //router.push(destinationUrl);
+    router.push(destinationUrl);
   };
 
   // 단계별 컴포넌트 렌더링
@@ -356,9 +356,6 @@ function SetupContent() {
             <h2 className="text-xl font-semibold text-gray-800">
               태어난 시간을 알려주세요 <span className="text-red-500">*</span>
             </h2>
-            <p className="text-sm text-gray-600">
-              정확한 시간을 모르시면 &apos;모름&apos;을 선택해주세요.
-            </p>
             <div className="grid grid-cols-2 gap-2">
               {timeOptions.map((time) => (
                 <button
@@ -432,34 +429,20 @@ function SetupContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4">
+    <div className="min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
-        <p className="my-8 text-purple-700 text-xs text-center absolute -bottom-16 left-0 w-full">
+        <p className="text-purple-700 text-xs text-center absolute -top-[28px] left-10 w-full">
           당신의 정보는 더 정확한 운세 결과를 위해서만 사용됩니다.
         </p>
-        <div className="absolute -top-[88px] left-1/2 -translate-x-1/2 -z-1">
+        <div className="absolute -top-[88px] left-5 -z-1">
           <Image src="/new_cat_thumb.png" alt="logo" width={70} height={70} />
         </div>
         {/* 진행 표시기 */}
         <div className="mb-6">
-          {/* <div className="flex justify-between mb-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                  index <= step
-                    ? "border-purple-500 bg-purple-500 text-white"
-                    : "border-gray-300 text-gray-400"
-                }`}
-              >
-                {index + 1}
-              </div>
-            ))}
-          </div> */}
           <div className="relative h-2 bg-gray-200 rounded-full">
             <div
-              className="absolute top-0 left-0 h-2 bg-purple-500 rounded-full"
-              style={{ width: `${(step / 3) * 100}%` }}
+              className="absolute top-0 left-0 h-2 bg-purple-500 rounded-full transition-all duration-300"
+              style={{ width: `${(step / 4) * 100}%` }}
             ></div>
           </div>
         </div>
