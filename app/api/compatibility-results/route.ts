@@ -182,7 +182,7 @@ export async function POST(request: Request) {
         .returning();
 
       // 쿠키에 세션 ID 설정 (클라이언트에 반환)
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
       cookieStore.set("session_id", profileId, {
         path: "/",
         maxAge: 60 * 60 * 24 * 30, // 30일

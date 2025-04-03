@@ -186,3 +186,5 @@ export default function MainLayout({
     </TalismanProvider>
   );
 }
+
+export const dynamicParams = true;

@@ -317,7 +317,7 @@ export default function CompatibilityResultPage() {
     };
   }, [state, router]);
 
-  // Callback으로 감싸서 메모이제이션
+  // useCallback으로 감싸서 메모이제이션
   const saveCompatibilityResult = useCallback(async () => {
     if (!compatibilityData || resultSaved) return;
 
@@ -339,7 +339,7 @@ export default function CompatibilityResultPage() {
           person2Birthdate: state.person2.birthdate,
           person2Gender: state.person2.gender,
           person2Birthtime: state.person2.birthtime,
-          totalScore: compatibilityData.totalScore,
+          totalScore: compatibilityData.score,
         }),
       });
 

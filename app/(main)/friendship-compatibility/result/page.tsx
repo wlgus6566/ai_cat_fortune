@@ -279,9 +279,10 @@ export default function FriendshipCompatibilityResultPage() {
   const [friendCompatibilityData, setFriendCompatibilityData] =
     useState<FriendCompatibilityResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [loadingStage, setLoadingStage] = useState(1); // 3단계 로딩 (1: 초기, 2: 분석중, 3: 완료)
+  const [error, setError] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
+  const [resultSaved, setResultSaved] = useState(false);
 
   // 로딩 단계에 따른 이미지 반환 함수
   const getLoadingImage = () => {
@@ -376,10 +377,16 @@ export default function FriendshipCompatibilityResultPage() {
 
   // 결과 저장 함수를 useCallback으로 감싸기
   const saveFriendCompatibilityResult = useCallback(async () => {
-    if (!friendCompatibilityData || !state.person1.name || !state.person2.name)
+    if (
+      !friendCompatibilityData ||
+      !state.person1.name ||
+      !state.person2.name ||
+      resultSaved
+    )
       return;
 
     try {
+      setResultSaved(true);
       // 데이터 준비 - 순환 참조 제거를 위해 JSON 변환 처리
       const safeResultData = JSON.parse(
         JSON.stringify(friendCompatibilityData)
@@ -387,8 +394,8 @@ export default function FriendshipCompatibilityResultPage() {
 
       console.log("친구 궁합 저장 요청 데이터:", {
         resultType: "friend",
-        person1: state.person1,
-        person2: state.person2,
+        person1Name: state.person1.name,
+        person2Name: state.person2.name,
       });
 
       const response = await fetch("/api/compatibility-results", {
@@ -400,8 +407,15 @@ export default function FriendshipCompatibilityResultPage() {
         body: JSON.stringify({
           resultType: "friend",
           resultData: safeResultData,
-          person1: state.person1,
-          person2: state.person2,
+          person1Name: state.person1.name,
+          person1Birthdate: state.person1.birthdate,
+          person1Gender: state.person1.gender,
+          person1Birthtime: state.person1.birthtime,
+          person2Name: state.person2.name,
+          person2Birthdate: state.person2.birthdate,
+          person2Gender: state.person2.gender,
+          person2Birthtime: state.person2.birthtime,
+          totalScore: friendCompatibilityData.totalScore,
         }),
       });
 
@@ -416,7 +430,7 @@ export default function FriendshipCompatibilityResultPage() {
     } catch (error) {
       console.error("결과 저장 중 오류:", error);
     }
-  }, [friendCompatibilityData, state.person1, state.person2]);
+  }, [friendCompatibilityData, state.person1, state.person2, resultSaved]);
 
   // 결과가 로드될 때 저장 로직 실행
   useEffect(() => {

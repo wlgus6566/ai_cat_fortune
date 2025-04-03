@@ -1,15 +1,17 @@
-import { notFound } from "next/navigation";
-// import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+"use client";
+
+import { notFound, useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import PageHeader from "@/app/components/PageHeader";
 import FriendCompatibilityResult from "./FriendCompatibilityResult";
-import LoveCompatibilityResult from "./LoveCompatibilityResult";
 import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
 interface CompatibilityResultData {
   id: number;
   resultType: "love" | "friend";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resultData: any;
   person1Name: string;
   person1Birthdate: string;
@@ -23,50 +25,50 @@ interface CompatibilityResultData {
   createdAt: string;
 }
 
-export default async function CompatibilityResultDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  // 결과 데이터 가져오기
-  let resultData: CompatibilityResultData | null = null;
-  let error = "";
+export default function CompatibilityResultDetail() {
+  const params = useParams();
+  const id = params?.id as string;
 
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/compatibility-results/${params.id}`,
-      {
-        cache: "no-store",
-      }
-    );
+  const [resultData, setResultData] = useState<CompatibilityResultData | null>(
+    null
+  );
+  const [error, setError] = useState("");
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return notFound();
+  const fetchConsultation = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SITE_URL}/api/compatibility-results/${id}`,
+        { cache: "no-store" }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) return notFound();
+        throw new Error("결과를 가져오는데 실패했습니다.");
       }
-      throw new Error("결과를 가져오는데 실패했습니다.");
+
+      const data = await response.json();
+      setResultData(data);
+    } catch (err) {
+      console.error("결과 조회 중 오류:", err);
+      setError("결과를 불러오는 중 오류가 발생했습니다.");
     }
+  }, [id]);
 
-    resultData = await response.json();
-  } catch (err) {
-    console.error("결과 조회 중 오류:", err);
-    error = "결과를 불러오는 중 오류가 발생했습니다.";
-  }
+  useEffect(() => {
+    if (id) fetchConsultation();
+  }, [id, fetchConsultation]);
 
-  // 사람 정보 객체 생성
   const createPersonData = (
     name: string,
     birthdate: string,
     gender: string,
     birthtime: string | null
-  ) => {
-    return {
-      name,
-      birthdate,
-      gender: gender as "남" | "여",
-      birthtime: birthtime || "",
-    };
-  };
+  ) => ({
+    name,
+    birthdate,
+    gender: gender as "남" | "여",
+    birthtime: birthtime || "",
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF]">
@@ -81,7 +83,6 @@ export default async function CompatibilityResultDetailPage({
 
       <div className="container mx-auto px-4 pb-24 relative">
         {error ? (
-          // 에러 화면
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-xl font-bold text-[#3B2E7E] mb-4">{error}</p>
             <Link
@@ -93,7 +94,6 @@ export default async function CompatibilityResultDetailPage({
             </Link>
           </div>
         ) : resultData ? (
-          // 결과 상세 화면
           <div>
             <Link
               className="mb-4 px-4 py-2 bg-white rounded-lg shadow-sm flex items-center hover:bg-gray-50 transition-colors"
@@ -104,21 +104,7 @@ export default async function CompatibilityResultDetailPage({
             </Link>
 
             {resultData.resultType === "love" ? (
-              <LoveCompatibilityResult
-                data={resultData.resultData}
-                person1={createPersonData(
-                  resultData.person1Name,
-                  resultData.person1Birthdate,
-                  resultData.person1Gender,
-                  resultData.person1Birthtime
-                )}
-                person2={createPersonData(
-                  resultData.person2Name,
-                  resultData.person2Birthdate,
-                  resultData.person2Gender,
-                  resultData.person2Birthtime
-                )}
-              />
+              <></> // 나중에 LoveCompatibilityResult 넣을 자리
             ) : (
               <FriendCompatibilityResult
                 data={resultData.resultData}
@@ -138,7 +124,6 @@ export default async function CompatibilityResultDetailPage({
             )}
           </div>
         ) : (
-          // 결과가 없는 경우
           <div className="text-center py-12">
             <p className="text-[#3B2E7E] mb-4">결과를 찾을 수 없습니다.</p>
             <Link

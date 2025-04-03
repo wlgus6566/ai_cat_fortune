@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { compatibilityResultsTable } from "@/db/schema";
 
@@ -18,12 +18,12 @@ async function getSessionId(): Promise<string | null> {
 
 // GET: 특정 ID의 호환성 결과 조회
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any
 ) {
   try {
     const sessionId = await getSessionId();
-
     if (!sessionId) {
       return NextResponse.json(
         { error: "인증되지 않은 사용자입니다." },
@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = Number(context.params.id); // context에서 꺼내기
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -69,8 +69,9 @@ export async function GET(
 
 // DELETE: 특정 ID의 호환성 결과 삭제
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any
 ) {
   try {
     const sessionId = await getSessionId();
@@ -82,7 +83,7 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
 
     if (isNaN(id)) {
       return NextResponse.json(
