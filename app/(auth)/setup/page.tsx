@@ -60,13 +60,13 @@ function SetupContent() {
   const [birthTime, setBirthTime] = useState<BirthTime>("모름");
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [error, setError] = useState("");
 
   // 프로필이 이미 완성된 경우 메인 페이지로 리다이렉트
   useEffect(() => {
     if (isProfileComplete) {
-      router.push(callbackUrl);
+      //router.push(callbackUrl);
     }
   }, [isProfileComplete, router, callbackUrl]);
 
@@ -114,7 +114,7 @@ function SetupContent() {
     setError("");
 
     // 단계별 유효성 검사
-    if (step === 0) {
+    if (step === 1) {
       // 이름 유효성 검사
       const nameValidation = validateName(name);
       if (!nameValidation.isValid) {
@@ -123,7 +123,7 @@ function SetupContent() {
       }
     }
 
-    if (step === 1) {
+    if (step === 2) {
       // 생년월일 필수값 및 유효성 검사
       if (!birthYear || !birthMonth || !birthDay) {
         setError("생년월일을 모두 선택해주세요.");
@@ -147,7 +147,7 @@ function SetupContent() {
       }
     }
 
-    if (step === 2) {
+    if (step === 3) {
       // 태어난 시간 필수값 검사
       if (!birthTime) {
         setError("태어난 시간을 선택해주세요.");
@@ -155,7 +155,7 @@ function SetupContent() {
       }
     }
 
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1);
     } else {
       handleSubmit();
@@ -164,7 +164,7 @@ function SetupContent() {
 
   // 이전 단계로 이동
   const handleBack = () => {
-    if (step > 0) {
+    if (step > 1) {
       setStep(step - 1);
     }
   };
@@ -182,19 +182,19 @@ function SetupContent() {
     const nameValidation = validateName(name);
     if (!nameValidation.isValid) {
       setError(nameValidation.errorMessage);
-      setStep(0);
+      setStep(1);
       return;
     }
 
     if (!birthYear || !birthMonth || !birthDay) {
       setError("생년월일을 모두 선택해주세요.");
-      setStep(1);
+      setStep(2);
       return;
     }
 
     if (!birthTime) {
       setError("태어난 시간을 선택해주세요.");
-      setStep(2);
+      setStep(3);
       return;
     }
 
@@ -220,13 +220,13 @@ function SetupContent() {
         ? `${callbackUrl}?showFortune=true`
         : callbackUrl;
 
-    router.push(destinationUrl);
+    //router.push(destinationUrl);
   };
 
   // 단계별 컴포넌트 렌더링
   const renderStep = () => {
     switch (step) {
-      case 0:
+      case 1:
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800">
@@ -271,7 +271,7 @@ function SetupContent() {
           </div>
         );
 
-      case 1:
+      case 2:
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800">
@@ -350,7 +350,7 @@ function SetupContent() {
           </div>
         );
 
-      case 2:
+      case 3:
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800">
@@ -378,7 +378,7 @@ function SetupContent() {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800">
@@ -434,6 +434,12 @@ function SetupContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
+        <p className="my-8 text-purple-700 text-xs text-center absolute -bottom-16 left-0 w-full">
+          당신의 정보는 더 정확한 운세 결과를 위해서만 사용됩니다.
+        </p>
+        <div className="absolute -top-[88px] left-1/2 -translate-x-1/2 -z-1">
+          <Image src="/new_cat_thumb.png" alt="logo" width={70} height={70} />
+        </div>
         {/* 진행 표시기 */}
         <div className="mb-6">
           {/* <div className="flex justify-between mb-2">
@@ -469,19 +475,22 @@ function SetupContent() {
         <div className="mb-6">{renderStep()}</div>
 
         {/* 단계별 네비게이션 버튼 */}
-        <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            className={`px-4 py-2 rounded-lg border border-purple-500 ${
-              step === 0
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-            disabled={step === 0}
-          >
-            이전
-          </button>
+        <div
+          className={`flex  ${step === 1 ? "justify-end" : "justify-between"}`}
+        >
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className={`px-4 py-2 rounded-lg border border-purple-500 ${
+                step === 0
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              이전
+            </button>
+          )}
 
           <button
             type="button"
