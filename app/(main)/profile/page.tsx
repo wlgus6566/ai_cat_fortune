@@ -140,7 +140,7 @@ export default function ProfilePage() {
         className="bg-white shadow-md relative z-10"
         rightElement={
           <div className="flex space-x-2">
-            <button onClick={handleGoToSettings} className="p-2">
+            <button onClick={handleGoToSettings} className="p-2 border-none">
               <Settings className="h-6 w-6 text-[#3B2E7E]" />
             </button>
           </div>

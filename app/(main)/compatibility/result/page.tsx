@@ -263,10 +263,10 @@ export default function CompatibilityResultPage() {
       return;
     }
 
-    // 기본적인 로딩 시간 (UX를 위해)
-    const loadingTimer = setTimeout(() => {
-      setLoadingStage(2);
-    }, 1500);
+    // 로딩 단계를 1,2,3을 순환하도록 설정 (추가)
+    const stageTimer = setInterval(() => {
+      setLoadingStage((prevStage) => (prevStage >= 3 ? 1 : prevStage + 1));
+    }, 2000);
 
     // API 호출로 궁합 분석
     const fetchCompatibility = async () => {
@@ -293,14 +293,8 @@ export default function CompatibilityResultPage() {
         const result = await response.json();
         setCompatibilityData(result);
 
-        // 추가 시간 후 로딩 완료
-        setTimeout(() => {
-          setLoadingStage(3);
-          // 3단계 로딩 화면을 충분히 보여주기 위해 시간 지연
-          setTimeout(() => {
-            setLoading(false);
-          }, 2000);
-        }, 1000);
+        // 데이터가 로드된 후 로딩 중지
+        setLoading(false);
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -313,8 +307,9 @@ export default function CompatibilityResultPage() {
 
     fetchCompatibility();
 
+    // 클린업 함수에서 인터벌 정리
     return () => {
-      clearTimeout(loadingTimer);
+      clearInterval(stageTimer);
     };
   }, [state, router]);
 
@@ -332,6 +327,7 @@ export default function CompatibilityResultPage() {
         body: JSON.stringify({
           resultType: "love",
           resultData: compatibilityData,
+          // 개별 필드로 보내서 API가 정확히 처리할 수 있도록 함
           person1Name: state.person1.name,
           person1Birthdate: state.person1.birthdate,
           person1Gender: state.person1.gender,
@@ -345,7 +341,8 @@ export default function CompatibilityResultPage() {
       });
 
       if (!response.ok) {
-        throw new Error("결과 저장에 실패했습니다.");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "결과 저장에 실패했습니다.");
       }
 
       console.log("결과가 성공적으로 저장되었습니다.");
@@ -690,7 +687,7 @@ export default function CompatibilityResultPage() {
                   className="absolute -inset-4 rounded-full opacity-20 blur-xl"
                   style={{
                     background:
-                      "linear-gradient(135deg,rgb(255, 125, 203),rgb(255, 92, 160))",
+                      "linear-gradient(135deg,rgb(255, 190, 229),rgb(255, 187, 215))",
                   }}
                   animate={{
                     opacity: [0.2, 0.4, 0.2],
@@ -704,16 +701,13 @@ export default function CompatibilityResultPage() {
                 />
                 <CircularProgress
                   percentage={compatibilityData?.score || 83}
-                  size={140}
-                  strokeWidth={12}
-                  color="rgb(255, 68, 68)"
+                  size={150}
+                  strokeWidth={10}
+                  color="rgb(255, 0, 0)"
                 />
                 <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                   <span className="text-3xl font-bold text-purple-700">
                     {compatibilityData?.score || 83}
-                  </span>
-                  <span className="block text-sm text-[#990dfa] mt-2 ml-1">
-                    점
                   </span>
                 </div>
               </div>
@@ -771,7 +765,7 @@ export default function CompatibilityResultPage() {
               {/* 두 사람의 오행 정보 */}
               <div className="flex flex-col md:flex-row gap-4 relative z-10 p-4">
                 {/* 첫 번째 사람 카드 */}
-                <div className="flex-1 bg-[#F9F5FF] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
+                <div className="flex-1 bg-[#e8eaff] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="text-xl">
                       {getElementEmoji(
@@ -837,7 +831,7 @@ export default function CompatibilityResultPage() {
                 </div>
 
                 {/* 두 번째 사람 카드 */}
-                <div className="flex-1 bg-[#F9F5FF] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
+                <div className="flex-1 bg-[#dceaf5] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="text-xl">
                       {getElementEmoji(

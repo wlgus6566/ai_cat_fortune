@@ -461,585 +461,614 @@ export default function HomePage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* 헤더 배너 영역 */}
-      <motion.div
-        className="flex flex-row items-center justify-between mb-6"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div
-          className="w-[100px] h-[100px] relative ml-5"
-          animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Image
-            src="/new_cat_magic.png"
-            alt="마법사 고양이"
-            fill
-            className="w-full h-full object-contain"
-          />
-        </motion.div>
-        <div className="flex-1 pl-10 text-left">
-          <h1 className="text-2xl font-bold text-[#3B2E7E] mb-1 font-heading">
-            <span className="text-md mr-2">🔮</span> {t("headerTitle")}
-          </h1>
-          <p className="text-[#990dfa] text-sm font-medium">
-            {userProfile?.name
-              ? t("forUser", {
-                  name: userProfile.name,
-                  date: new Date().toLocaleDateString("ko-KR", {
-                    month: "long",
-                    day: "numeric",
-                  }),
-                })
-              : t("headerTitle")}
-          </p>
+      <h1 className="text-2xl text-center font-bold text-[#3B2E7E] mb-4">
+        {t("pageTitle")}
+      </h1>
 
-          {/* 사주 정보 표시 */}
-          {/* {fortune?.saju && (
-            <div className="mt-2">
-              <p className="text-gray-600 text-sm">
-                {userProfile?.birthDate
-                  ? `${new Date(userProfile.birthDate).getFullYear()}년 ${
-                      new Date(userProfile.birthDate).getMonth() + 1
-                    }월 ${new Date(userProfile.birthDate).getDate()}일 ${
-                      userProfile?.birthTime?.includes("시")
-                        ? userProfile?.birthTime?.substring(0, 2)
-                        : ""
-                    } 0분생`
-                  : ""}
-              </p>
-              <p className="text-sm mt-1 text-gray-600">
-                {fortune.saju.ilju}{" "}
-                {userProfile?.gender === "여성" ? "여자" : "남자"}
-              </p>
+      {/* 2025 친구 궁합 배너 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-6"
+      >
+        <Link href="/zodiac-compatibility">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#990dfa] to-[#7702c9] shadow-md">
+            <div className="absolute top-0 right-0 w-1/3 h-full opacity-20">
+              <div className="absolute top-1/4 right-8 w-16 h-16 rounded-full bg-white opacity-20"></div>
+              <div className="absolute bottom-1/4 right-4 w-8 h-8 rounded-full bg-white opacity-20"></div>
             </div>
-          )} */}
-        </div>
+            <div className="p-4 text-white">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs font-medium mb-1">특별 이벤트 🎉</p>
+                  <h3 className="text-lg font-bold mb-2">2025 친구 궁합</h3>
+                  <p className="text-sm mb-2">
+                    가장 어울리는 사람은 누구일까요?
+                  </p>
+                </div>
+                <div className="bg-white bg-opacity-20 rounded-full p-2">
+                  <Star className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div className="flex items-center mt-2">
+                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  지금 확인하기
+                </span>
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </div>
+            </div>
+          </div>
+        </Link>
       </motion.div>
 
-      {/* 에러 표시 */}
-      {error && (
+      {/* 기존 카드들 */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {/* 헤더 배너 영역 */}
         <motion.div
-          className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 shadow-sm border border-red-100"
+          className="flex flex-row items-center justify-between mb-6"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <p className="flex items-center">
-            <span className="mr-2">⚠️</span> {error}
-          </p>
+          <motion.div
+            className="w-[100px] h-[100px] relative ml-5"
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Image
+              src="/new_cat_magic.png"
+              alt="마법사 고양이"
+              fill
+              className="w-full h-full object-contain"
+            />
+          </motion.div>
+          <div className="flex-1 pl-10 text-left">
+            <h1 className="text-2xl font-bold text-[#3B2E7E] mb-1 font-heading">
+              <span className="text-md mr-2">🔮</span> {t("headerTitle")}
+            </h1>
+            <p className="text-[#990dfa] text-sm font-medium">
+              {userProfile?.name
+                ? t("forUser", {
+                    name: userProfile.name,
+                    date: new Date().toLocaleDateString("ko-KR", {
+                      month: "long",
+                      day: "numeric",
+                    }),
+                  })
+                : t("headerTitle")}
+            </p>
+          </div>
         </motion.div>
-      )}
 
-      {/* 오늘의 운세 섹션 */}
-      <motion.section
-        className="mb-8"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="bg-white rounded-xl shadow-md p-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] p-4">
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <span className="mr-2 flex">
-                {starAnimationData ? (
-                  <Lottie
-                    animationData={starAnimationData}
-                    style={{ width: 35, height: 35 }}
-                  />
-                ) : (
-                  <Star className="h-5 w-5 text-[#FFD966]" />
-                )}
-              </span>
-              {t("overall")}
-            </h3>
-          </div>
-          <div className="p-5">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="relative">
-                  <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
-                  <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
-                </div>
-                <p className="mt-4 text-[#3B2E7E] font-medium">
-                  {t("loading")}
-                </p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-8">
-                <p className="text-red-500 mb-4">{error}</p>
-                <motion.button
-                  className="btn-magic btn-shine"
-                  onClick={fetchDailyFortune}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {t("tryAgain")}
-                </motion.button>
-              </div>
-            ) : fortune ? (
-              <div className="space-y-5">
-                {/* 전체 운세 점수 */}
-                <motion.div className="mb-4" variants={itemVariants}>
-                  <div className="p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-[#3B2E7E]">
-                        {t("fortuneScore")}
-                      </h4>
-                    </div>
+        {/* 에러 표시 */}
+        {error && (
+          <motion.div
+            className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 shadow-sm border border-red-100"
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <p className="flex items-center">
+              <span className="mr-2">⚠️</span> {error}
+            </p>
+          </motion.div>
+        )}
 
-                    {/* 점수 바 */}
-                    <div className="w-full bg-gray-200 rounded-full h-5 mb-3 overflow-hidden">
-                      <motion.div
-                        className="h-5 bg-gradient-to-r from-[#990dfa] to-[#7609c1] rounded-full flex items-center justify-center text-white text-xs font-medium"
-                        initial={{ width: "0%" }}
-                        animate={{ width: `${fortune.overall.score}%` }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
-                      >
-                        {fortune.overall.score}%
-                      </motion.div>
-                    </div>
-
-                    <p className="text-gray-700 text-md">
-                      {fortune.overall.description}
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-[#3B2E7E] mb-4">{t("error")}</p>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="mt-5 bg-white rounded-xl shadow-md p-0 overflow-hidden">
-          <div className="p-5">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="relative">
-                  <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
-                  <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
-                </div>
-                <p className="mt-4 text-[#3B2E7E] font-medium">
-                  {t("loading")}
-                </p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-8">
-                <p className="text-red-500 mb-4">{error}</p>
-                <motion.button
-                  className="btn-magic btn-shine"
-                  onClick={fetchDailyFortune}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {t("tryAgain")}
-                </motion.button>
-              </div>
-            ) : fortune ? (
-              <div className="space-y-5">
-                {/* 카테고리별 운세 */}
-                <motion.div variants={itemVariants}>
-                  <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
-                    {t("categoryTitle")}
-                  </h4>
-
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
-                    {categories.map((category, index) => (
-                      <motion.div
-                        key={category.key}
-                        variants={itemVariants}
-                        custom={index}
-                      >
-                        <CategoryCard
-                          title={category.title}
-                          score={
-                            fortune?.categories?.[
-                              category.key as keyof typeof fortune.categories
-                            ]?.score || 3
-                          }
-                          description={
-                            fortune?.categories?.[
-                              category.key as keyof typeof fortune.categories
-                            ]?.talisman || ""
-                          }
-                          icon={category.icon}
-                          color={category.color}
-                          onClick={() => handleCategorySelect(category.key)}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-                {/* 행운의 요소 */}
-                <motion.div
-                  className="p-4 bg-white rounded-xl shadow-sm border border-[#e6e6e6]"
-                  variants={itemVariants}
-                >
-                  <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
-                    {t("luckyElements")}
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="text-[#6366f1] mr-2">
-                          <Paintbrush className="h-5 w-5" />
-                        </div>
-                        <span className="text-gray-500 text-sm">
-                          {t("luckyColor")}
-                        </span>
-                      </div>
-                      <span className="font-medium text-gray-800">
-                        {fortune.luckyColor}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="text-[#6366f1] mr-2">
-                          <Hash className="h-5 w-5" />
-                        </div>
-                        <span className="text-gray-500 text-sm">
-                          {t("luckyNumber")}
-                        </span>
-                      </div>
-                      <span className="font-medium text-gray-800">
-                        {fortune.luckyNumber}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="text-[#6366f1] mr-2">
-                          <Gift className="h-5 w-5" />
-                        </div>
-                        <span className="text-gray-500 text-sm">
-                          {t("luckyItem")}
-                        </span>
-                      </div>
-                      <span className="font-medium text-gray-800">
-                        {fortune.luckyItem}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center min-w-[130px]">
-                        <div className="text-[#6366f1] mr-2">
-                          <Music className="h-5 w-5" />
-                        </div>
-                        <span className="text-gray-500 text-sm">
-                          {t("luckySong")}
-                        </span>
-                      </div>
-                      <span className="font-medium text-gray-800">
-                        {fortune.luckySong}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-                {/* 오늘의 조언 */}
-                <motion.div
-                  className="pt-3 mt-3 relative"
-                  variants={itemVariants}
-                >
-                  <h4 className="font-medium text-[#3B2E7E] mb-2 font-subheading">
-                    {t("advice")}
-                  </h4>
-                  <div className="p-4 bg-white rounded-xl shadow-sm border border-[#990dfa]/20 magic-bg">
-                    <div className="flex">
-                      <span className="text-2xl mr-3 flex-shrink-0">😺</span>
-                      <p className="text-gray-700 text-md">{fortune.advice}</p>
-                    </div>
-                  </div>
-
-                  {/* 별 장식 */}
-                  <div className="absolute -top-1 -right-1 text-[#FFD966]">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                    >
-                      <Star className="h-5 w-5 text-[#FFD966]" />
-                    </motion.div>
-                  </div>
-                </motion.div>
-                {/* 마지막 업데이트 시간 표시 */}
-                <motion.div className="text-right mt-3" variants={itemVariants}>
-                  <p className="text-xs text-gray-500">{t("updateInfo")}</p>
-                </motion.div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-[#3B2E7E] mb-4">{t("error")}</p>
-                <motion.button
-                  className="btn-magic"
-                  onClick={fetchDailyFortune}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {t("tryAgain")}
-                </motion.button>
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* 슬라이드 섹션 */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="mb-8"
-      >
-        <Swiper
-          spaceBetween={10}
-          slidesPerView={2.2}
-          className="swiper-container relative"
+        {/* 오늘의 운세 섹션 */}
+        <motion.section
+          className="mb-8"
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
         >
-          {/* 첫 번째 슬라이드 */}
-          <SwiperSlide>
-            {/* 첫 번째 카드 */}
-            <div className="bg-[#F0EAFF] rounded-2xl p-6 relative overflow-hidden">
-              <Link href="/compatibility">
-                <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                  {loveAnimationData ? (
+          <div className="bg-white rounded-xl shadow-md p-0 overflow-hidden">
+            <div className="bg-gradient-to-r from-[#990dfa] to-[#7609c1] p-4">
+              <h3 className="text-lg font-semibold text-white flex items-center">
+                <span className="mr-2 flex">
+                  {starAnimationData ? (
                     <Lottie
-                      animationData={loveAnimationData}
-                      lottieRef={loveAnimationRef}
-                      style={{ width: 48, height: 48 }}
+                      animationData={starAnimationData}
+                      style={{ width: 35, height: 35 }}
                     />
                   ) : (
-                    <BookHeart className="h-8 w-8 text-[#6366f1]" />
+                    <Star className="h-5 w-5 text-[#FFD966]" />
                   )}
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 mb-1">
-                  AI 사주
-                  <br />
-                  사랑궁합
-                </h3>
-                <p className="text-[#6366f1] text-sm font-medium">
-                  내 짝은 어디에?
-                </p>
-              </Link>
+                </span>
+                {t("overall")}
+              </h3>
             </div>
-          </SwiperSlide>
+            <div className="p-5">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="relative">
+                    <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
+                    <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
+                  </div>
+                  <p className="mt-4 text-[#3B2E7E] font-medium">
+                    {t("loading")}
+                  </p>
+                </div>
+              ) : error ? (
+                <div className="text-center py-8">
+                  <p className="text-red-500 mb-4">{error}</p>
+                  <motion.button
+                    className="btn-magic btn-shine"
+                    onClick={fetchDailyFortune}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {t("tryAgain")}
+                  </motion.button>
+                </div>
+              ) : fortune ? (
+                <div className="space-y-5">
+                  {/* 전체 운세 점수 */}
+                  <motion.div className="mb-4" variants={itemVariants}>
+                    <div className="p-4 bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF] rounded-xl">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-[#3B2E7E]">
+                          {t("fortuneScore")}
+                        </h4>
+                      </div>
 
-          {/* 두 번째 슬라이드 */}
-          <SwiperSlide>
-            {/* 두 번째 카드 */}
-            <div className="bg-[#E6F7ED] rounded-2xl p-6 relative overflow-hidden">
-              <Link href="/friendship-compatibility">
+                      {/* 점수 바 */}
+                      <div className="w-full bg-gray-200 rounded-full h-5 mb-3 overflow-hidden">
+                        <motion.div
+                          className="h-5 bg-gradient-to-r from-[#990dfa] to-[#7609c1] rounded-full flex items-center justify-center text-white text-xs font-medium"
+                          initial={{ width: "0%" }}
+                          animate={{ width: `${fortune.overall.score}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                        >
+                          {fortune.overall.score}%
+                        </motion.div>
+                      </div>
+
+                      <p className="text-gray-700 text-md">
+                        {fortune.overall.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <p className="text-[#3B2E7E] mb-4">{t("error")}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-5 bg-white rounded-xl shadow-md p-0 overflow-hidden">
+            <div className="p-5">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="relative">
+                    <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
+                    <div className="absolute top-0 left-0 w-12 h-12 animate-ping opacity-20 scale-75 rounded-full bg-[#990dfa]"></div>
+                  </div>
+                  <p className="mt-4 text-[#3B2E7E] font-medium">
+                    {t("loading")}
+                  </p>
+                </div>
+              ) : error ? (
+                <div className="text-center py-8">
+                  <p className="text-red-500 mb-4">{error}</p>
+                  <motion.button
+                    className="btn-magic btn-shine"
+                    onClick={fetchDailyFortune}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {t("tryAgain")}
+                  </motion.button>
+                </div>
+              ) : fortune ? (
+                <div className="space-y-5">
+                  {/* 카테고리별 운세 */}
+                  <motion.div variants={itemVariants}>
+                    <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
+                      {t("categoryTitle")}
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+                      {categories.map((category, index) => (
+                        <motion.div
+                          key={category.key}
+                          variants={itemVariants}
+                          custom={index}
+                        >
+                          <CategoryCard
+                            title={category.title}
+                            score={
+                              fortune?.categories?.[
+                                category.key as keyof typeof fortune.categories
+                              ]?.score || 3
+                            }
+                            description={
+                              fortune?.categories?.[
+                                category.key as keyof typeof fortune.categories
+                              ]?.talisman || ""
+                            }
+                            icon={category.icon}
+                            color={category.color}
+                            onClick={() => handleCategorySelect(category.key)}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                  {/* 행운의 요소 */}
+                  <motion.div
+                    className="p-4 bg-white rounded-xl shadow-sm border border-[#e6e6e6]"
+                    variants={itemVariants}
+                  >
+                    <h4 className="font-medium text-[#3B2E7E] mb-3 font-subheading">
+                      {t("luckyElements")}
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="text-[#6366f1] mr-2">
+                            <Paintbrush className="h-5 w-5" />
+                          </div>
+                          <span className="text-gray-500 text-sm">
+                            {t("luckyColor")}
+                          </span>
+                        </div>
+                        <span className="font-medium text-gray-800">
+                          {fortune.luckyColor}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="text-[#6366f1] mr-2">
+                            <Hash className="h-5 w-5" />
+                          </div>
+                          <span className="text-gray-500 text-sm">
+                            {t("luckyNumber")}
+                          </span>
+                        </div>
+                        <span className="font-medium text-gray-800">
+                          {fortune.luckyNumber}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="text-[#6366f1] mr-2">
+                            <Gift className="h-5 w-5" />
+                          </div>
+                          <span className="text-gray-500 text-sm">
+                            {t("luckyItem")}
+                          </span>
+                        </div>
+                        <span className="font-medium text-gray-800">
+                          {fortune.luckyItem}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center min-w-[130px]">
+                          <div className="text-[#6366f1] mr-2">
+                            <Music className="h-5 w-5" />
+                          </div>
+                          <span className="text-gray-500 text-sm">
+                            {t("luckySong")}
+                          </span>
+                        </div>
+                        <span className="font-medium text-gray-800">
+                          {fortune.luckySong}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                  {/* 오늘의 조언 */}
+                  <motion.div
+                    className="pt-3 mt-3 relative"
+                    variants={itemVariants}
+                  >
+                    <h4 className="font-medium text-[#3B2E7E] mb-2 font-subheading">
+                      {t("advice")}
+                    </h4>
+                    <div className="p-4 bg-white rounded-xl shadow-sm border border-[#990dfa]/20 magic-bg">
+                      <div className="flex">
+                        <span className="text-2xl mr-3 flex-shrink-0">😺</span>
+                        <p className="text-gray-700 text-md">
+                          {fortune.advice}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 별 장식 */}
+                    <div className="absolute -top-1 -right-1 text-[#FFD966]">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 20,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                      >
+                        <Star className="h-5 w-5 text-[#FFD966]" />
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                  {/* 마지막 업데이트 시간 표시 */}
+                  <motion.div
+                    className="text-right mt-3"
+                    variants={itemVariants}
+                  >
+                    <p className="text-xs text-gray-500">{t("updateInfo")}</p>
+                  </motion.div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <p className="text-[#3B2E7E] mb-4">{t("error")}</p>
+                  <motion.button
+                    className="btn-magic"
+                    onClick={fetchDailyFortune}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {t("tryAgain")}
+                  </motion.button>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.section>
+
+        {/* 슬라이드 섹션 */}
+        <motion.section
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mb-8"
+        >
+          <Swiper
+            spaceBetween={10}
+            slidesPerView={2.2}
+            className="swiper-container relative"
+          >
+            {/* 첫 번째 슬라이드 */}
+            <SwiperSlide>
+              {/* 첫 번째 카드 */}
+              <div className="bg-[#F0EAFF] rounded-2xl p-6 relative overflow-hidden">
+                <Link href="/compatibility">
+                  <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                    {loveAnimationData ? (
+                      <Lottie
+                        animationData={loveAnimationData}
+                        lottieRef={loveAnimationRef}
+                        style={{ width: 48, height: 48 }}
+                      />
+                    ) : (
+                      <BookHeart className="h-8 w-8 text-[#6366f1]" />
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">
+                    AI 사주
+                    <br />
+                    사랑궁합
+                  </h3>
+                  <p className="text-[#6366f1] text-sm font-medium">
+                    내 짝은 어디에?
+                  </p>
+                </Link>
+              </div>
+            </SwiperSlide>
+
+            {/* 두 번째 슬라이드 */}
+            <SwiperSlide>
+              {/* 두 번째 카드 */}
+              <div className="bg-[#E6F7ED] rounded-2xl p-6 relative overflow-hidden">
+                <Link href="/zodiac-compatibility">
+                  <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                    <MessageCircleHeart className="h-8 w-8 text-[#10B981]" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">
+                    2025 <br />
+                    친구 궁합
+                  </h3>
+                  <p className="text-[#10B981] text-sm font-medium">
+                    케미 확인하기
+                  </p>
+                </Link>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              <div className="bg-[#FEF3C7] rounded-2xl p-6 relative overflow-hidden">
                 <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                  <MessageCircleHeart className="h-8 w-8 text-[#10B981]" />
+                  <ScanFace className="h-8 w-8 text-[#F59E0B]" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-1">
-                  2025 <br />
-                  친구 궁합
+                  2025
+                  <br />
+                  친구조합
                 </h3>
-                <p className="text-[#10B981] text-sm font-medium">
-                  케미 확인하기
+                <p className="text-[#F59E0B] text-sm font-medium">
+                  내 친구조합은?
                 </p>
+              </div>
+            </SwiperSlide>
+            <SwiperSlide>
+              {/* 네 번째 카드 */}
+              <div className="bg-[#FEE2E2] rounded-2xl p-6 relative overflow-hidden">
+                <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
+                  <Zap className="h-8 w-8 text-[#EF4444]" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-1">
+                  Yes or
+                  <br />
+                  No
+                </h3>
+                <p className="text-[#EF4444] text-sm font-medium">
+                  딱 골라드려요
+                </p>
+              </div>
+            </SwiperSlide>
+          </Swiper>
+        </motion.section>
+
+        {/* 빠른 메뉴 섹션 */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-8 mb-16"
+        >
+          <h3 className="text-lg font-bold text-[#3B2E7E] mb-4 font-heading">
+            빠른 메뉴
+          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              <Link href="/chat">
+                <motion.div
+                  className="card-magic p-5 h-full cursor-pointer"
+                  whileHover={{
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
+                    운세 상담
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    포춘냥이와 운세 기반 고민 상담
+                  </p>
+                </motion.div>
               </Link>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="bg-[#FEF3C7] rounded-2xl p-6 relative overflow-hidden">
-              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <ScanFace className="h-8 w-8 text-[#F59E0B]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">
-                2025
-                <br />
-                친구조합
-              </h3>
-              <p className="text-[#F59E0B] text-sm font-medium">
-                내 친구조합은?
-              </p>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            {/* 네 번째 카드 */}
-            <div className="bg-[#FEE2E2] rounded-2xl p-6 relative overflow-hidden">
-              <div className="mb-4 bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-sm">
-                <Zap className="h-8 w-8 text-[#EF4444]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">
-                Yes or
-                <br />
-                No
-              </h3>
-              <p className="text-[#EF4444] text-sm font-medium">
-                딱 골라드려요
-              </p>
-            </div>
-          </SwiperSlide>
-        </Swiper>
-      </motion.section>
+            </motion.div>
 
-      {/* 빠른 메뉴 섹션 */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-8 mb-16"
-      >
-        <h3 className="text-lg font-bold text-[#3B2E7E] mb-4 font-heading">
-          빠른 메뉴
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <Link href="/chat">
-              <motion.div
-                className="card-magic p-5 h-full cursor-pointer"
-                whileHover={{
-                  y: -5,
-                  scale: 1.02,
-                  boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                    />
-                  </svg>
-                </div>
-                <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                  운세 상담
-                </h4>
-                <p className="text-sm text-gray-600">
-                  포춘냥이와 운세 기반 고민 상담
-                </p>
-              </motion.div>
-            </Link>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              <Link href="/profile">
+                <motion.div
+                  className="card-magic p-5 h-full cursor-pointer"
+                  whileHover={{
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
+                    내 프로필
+                  </h4>
+                  <p className="text-sm text-gray-600">프로필 확인 및 수정</p>
+                </motion.div>
+              </Link>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            <Link href="/profile">
-              <motion.div
-                className="card-magic p-5 h-full cursor-pointer"
-                whileHover={{
-                  y: -5,
-                  scale: 1.02,
-                  boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
-                <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                  내 프로필
-                </h4>
-                <p className="text-sm text-gray-600">프로필 확인 및 수정</p>
-              </motion.div>
-            </Link>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              <Link href="/talisman-gallery">
+                <motion.div
+                  className="card-magic p-5 h-full cursor-pointer"
+                  whileHover={{
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
+                    나의 부적 갤러리
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    상담 후 생성된 행운의 부적 모음
+                  </p>
+                </motion.div>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            <Link href="/talisman-gallery">
-              <motion.div
-                className="card-magic p-5 h-full cursor-pointer"
-                whileHover={{
-                  y: -5,
-                  scale: 1.02,
-                  boxShadow: "0 10px 25px -5px rgba(153, 13, 250, 0.15)",
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="mb-3 text-[#990dfa] bg-[#F9F5FF] w-12 h-12 rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <h4 className="font-medium text-[#3B2E7E] mb-1 font-subheading">
-                  나의 부적 갤러리
-                </h4>
-                <p className="text-sm text-gray-600">
-                  상담 후 생성된 행운의 부적 모음
-                </p>
-              </motion.div>
-            </Link>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* 카테고리 팝업 */}
-      {selectedCategory && fortune && (
-        <CategoryPopup
-          isOpen={!!selectedCategory}
-          onClose={handleClosePopup}
-          title={
-            categories.find((cat) => cat.key === selectedCategory)?.title || ""
-          }
-          emoji={
-            categories.find((cat) => cat.key === selectedCategory)?.icon || ""
-          }
-          category={
-            fortune.categories?.[
-              selectedCategory as keyof typeof fortune.categories
-            ] || {
-              score: 3,
-              description: "",
-              trend: "",
-              talisman: "",
+        {/* 카테고리 팝업 */}
+        {selectedCategory && fortune && (
+          <CategoryPopup
+            isOpen={!!selectedCategory}
+            onClose={handleClosePopup}
+            title={
+              categories.find((cat) => cat.key === selectedCategory)?.title ||
+              ""
             }
-          }
-        />
-      )}
+            emoji={
+              categories.find((cat) => cat.key === selectedCategory)?.icon || ""
+            }
+            category={
+              fortune.categories?.[
+                selectedCategory as keyof typeof fortune.categories
+              ] || {
+                score: 3,
+                description: "",
+                trend: "",
+                talisman: "",
+              }
+            }
+          />
+        )}
+      </div>
     </motion.div>
   );
 }

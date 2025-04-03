@@ -83,7 +83,7 @@ export default function CompatibilityResultsPage() {
       <div className="container max-w-4xl px-4 py-8 mx-auto">
         <div className="text-center mb-8">
           <motion.h1
-            className="text-3xl font-bold text-[#3B2E7E] mb-4"
+            className="text-xl font-bold text-[#3B2E7E] mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -150,7 +150,7 @@ export default function CompatibilityResultsPage() {
         ) : results.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
             <Image
-              src="/new_cat_waiting.png"
+              src="/new_cat_back.png"
               alt="결과 없음"
               width={100}
               height={100}

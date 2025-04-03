@@ -8,6 +8,7 @@ import PageHeader from "@/app/components/PageHeader";
 import FriendCompatibilityResult from "./FriendCompatibilityResult";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import LoveCompatibilityResult from "./LoveCompatibilityResult";
 
 interface CompatibilityResultData {
   id: number;
@@ -36,10 +37,9 @@ export default function CompatibilityResultDetail() {
 
   const fetchConsultation = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SITE_URL}/api/compatibility-results/${id}`,
-        { cache: "no-store" }
-      );
+      const response = await fetch(`/api/compatibility-results/${id}`, {
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         if (response.status === 404) return notFound();
@@ -95,16 +95,22 @@ export default function CompatibilityResultDetail() {
           </div>
         ) : resultData ? (
           <div>
-            <Link
-              className="mb-4 px-4 py-2 bg-white rounded-lg shadow-sm flex items-center hover:bg-gray-50 transition-colors"
-              href="/compatibility-results"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2 text-[#990dfa]" />
-              <span className="text-[#3B2E7E]">목록으로 돌아가기</span>
-            </Link>
-
             {resultData.resultType === "love" ? (
-              <></> // 나중에 LoveCompatibilityResult 넣을 자리
+              <LoveCompatibilityResult
+                data={resultData.resultData}
+                person1={createPersonData(
+                  resultData.person1Name,
+                  resultData.person1Birthdate,
+                  resultData.person1Gender,
+                  resultData.person1Birthtime
+                )}
+                person2={createPersonData(
+                  resultData.person2Name,
+                  resultData.person2Birthdate,
+                  resultData.person2Gender,
+                  resultData.person2Birthtime
+                )}
+              />
             ) : (
               <FriendCompatibilityResult
                 data={resultData.resultData}

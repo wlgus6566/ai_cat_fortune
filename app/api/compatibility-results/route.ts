@@ -115,17 +115,55 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log("요청 바디:", JSON.stringify(body, null, 2));
 
-    const { resultType, person1, person2, resultData } = body;
+    // person1, person2 객체 대신 개별 필드로 전달된 경우 처리
+    const {
+      resultType,
+      resultData,
+      person1Name,
+      person1Birthdate,
+      person1Gender,
+      person1Birthtime,
+      person2Name,
+      person2Birthdate,
+      person2Gender,
+      person2Birthtime,
+      totalScore,
+    } = body;
 
-    if (!resultType || !person1 || !person2 || !resultData) {
-      console.error("필수 데이터 누락:", {
-        resultType,
-        person1,
-        person2,
-        resultData,
-      });
+    // 필수 데이터 검증
+    if (!resultType || !resultData) {
+      console.error("필수 데이터 누락: resultType 또는 resultData 없음");
       return NextResponse.json(
         { error: "필수 데이터가 누락되었습니다." },
+        { status: 400 }
+      );
+    }
+
+    // person1, person2 정보 누락 여부 검증
+    if (
+      !person1Name ||
+      !person1Birthdate ||
+      !person1Gender ||
+      !person2Name ||
+      !person2Birthdate ||
+      !person2Gender
+    ) {
+      console.error("person1/person2 정보 누락", {
+        person1: {
+          person1Name,
+          person1Birthdate,
+          person1Gender,
+          person1Birthtime,
+        },
+        person2: {
+          person2Name,
+          person2Birthdate,
+          person2Gender,
+          person2Birthtime,
+        },
+      });
+      return NextResponse.json(
+        { error: "person1 또는 person2 정보가 누락되었습니다." },
         { status: 400 }
       );
     }
@@ -144,12 +182,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // 타입별 총점 계산
-    let totalScore = 0;
-    if (resultType === "love") {
-      totalScore = processedResultData.score || 0;
-    } else if (resultType === "friend") {
-      totalScore = processedResultData.totalScore || 0;
+    // 타입별 총점 계산 (클라이언트에서 전달된 값이 있으면 사용)
+    let finalTotalScore = totalScore;
+    if (!finalTotalScore) {
+      if (resultType === "love") {
+        finalTotalScore = processedResultData.score || 0;
+      } else if (resultType === "friend") {
+        finalTotalScore = processedResultData.totalScore || 0;
+      } else {
+        finalTotalScore = 0;
+      }
     }
 
     try {
@@ -159,8 +201,8 @@ export async function POST(request: Request) {
       console.log("DB 삽입 시도:", {
         userId: profileId,
         resultType,
-        person1Name: person1.name,
-        totalScore,
+        person1Name,
+        totalScore: finalTotalScore,
       });
 
       const result = await db
@@ -168,16 +210,16 @@ export async function POST(request: Request) {
         .values({
           userId: profileId,
           resultType,
-          person1Name: person1.name,
-          person1Birthdate: person1.birthdate,
-          person1Gender: person1.gender,
-          person1Birthtime: person1.birthtime || null,
-          person2Name: person2.name,
-          person2Birthdate: person2.birthdate,
-          person2Gender: person2.gender,
-          person2Birthtime: person2.birthtime || null,
+          person1Name,
+          person1Birthdate,
+          person1Gender,
+          person1Birthtime: person1Birthtime || null,
+          person2Name,
+          person2Birthdate,
+          person2Gender,
+          person2Birthtime: person2Birthtime || null,
           resultData: processedResultData,
-          totalScore,
+          totalScore: finalTotalScore,
         })
         .returning();
 
