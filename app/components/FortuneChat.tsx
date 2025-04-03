@@ -12,6 +12,8 @@ import { CONCERN_TYPES, DETAILED_CONCERNS } from "../data";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from "../data.en"; // 영어 데이터 필요 시 사용
 import { useTalisman } from "../contexts/TalismanContext";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import { toast } from "react-hot-toast";
 
 // 직접 입력창 컴포넌트
 const ChatInput = ({
@@ -62,6 +64,11 @@ interface FortuneChatProps {
   initialMessages?: ChatMessageType[];
 }
 
+// ChatMessageType에 isFortuneResult 속성을 추가하기 위한 타입 확장
+interface FortuneMessage extends ChatMessageType {
+  isFortuneResult?: boolean;
+}
+
 export default function FortuneChat({
   userName,
   userProfile,
@@ -109,6 +116,16 @@ export default function FortuneChat({
   const [translatedPhrase, setTranslatedPhrase] = useState<string | null>(null);
   // 부적 ID를 저장하는 상태 추가
   const [talismanId, setTalismanId] = useState<string | null>(null);
+  // 메시지 리액션 관련 상태
+  const [messageReactions, setMessageReactions] = useState<
+    Record<string, string[]>
+  >({});
+  const [heartAnimationData, setHeartAnimationData] = useState<object | null>(
+    null
+  );
+  const heartAnimationRef = useRef<LottieRefCurrentProps | null>(null);
+  const [savedMessageId, setSavedMessageId] = useState<string | null>(null);
+
   // 채팅창 자동 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -369,12 +386,14 @@ export default function FortuneChat({
       const fortuneText = data.fortune;
 
       // 운세 메시지를 먼저 표시 (고양이 이모티콘 추가)
+      const fortuneMessageId = uuidv4();
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
-          id: uuidv4(),
+          id: fortuneMessageId,
           sender: "system",
           text: fortuneText + " 😽", // 고양이 이모티콘 추가
+          isFortuneResult: true, // 운세 결과 메시지임을 표시하는 플래그 추가
         },
       ]);
       scrollToBottom();
@@ -551,7 +570,7 @@ export default function FortuneChat({
 
     // 로딩 메시지 추가
     await addMessageWithTypingEffect(
-      { text: "운세를 살펴보고 있어요..." },
+      { text: "운세를 살펴보고 있다냥..." },
       1000,
       1200
     );
@@ -581,12 +600,14 @@ export default function FortuneChat({
       const fortuneText = data.fortune;
 
       // 운세 메시지를 먼저 표시 (고양이 이모티콘 추가)
+      const fortuneMessageId = uuidv4();
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
-          id: uuidv4(),
+          id: fortuneMessageId,
           sender: "system",
           text: fortuneText + " 😽", // 고양이 이모티콘 추가
+          isFortuneResult: true, // 운세 결과 메시지임을 표시하는 플래그 추가
         },
       ]);
       scrollToBottom();
@@ -708,9 +729,69 @@ export default function FortuneChat({
   };
 
   // 채팅 종료 시 상담 내역 저장
-  const handleEndChat = async () => {
+  const handleSaveConsultation = async () => {
     await saveConsultation();
-    resetChat();
+  };
+  const handleEndChat = async () => {
+    await resetChat();
+  };
+
+  // 하트 리액션 로티 애니메이션 로드
+  useEffect(() => {
+    const loadHeartAnimation = async () => {
+      try {
+        // 하트 애니메이션 로드 (public/lottie/heart.json에 있다고 가정)
+        const heartResponse = await fetch("/lottie/heart.json");
+        const heartData = await heartResponse.json();
+        setHeartAnimationData(heartData);
+      } catch (error) {
+        console.error("Failed to load heart animation:", error);
+      }
+    };
+
+    loadHeartAnimation();
+  }, []);
+
+  // 리액션 토글 핸들러
+  const handleReaction = (messageId: string, reaction: string) => {
+    setMessageReactions((prev) => {
+      const currentReactions = prev[messageId] || [];
+      const exists = currentReactions.includes(reaction);
+
+      if (exists) {
+        // 이미 반응이 있으면 제거
+        return {
+          ...prev,
+          [messageId]: currentReactions.filter((r) => r !== reaction),
+        };
+      } else {
+        // 반응이 없으면 추가
+        // 하트 애니메이션 참조가 있으면 애니메이션 재생
+        if (heartAnimationRef.current && reaction === "heart") {
+          heartAnimationRef.current.goToAndPlay(0);
+        }
+
+        return {
+          ...prev,
+          [messageId]: [...currentReactions, reaction],
+        };
+      }
+    });
+  };
+
+  // 특정 메시지 저장 핸들러 - 버튼 숨김 추가
+  const handleSaveMessage = async (messageId: string) => {
+    setSavedMessageId(messageId);
+    await handleSaveConsultation();
+
+    // 저장 성공 메시지 표시
+    toast.success(
+      "상담이 간직되었습니다. 상담내용은 상담보관함에서 확인할 수 있습니다.",
+      {
+        duration: 3000,
+        position: "bottom-center",
+      }
+    );
   };
 
   return (
@@ -718,11 +799,90 @@ export default function FortuneChat({
       {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto mb-4 p-2">
         {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            isTyping={message.id === typingMessageId}
-          />
+          <div key={message.id} className="mb-4">
+            <ChatMessage
+              message={message}
+              isTyping={message.id === typingMessageId}
+            />
+
+            {/* 시스템 메시지에만 리액션 UI 표시 */}
+            {message.sender === "system" &&
+              !typingMessageId &&
+              !isLoading &&
+              message.id !== typingMessageId &&
+              // 메시지에 isFortuneResult 플래그가 있는 경우에만 표시
+              (message as FortuneMessage).isFortuneResult && (
+                <div className="flex items-center justify-end mr-20 mt-1 space-x-2">
+                  {/* 하트 리액션 버튼 */}
+                  <button
+                    onClick={() => handleReaction(message.id, "heart")}
+                    className={` reaction-btn p-1 rounded-full transition-all ${
+                      messageReactions[message.id]?.includes("heart")
+                        ? "bg-red-50"
+                        : "hover:bg-gray-100"
+                    }`}
+                    aria-label="좋아요"
+                  >
+                    {messageReactions[message.id]?.includes("heart") ? (
+                      <div className="w-8 h-8 flex items-center justify-center text-red-500">
+                        {heartAnimationData ? (
+                          <Lottie
+                            animationData={heartAnimationData}
+                            lottieRef={heartAnimationRef}
+                            style={{ width: 28, height: 28 }}
+                            loop={false}
+                            initialSegment={[0, 60]} // 애니메이션 시작과 끝 프레임
+                            autoplay={false} // 자동 재생 비활성화 (클릭할 때만 재생)
+                          />
+                        ) : (
+                          <span>❤️</span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 flex items-center justify-center text-gray-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-5 h-5"
+                        >
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* 간직하기(저장) 버튼 - 저장되지 않은 경우에만 표시 */}
+                  {savedMessageId !== message.id && (
+                    <button
+                      onClick={() => handleSaveMessage(message.id)}
+                      className={`flex items-center justify-center reaction-btn p-1 pr-3 rounded-full transition-all hover:bg-gray-100 text-gray-400`}
+                      aria-label="상담 간직하기"
+                    >
+                      <div className="w-8 h-8 flex items-center justify-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-5 h-5"
+                        >
+                          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                      </div>
+                      <span className="text-xs ml-1">상담 간직하기</span>
+                    </button>
+                  )}
+                </div>
+              )}
+          </div>
         ))}
         <div ref={messagesEndRef} />
 
@@ -795,8 +955,8 @@ export default function FortuneChat({
             initialMessagesComplete &&
             !typingMessageId &&
             currentStep !== "DIRECT_INPUT" && (
-              <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                <div className="flex flex-wrap gap-2 justify-center">
+              <div className="border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <div className="flex flex-wrap gap-2 justify-center mt-4">
                   {currentOptions.map((option) => (
                     <button
                       key={option}
@@ -817,21 +977,18 @@ export default function FortuneChat({
                       {option}
                     </button>
                   ))}
+                  {/* 채팅 종료 버튼 */}
+                  {messages.length > 0 &&
+                    currentStep === "FORTUNE_RESULT" &&
+                    !readOnly && (
+                      <button
+                        onClick={handleEndChat}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
+                      >
+                        상담 종료
+                      </button>
+                    )}
                 </div>
-              </div>
-            )}
-
-          {/* 채팅 종료 버튼 */}
-          {messages.length > 0 &&
-            currentStep === "FORTUNE_RESULT" &&
-            !readOnly && (
-              <div className="mt-4 p-3 flex justify-center">
-                <button
-                  onClick={handleEndChat}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
-                >
-                  상담 내용 저장/상담 종료
-                </button>
               </div>
             )}
         </>
