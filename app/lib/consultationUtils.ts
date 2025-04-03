@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { consultationsTable } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { ChatMessage } from "../type/types";
 import { createSupabaseClient } from "../lib/supabase";
@@ -126,7 +126,10 @@ export async function deleteConsultation(id: string, userId: string) {
     const [deletedConsultation] = await db
       .delete(consultationsTable)
       .where(
-        eq(consultationsTable.id, id) && eq(consultationsTable.userId, userId)
+        and(
+          eq(consultationsTable.id, id),
+          eq(consultationsTable.userId, userId)
+        )
       )
       .returning();
 
