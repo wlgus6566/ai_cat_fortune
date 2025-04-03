@@ -12,6 +12,7 @@ import { Heart, Star, Sparkles } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 import ShareModal from "@/app/components/ShareModal";
 import PageHeader from "@/app/components/PageHeader";
+import Lottie from "lottie-react";
 
 // 카카오 SDK 타입 정의
 declare global {
@@ -99,30 +100,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   icon,
   color = "rgba(255, 107, 158, 0.8)",
 }) => {
-  // 제목이 '음양오행 분석'인 경우 기본적으로 펼쳐진 상태로 초기화
-  const [isOpen, setIsOpen] = useState(title === "음양오행 분석");
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <motion.div
-      className="mb-4 rounded-2xl overflow-hidden backdrop-blur-md shadow-lg border border-white/20"
-      style={{
-        background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
-      }}
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: { opacity: 0, y: 50 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            type: "spring",
-            stiffness: 100,
-            damping: 15,
-            delay,
-          },
-        },
-      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.5 }}
+      className="mb-4 rounded-2xl overflow-hidden shadow-sm border border-[#e6e6e6] bg-white"
     >
       <div
         className="p-4 flex items-center justify-between cursor-pointer"
@@ -133,20 +118,21 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             className="w-12 h-12 rounded-full flex items-center justify-center mr-3"
             style={{
               background: `linear-gradient(135deg, ${color}, rgba(255, 255, 255, 0.3))`,
+              border: "1px solid rgba(153, 13, 250, 0.2)",
             }}
           >
-            {icon || <span className="text-white font-bold">{score}</span>}
+            {icon}
           </div>
           <div>
-            <h3 className="text-lg font-medium text-white">{title}</h3>
+            <h3 className="text-lg font-medium text-[#3B2E7E]">{title}</h3>
             <div className="flex items-center mt-1">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="relative w-4 h-4 mr-1">
                   <Star
                     className={`w-4 h-4 ${
                       i < Math.round(score / 20)
-                        ? "text-yellow-300 fill-yellow-300"
-                        : "text-gray-400"
+                        ? "text-[#FFD966] fill-[#FFD966]"
+                        : "text-gray-300"
                     }`}
                   />
                 </div>
@@ -156,11 +142,15 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         </div>
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-            isOpen ? "bg-white/30 rotate-180" : "bg-white/10"
+            isOpen
+              ? "bg-[#f7f7f7] border border-[#990dfa]/20"
+              : "bg-[#f7f7f7] border border-[#990dfa]/20"
           }`}
         >
           <svg
-            className="w-5 h-5 text-white"
+            className={`w-5 h-5 transform transition-transform duration-300 text-[#990dfa] ${
+              isOpen ? "rotate-180" : ""
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -175,21 +165,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           </svg>
         </div>
       </div>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="px-4 pb-4"
-          >
-            <div className="bg-white/10 p-4 rounded-xl text-white border border-white/20">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div className="px-4 pb-4">
+          <div className="bg-[#F9F5FF] p-4 rounded-xl text-gray-700 border border-[#e6e6e6]">
+            {children}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -253,6 +235,25 @@ export default function CompatibilityResultPage() {
     return () => {
       document.body.removeChild(script);
     };
+  }, []);
+
+  const [heartAnimationData, setHeartAnimationData] = useState<object | null>(
+    null
+  );
+
+  // Lottie 애니메이션 로딩
+  useEffect(() => {
+    const loadAnimations = async () => {
+      try {
+        const heartResponse = await fetch("/lottie/heart2.json");
+        const heartData = await heartResponse.json();
+        setHeartAnimationData(heartData);
+      } catch (error) {
+        console.error("Failed to load Lottie animations:", error);
+      }
+    };
+
+    loadAnimations();
   }, []);
 
   useEffect(() => {
@@ -425,14 +426,17 @@ export default function CompatibilityResultPage() {
   const getElementEmoji = (element?: string) => {
     switch (element) {
       case "목":
+      case "나무":
         return "🌿"; // 나무, 식물
       case "화":
+      case "불":
         return "🔥"; // 불
       case "토":
         return "🏔️"; // 땅, 산
       case "금":
         return "💎"; // 보석, 금속
       case "수":
+      case "물":
         return "💧"; // 물방울
       default:
         return "✨"; // 기본값
@@ -500,7 +504,7 @@ export default function CompatibilityResultPage() {
 
   if (loading && !compatibilityData?.magicTitle) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-purple-600/50 to-blue-600/50 font-gothic flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF]">
         {/* Toaster for notifications */}
         <Toaster position="bottom-center" />
 
@@ -517,46 +521,48 @@ export default function CompatibilityResultPage() {
           )}
         </AnimatePresence>
 
-        <motion.div
-          className="w-24 h-28 mb-8 relative"
-          animate={{
-            y: [0, -10, 0],
-          }}
-          transition={{
-            y: {
-              duration: 2,
-              ease: "easeInOut",
-            },
-          }}
-        >
-          <Image
-            src={getLoadingImage()}
-            alt="로딩중"
-            width={80}
-            height={120}
-            className="w-full h-full relative z-10 -rotate-12"
-          />
-        </motion.div>
+        <div className="flex flex-col items-center justify-center flex-grow p-6 text-center min-h-screen">
+          <motion.div
+            className="w-24 h-28 mb-8 relative"
+            animate={{
+              y: [0, -10, 0],
+            }}
+            transition={{
+              y: {
+                duration: 2,
+                ease: "easeInOut",
+              },
+            }}
+          >
+            <Image
+              src={getLoadingImage()}
+              alt="로딩중"
+              width={80}
+              height={120}
+              className="w-full h-full relative z-10 -rotate-12"
+            />
+          </motion.div>
 
-        <motion.h2
-          className="text-lg font-gothic font-bold mb-6 text-center text-white"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          key={loadingStage} // 메시지 변경시 애니메이션 다시 실행
-          transition={{
-            duration: 0.5,
-            ease: "easeOut",
-          }}
-        >
-          {getLoadingMessage()}
-        </motion.h2>
+          <motion.h2
+            className="text-lg font-gothic font-bold mb-6 text-center text-[#3B2E7E]"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            key={loadingStage} // 메시지 변경시 애니메이션 다시 실행
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+            }}
+          >
+            {getLoadingMessage()}
+          </motion.h2>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#3B2E7E] via-[#5D4A9C] to-[#7057C9] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF]">
         {/* 배경 장식 요소 */}
         {[...Array(10)].map((_, i) => (
           <motion.div
@@ -575,7 +581,7 @@ export default function CompatibilityResultPage() {
           </motion.div>
         ))}
 
-        <div className="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 mb-8 max-w-md w-full border border-white/30">
+        <div className="bg-white shadow-lg rounded-2xl p-8 mb-8 max-w-md w-full border border-[#e6e6e6]">
           <div className="text-center mb-6">
             <div className="w-16 h-16 mx-auto mb-4 text-red-500 flex items-center justify-center">
               <svg
@@ -593,14 +599,14 @@ export default function CompatibilityResultPage() {
                 ></path>
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-[#3B2E7E]">
               오류가 발생했습니다
             </h2>
           </div>
-          <p className="text-center text-white/80 mb-6">{error}</p>
+          <p className="text-center text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => router.push("/compatibility")}
-            className="w-full px-6 py-3 rounded-xl bg-white text-[#3B2E7E] font-medium hover:bg-white/90 transition-colors"
+            className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-[#990dfa] to-[#7609c1] text-white font-medium hover:bg-opacity-90 transition-colors"
           >
             다시 시도하기
           </button>
@@ -610,18 +616,28 @@ export default function CompatibilityResultPage() {
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden">
-      <div className="absolute inset-0 w-full h-full">
-        <Image
-          src="/bg_only_sky.png"
-          alt="배경이미지"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF]">
+      {/* Toaster for notifications */}
+      <Toaster position="bottom-center" />
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShareModal && (
+          <ShareModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            onShareKakao={shareToKakao}
+            onCopyLink={copyToClipboard}
+            title="결과 공유하기"
+          />
+        )}
+      </AnimatePresence>
+
       {/* 커스텀 헤더 */}
-      <PageHeader title="궁합 결과" />
+      <PageHeader
+        title="궁합 결과"
+        className="bg-white shadow-md relative z-10"
+      />
       <div className="container max-w-md mx-auto px-4 py-6 relative z-10 pb-28">
         {/* 결과 컨테이너 */}
         <motion.div
@@ -631,11 +647,11 @@ export default function CompatibilityResultPage() {
           className="space-y-6"
         >
           {/* 상단 요소: 제목 및 테마 */}
-          <motion.div variants={slideInUp} className="text-center my-8">
-            <h1 className="text-2xl font-bold mb-4 px-8 font-gothic word-break-keep">
+          <motion.div variants={slideInUp} className="text-center mt-8 mb-32">
+            <h1 className="text-2xl font-bold mb-4 px-8 font-gothic text-[#3B2E7E] word-break-keep">
               {compatibilityData?.magicTitle || "너와 나, 우주가 허락한 궁합"}
             </h1>
-            <p className="text-lg opacity-90 bg-white/10 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
+            <p className="text-lg opacity-90 bg-[#990dfa]/10 inline-block px-4 py-1 rounded-full text-[#990dfa]">
               <span className="font-semibold">
                 {compatibilityData?.compatibilityTheme || "상생의 기운"}
               </span>
@@ -645,45 +661,36 @@ export default function CompatibilityResultPage() {
           {/* 점수 요약 카드 */}
           <motion.div
             variants={slideInUp}
-            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20"
-            style={{
-              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-            }}
+            className="bg-white relative rounded-2xl p-6 mb-8 border border-[#e6e6e6] shadow-sm"
           >
-            <div className="flex items-center justify-center mb-6">
-              <div className="mr-4 text-2xl">
-                <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-pink-200 to-pink-100">
-                  {state.person1.name}
-                </span>
-              </div>
-              <motion.div
-                className="bg-gradient-to-br from-pink-500 to-red-500 rounded-full p-2"
-                animate={{
-                  scale: [1, 1.1, 1],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                }}
-              >
-                <Heart className="w-8 h-8 text-white fill-white" />
-              </motion.div>
-              <div className="ml-4 text-2xl">
-                <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-pink-100 to-pink-200">
-                  {state.person2.name}
-                </span>
-              </div>
+            <div className="absolute -top-[123px] left-1/2 -translate-x-1/2 -z-1">
+              <Image
+                src="/new_cat_thumb.png"
+                alt="logo"
+                width={100}
+                height={100}
+              />
+              {heartAnimationData && (
+                <Lottie
+                  animationData={heartAnimationData}
+                  style={{
+                    width: 30,
+                    height: 30,
+                    position: "absolute",
+                    right: "-20%",
+                    top: "50%",
+                  }}
+                />
+              )}
             </div>
-
             {/* 원형 차트 */}
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <motion.div
                   className="absolute -inset-4 rounded-full opacity-20 blur-xl"
                   style={{
-                    background: "linear-gradient(135deg, #FF6B9E, #FFDD94)",
+                    background:
+                      "linear-gradient(135deg,rgb(255, 125, 203),rgb(255, 92, 160))",
                   }}
                   animate={{
                     opacity: [0.2, 0.4, 0.2],
@@ -699,21 +706,46 @@ export default function CompatibilityResultPage() {
                   percentage={compatibilityData?.score || 83}
                   size={140}
                   strokeWidth={12}
-                  color="#FF6B9E"
-                  backgroundColor="rgba(255, 255, 255, 0.2)"
+                  color="rgb(255, 68, 68)"
                 />
                 <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                  <span className="text-3xl font-bold text-white">
+                  <span className="text-3xl font-bold text-purple-700">
                     {compatibilityData?.score || 83}
                   </span>
-                  <span className="block text-sm text-pink-200 mt-2 ml-2">
+                  <span className="block text-sm text-[#990dfa] mt-2 ml-1">
                     점
                   </span>
                 </div>
               </div>
             </div>
 
-            <p className="text-center font-medium text-xl text-white">
+            <div className="flex items-center justify-center mb-6">
+              <div className="mr-4 text-2xl">
+                <span className="font-medium text-[#3B2E7E]">
+                  {state.person1.name}
+                </span>
+              </div>
+              <motion.div
+                className="bg-gradient-to-br from-[red] to-[red] rounded-full p-2"
+                animate={{
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              >
+                <Heart className="w-8 h-8 text-white fill-white" />
+              </motion.div>
+              <div className="ml-4 text-2xl">
+                <span className="font-medium text-[#3B2E7E]">
+                  {state.person2.name}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-center font-medium text-xl text-[#3B2E7E]">
               {compatibilityData?.summary ||
                 "함께 있을수록 더 빛나는 인연이다냥~"}
             </p>
@@ -722,40 +754,40 @@ export default function CompatibilityResultPage() {
           {/* 음양오행 분석 섹션 - 별도 섹션으로 추출 */}
           <motion.div variants={slideInUp} className="mb-24">
             <div className="text-left mb-6">
-              <h2 className="text-2xl font-bold inline-block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+              <h2 className="text-2xl font-bold text-[#3B2E7E]">
                 음양오행 분석
               </h2>
-              <p className="text-sm text-white/80 mt-2 max-w-md mx-auto">
+              <p className="text-sm text-gray-600 mt-2 max-w-md mx-auto">
                 음양오행은 우주와 만물의 기운을 설명하는 동양 철학으로, 두
                 사람의 에너지가 어떻게 상호작용하는지 보여줍니다
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden relative">
+            <div className="bg-white rounded-2xl border border-[#e6e6e6] shadow-sm overflow-hidden relative">
               {/* 배경 장식 */}
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#990dfa]/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-[#7609c1]/10 rounded-full blur-3xl"></div>
 
               {/* 두 사람의 오행 정보 */}
-              <div className="flex flex-col md:flex-row gap-4 relative z-10">
+              <div className="flex flex-col md:flex-row gap-4 relative z-10 p-4">
                 {/* 첫 번째 사람 카드 */}
-                <div className="flex-1 bg-white/5 rounded-xl p-5 border border-white/20 relative overflow-hidden">
+                <div className="flex-1 bg-[#F9F5FF] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-indigo-600/40 text-xl">
+                    <div className="text-xl">
                       {getElementEmoji(
                         compatibilityData?.details?.yinYangAnalysis?.user
                           ?.element
                       )}
                     </div>
-                    <h3 className="text-xl font-semibold">
+                    <h3 className="text-xl font-semibold text-[#3B2E7E]">
                       {state.person1.name}
                     </h3>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-white/10 rounded-lg p-3 text-center">
-                      <span className="block text-xs opacity-70">오행</span>
-                      <span className="block text-lg font-bold">
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <span className="block text-xs text-gray-500">오행</span>
+                      <span className="block text-lg font-bold text-[#3B2E7E]">
                         {getElementEmoji(
                           compatibilityData?.details?.yinYangAnalysis?.user
                             ?.element
@@ -764,9 +796,9 @@ export default function CompatibilityResultPage() {
                           ?.element || "목"}
                       </span>
                     </div>
-                    <div className="bg-white/10 rounded-lg p-3 text-center">
-                      <span className="block text-xs opacity-70">음양</span>
-                      <span className="block text-lg font-bold">
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <span className="block text-xs text-gray-500">음양</span>
+                      <span className="block text-lg font-bold text-[#3B2E7E]">
                         {compatibilityData?.details?.yinYangAnalysis?.user
                           ?.yinYang === "음"
                           ? "☽"
@@ -777,8 +809,8 @@ export default function CompatibilityResultPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white/10 rounded-lg p-4">
-                    <p className="italic text-sm">
+                  <div className="bg-white rounded-lg p-4">
+                    <p className="italic text-sm text-gray-700">
                       &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.user
@@ -791,8 +823,8 @@ export default function CompatibilityResultPage() {
 
                 {/* 중앙 상생/상극 관계 표시 */}
                 <div className="hidden md:flex flex-col items-center justify-center relative min-w-[100px]">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center z-10">
-                    <div className="text-2xl">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#990dfa]/20 to-[#7609c1]/20 flex items-center justify-center z-10">
+                    <div className="text-2xl text-[#990dfa]">
                       {getCompatibilitySymbol(
                         compatibilityData?.details?.yinYangAnalysis?.user
                           ?.element,
@@ -801,41 +833,27 @@ export default function CompatibilityResultPage() {
                       )}
                     </div>
                   </div>
-                  <div className="absolute w-[2px] h-full bg-gradient-to-b from-indigo-500/20 via-purple-500/40 to-pink-500/20"></div>
+                  <div className="absolute w-[2px] h-full bg-gradient-to-b from-[#990dfa]/20 via-[#7609c1]/40 to-[#990dfa]/20"></div>
                 </div>
 
-                {/* 모바일에서 표시되는 관계 표시 */}
-                {/* <div className="md:hidden flex justify-center items-center py-2">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center">
-                    <div className="text-xl">
-                      {getCompatibilitySymbol(
-                        compatibilityData?.details?.yinYangAnalysis?.user
-                          ?.element,
-                        compatibilityData?.details?.yinYangAnalysis?.partner
-                          ?.element
-                      )}
-                    </div>
-                  </div>
-                </div> */}
-
                 {/* 두 번째 사람 카드 */}
-                <div className="flex-1 bg-white/10 rounded-xl p-5 border border-white/20 relative overflow-hidden">
+                <div className="flex-1 bg-[#F9F5FF] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-pink-600/40 text-xl">
+                    <div className="text-xl">
                       {getElementEmoji(
                         compatibilityData?.details?.yinYangAnalysis?.partner
                           ?.element
                       )}
                     </div>
-                    <h3 className="text-xl font-semibold">
+                    <h3 className="text-xl font-semibold text-[#3B2E7E]">
                       {state.person2.name}
                     </h3>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-white/10 rounded-lg p-3 text-center">
-                      <span className="block text-xs opacity-70">오행</span>
-                      <span className="block text-lg font-bold">
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <span className="block text-xs text-gray-500">오행</span>
+                      <span className="block text-lg font-bold text-[#3B2E7E]">
                         {getElementEmoji(
                           compatibilityData?.details?.yinYangAnalysis?.partner
                             ?.element
@@ -844,9 +862,9 @@ export default function CompatibilityResultPage() {
                           ?.element || "화"}
                       </span>
                     </div>
-                    <div className="bg-white/10 rounded-lg p-3 text-center">
-                      <span className="block text-xs opacity-70">음양</span>
-                      <span className="block text-lg font-bold">
+                    <div className="bg-white rounded-lg p-3 text-center">
+                      <span className="block text-xs text-gray-500">음양</span>
+                      <span className="block text-lg font-bold text-[#3B2E7E]">
                         {compatibilityData?.details?.yinYangAnalysis?.partner
                           ?.yinYang === "음"
                           ? "☽"
@@ -857,8 +875,8 @@ export default function CompatibilityResultPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white/10 rounded-lg p-4">
-                    <p className="italic text-sm">
+                  <div className="bg-white rounded-lg p-4">
+                    <p className="italic text-sm text-gray-700">
                       &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.partner
@@ -871,12 +889,12 @@ export default function CompatibilityResultPage() {
               </div>
 
               {/* 상성 분석 결과 */}
-              <div className="mt-6 p-5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-xl border border-white/20">
+              <div className="mt-2 p-5 bg-[#F9F5FF] m-4 rounded-xl border border-[#e6e6e6]">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold flex items-center">
+                  <h3 className="text-lg font-semibold flex items-center text-[#3B2E7E]">
                     <span className="mr-2">✨</span> 상성 분석
                   </h3>
-                  <div className="bg-white/20 rounded-full px-3 py-1 text-sm">
+                  <div className="bg-white rounded-full px-3 py-1 text-sm text-[#990dfa]">
                     점수:{" "}
                     <span className="font-bold">
                       {compatibilityData?.details?.yinYangAnalysis
@@ -885,16 +903,16 @@ export default function CompatibilityResultPage() {
                   </div>
                 </div>
 
-                <p className="mb-4 text-sm">
+                <p className="mb-4 text-sm text-gray-700">
                   {
                     compatibilityData?.details?.yinYangAnalysis?.compatibility
                       ?.description
                   }
                 </p>
 
-                <div className="bg-white/10 rounded-lg p-4 flex items-center">
+                <div className="bg-white rounded-lg p-4 flex items-center">
                   <span className="text-lg mr-2">🐾</span>
-                  <p className="text-sm italic">
+                  <p className="text-sm italic text-[#990dfa]">
                     {
                       compatibilityData?.details?.yinYangAnalysis?.compatibility
                         ?.catComment
@@ -907,8 +925,8 @@ export default function CompatibilityResultPage() {
 
           {/* 세부 분석 카드들 */}
           <motion.div variants={slideInUp} className="space-y-4">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Star className="h-5 w-5 text-yellow-300 mr-2 fill-yellow-300" />
+            <h2 className="text-xl font-bold mb-4 flex items-center text-[#3B2E7E]">
+              <Star className="h-5 w-5 text-[#990dfa] mr-2 fill-[#990dfa]" />
               세부 분석
             </h2>
             {/* 성격 궁합 */}
@@ -920,13 +938,13 @@ export default function CompatibilityResultPage() {
               }
               delay={0.1}
               icon={<Sparkles className="h-6 w-6 text-white" />}
-              color="rgba(255, 107, 158, 0.8)"
+              color="rgba(153, 13, 250, 0.8)"
             >
               <p className="mb-3">
                 {compatibilityData?.details?.personalityCompatibility?.analysis}
               </p>
-              <div className="bg-white/20 p-3 rounded-lg">
-                <p className="text-sm font-medium">
+              <div className="bg-[#990dfa]/10 p-3 rounded-lg border border-[#990dfa]/20">
+                <p className="text-sm font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.personalityCompatibility?.tip}
                 </p>
               </div>
@@ -943,8 +961,8 @@ export default function CompatibilityResultPage() {
               <p className="mb-3">
                 {compatibilityData?.details?.loveStyle?.analysis}
               </p>
-              <div className="bg-white/30 p-3 rounded-lg">
-                <p className="text-sm font-medium">
+              <div className="bg-[#FF4D80]/10 p-3 rounded-lg border border-[#FF4D80]/20">
+                <p className="text-sm font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.loveStyle?.tip}
                 </p>
               </div>
@@ -975,8 +993,8 @@ export default function CompatibilityResultPage() {
               <p className="mb-3">
                 {compatibilityData?.details?.conflictElements?.analysis}
               </p>
-              <div className="bg-white/30 p-3 rounded-lg">
-                <p className="text-sm font-medium">
+              <div className="bg-[#FF9F40]/10 p-3 rounded-lg border border-[#FF9F40]/20">
+                <p className="text-sm font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.conflictElements?.tip}
                 </p>
               </div>
@@ -1007,8 +1025,8 @@ export default function CompatibilityResultPage() {
               <p className="mb-3">
                 {compatibilityData?.details?.futurePerspective?.analysis}
               </p>
-              <div className="bg-white/30 p-3 rounded-lg">
-                <p className="text-sm font-medium">
+              <div className="bg-[#48BB78]/10 p-3 rounded-lg border border-[#48BB78]/20">
+                <p className="text-sm font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.futurePerspective?.tip}
                 </p>
               </div>
@@ -1018,38 +1036,63 @@ export default function CompatibilityResultPage() {
           {/* 하단 콘텐츠 */}
           <motion.div
             variants={slideInUp}
-            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mt-8 border border-white/20"
-            style={{
-              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))`,
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-            }}
+            className="bg-white rounded-2xl p-6 mt-8 border border-[#e6e6e6] shadow-sm"
           >
-            <h3 className="text-lg font-bold mb-4 flex items-center">
+            <h3 className="text-lg font-bold mb-4 flex items-center text-[#3B2E7E]">
               <span className="mr-2">🧙‍♂️</span> 전체 조언
             </h3>
-            <p className="mb-6 leading-relaxed">
+            <p className="mb-6 leading-relaxed text-gray-700">
               {compatibilityData?.totalAdvice}
             </p>
 
-            <h3 className="text-lg font-bold mb-4 flex items-center">
-              <span className="mr-2">🐾</span> 고양이의 한마디
-            </h3>
-            <p className="mb-6 leading-relaxed">
-              {compatibilityData?.catComment}
-            </p>
-
-            <div className="bg-white/20 p-4 rounded-lg border border-white/10">
-              <h3 className="text-md font-bold mb-2 flex items-center">
+            <div className="bg-[#F9F5FF] p-4 rounded-lg border border-[#e6e6e6]">
+              <h3 className="text-md font-bold mb-2 flex items-center text-[#3B2E7E]">
                 <span className="mr-2">🎁</span> 행운 아이템
               </h3>
-              <p className="text-sm">{compatibilityData?.luckyItem}</p>
+              <p className="text-sm text-gray-700">
+                {compatibilityData?.luckyItem}
+              </p>
             </div>
-            <div className="mt-2 bg-white/20 p-4 rounded-lg border border-white/10">
-              <h3 className="text-md font-bold mb-2 flex items-center">
+            <div className="mt-2 bg-[#F9F5FF] p-4 rounded-lg border border-[#e6e6e6]">
+              <h3 className="text-md font-bold mb-2 flex items-center text-[#3B2E7E]">
                 <span className="mr-2">💑</span> 추천 데이트
               </h3>
-              <p className="text-sm">{compatibilityData?.recommendedDate}</p>
+              <p className="text-sm text-gray-700">
+                {compatibilityData?.recommendedDate}
+              </p>
             </div>
+          </motion.div>
+          <motion.div
+            variants={slideInUp}
+            className="relative text-center mt-8 mb-12 h-[250px]"
+          >
+            <motion.div
+              className="absolute left-10 max-w-[300px] transform -translate-x-1/2 bg-[#FFF7EA] border-[3px] border-[#FFD5A8] rounded-full px-6 py-3 shadow-xl z-10"
+              initial={{ opacity: 0, scale: 0.7, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
+            >
+              <div className="relative">
+                <p className="text-[#3B2E7E] text-md text-center font-semibold">
+                  {compatibilityData?.catComment}
+                </p>
+                <div
+                  className="absolute -bottom-5 left-1/3 transform -translate-x-1/2 
+              w-0 h-0 border-l-[10px] border-r-[10px] border-t-[10px] 
+              border-l-transparent border-r-transparent border-t-[#FFF7EA]"
+                ></div>
+              </div>
+              <span className="mt-5 absolute left-12">
+                <Image
+                  src="/new_cat.png"
+                  alt="냥냥이"
+                  width={100}
+                  height={100}
+                  className=""
+                />
+              </span>
+            </motion.div>
           </motion.div>
 
           {/* 하단 버튼 */}
@@ -1057,14 +1100,14 @@ export default function CompatibilityResultPage() {
             <div className="flex gap-4 justify-center">
               <button
                 onClick={() => router.push("/compatibility")}
-                className="px-8 py-3 bg-white text-[#3B2E7E] rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
+                className="px-8 py-3 bg-white text-[#990dfa] border border-[#990dfa] rounded-full font-medium shadow-sm hover:bg-[#F9F5FF] transition-all"
               >
                 다시 궁합 보기
               </button>
 
               <button
                 onClick={() => setShowShareModal(true)}
-                className="px-8 py-3 bg-[#3B2E7E] text-white border border-white/30 rounded-full font-medium shadow-lg hover:bg-opacity-90 transition-all"
+                className="px-8 py-3 bg-gradient-to-r from-[#990dfa] to-[#7609c1] text-white rounded-full font-medium shadow-sm hover:opacity-90 transition-all"
               >
                 결과 공유하기
               </button>

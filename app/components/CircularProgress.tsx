@@ -48,7 +48,6 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          className="drop-shadow-[0_0_8px_rgba(255,107,158,0.7)]"
           style={{
             transition: "stroke-dashoffset 1s ease-in-out",
           }}
