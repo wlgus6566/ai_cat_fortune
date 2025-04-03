@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 import ShareModal from "@/app/components/ShareModal";
+import PageHeader from "@/app/components/PageHeader";
 
 // 카카오 SDK 타입 정의
 declare global {
@@ -231,6 +232,60 @@ async function fetchFriendCompatibilityAnalysis(data: FriendshipData) {
   }
 }
 
+// 점수별 닉네임과 고양이 첨언
+const SCORE_NICKNAME_MAP = [
+  {
+    score: 10,
+    nickname: "🐾 다른 세상에서 온 듯한 우리",
+    catComment: "다르지만 그래서 더 기억에 남는 조합이라냥.",
+  },
+  {
+    score: 20,
+    nickname: "🧩 서로를 아직 배우는 중인 사이",
+    catComment: "익숙하진 않아도, 알아가려는 게 중요하다옹~",
+  },
+  {
+    score: 30,
+    nickname: "🌱 서서히 싹트는 느린 우정",
+    catComment: "시간이 쌓일수록 더 자연스러워지는 관계라냥.",
+  },
+  {
+    score: 40,
+    nickname: "🍵 말은 없어도 편안한 온도",
+    catComment: "같이 있는 것만으로도 차분해지는 사이다옹.",
+  },
+  {
+    score: 50,
+    nickname: "🌤 흐림과 맑음이 공존하는 친구",
+    catComment: "완벽하진 않아도 함께 있으면 나쁘지 않다냥.",
+  },
+  {
+    score: 60,
+    nickname: "🌙 달처럼 멀지만 정 있는 사이",
+    catComment: "항상 가깝진 않아도 마음은 은은히 이어진다냥.",
+  },
+  {
+    score: 70,
+    nickname: "🔗 느슨하지만 단단한 연결",
+    catComment: "틈이 있어도 그게 오히려 우리를 편하게 해준다냥.",
+  },
+  {
+    score: 80,
+    nickname: "🌻 보면 기분 좋아지는 친구",
+    catComment: "가끔만 봐도 에너지 받는 그런 관계라옹~",
+  },
+  {
+    score: 90,
+    nickname: "🍀 말 안 해도 마음이 닿는 사이",
+    catComment: "고양이도 눈빛만 봐도 아는 그런 느낌이라냥!",
+  },
+  {
+    score: 100,
+    nickname: "✨ 운명처럼 맞아떨어지는 찐친",
+    catComment: "함께 있는 게 가장 자연스러운 친구라옹~",
+  },
+];
+
 export default function FriendshipCompatibilityResultPage() {
   const router = useRouter();
   const { state } = useFriendCompatibility();
@@ -249,7 +304,7 @@ export default function FriendshipCompatibilityResultPage() {
       case 2:
         return "/new_cat_book.png";
       case 3:
-        return "/new_cat_friends.png";
+        return "/new_cat_love.png";
       default:
         return "/new_cat_magic.png";
     }
@@ -369,8 +424,16 @@ export default function FriendshipCompatibilityResultPage() {
       });
   };
 
+  // 점수에 따른 닉네임과 고양이 첨언 가져오기
+  const getScoreNickname = (score: number) => {
+    // 점수를 10점 단위로 변환 (0~9 -> 10, 10~19 -> 20, ...)
+    const normalizedScore = Math.min(Math.ceil(score / 10) * 10, 100);
+    const index = normalizedScore / 10 - 1;
+    return SCORE_NICKNAME_MAP[index >= 0 ? index : 0];
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-900 via-indigo-900 to-blue-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black via-indigo-900 to-blue-900">
       <Toaster />
       {showShareModal && (
         <ShareModal
@@ -384,28 +447,38 @@ export default function FriendshipCompatibilityResultPage() {
       {loading ? (
         // 로딩 화면
         <div className="flex flex-col items-center justify-center flex-grow p-6 text-center">
-          <div className="w-64 h-64 relative mb-8">
+          <motion.div
+            className="w-24 h-28 mb-8 relative"
+            animate={{
+              y: [0, -10, 0],
+            }}
+            transition={{
+              y: {
+                duration: 2,
+                ease: "easeInOut",
+              },
+            }}
+          >
             <Image
               src={getLoadingImage()}
-              alt="Loading"
-              width={250}
-              height={250}
-              className="object-contain"
+              alt="로딩중"
+              width={80}
+              height={120}
+              className="w-full h-full relative z-10 -rotate-12"
             />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-4">
+          </motion.div>
+          <motion.h2
+            className="text-lg font-gothic font-bold mb-6 text-center text-white"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            key={loadingStage} // 메시지 변경시 애니메이션 다시 실행
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+            }}
+          >
             {getLoadingMessage()}
-          </h2>
-          <div className="flex gap-2 mt-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`w-3 h-3 rounded-full ${
-                  loadingStage >= i ? "bg-pink-400" : "bg-gray-400"
-                }`}
-              ></div>
-            ))}
-          </div>
+          </motion.h2>
         </div>
       ) : error ? (
         // 에러 화면
@@ -428,24 +501,15 @@ export default function FriendshipCompatibilityResultPage() {
           className="flex-grow"
         >
           {/* 헤더 */}
-          <div className="sticky top-0 z-10 bg-gradient-to-b from-purple-900/80 to-purple-900/0 backdrop-blur-md">
-            <div className="container mx-auto p-4 flex items-center">
-              <button
-                onClick={() => router.push("/friendship-compatibility")}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
-              <h1 className="ml-4 text-lg font-medium text-white">
-                친구 궁합 결과
-              </h1>
-            </div>
-          </div>
+          <PageHeader
+            title="친구 궁합 결과"
+            className="bg-white shadow-md relative z-10"
+          />
 
           {/* 결과 컨텐츠 */}
           <div className="container mx-auto px-4 pb-24 relative">
             {/* 배경 별 효과 */}
-            {[...Array(10)].map((_, i) => (
+            {/* {[...Array(10)].map((_, i) => (
               <motion.div
                 key={i}
                 className="absolute text-white opacity-70"
@@ -460,7 +524,7 @@ export default function FriendshipCompatibilityResultPage() {
               >
                 ✨
               </motion.div>
-            ))}
+            ))} */}
 
             {/* 닉네임 및 점수 */}
             <motion.div
@@ -469,17 +533,38 @@ export default function FriendshipCompatibilityResultPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-3xl font-bold text-white mb-3">
-                {friendCompatibilityData.nickname}
-              </h1>
-              <div className="flex justify-center items-center mb-4">
+              {friendCompatibilityData && (
+                <>
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    {
+                      getScoreNickname(friendCompatibilityData.totalScore)
+                        .nickname
+                    }
+                  </h1>
+                  <p className="text-yellow-200 text-lg mb-4 italic">
+                    {
+                      getScoreNickname(friendCompatibilityData.totalScore)
+                        .catComment
+                    }
+                  </p>
+                </>
+              )}
+              <div className="flex justify-center relative items-center my-4">
                 <CircularProgress
                   percentage={friendCompatibilityData.totalScore}
-                  size={100}
-                  strokeWidth={10}
-                  color="rgba(255, 107, 158, 0.9)"
+                  size={200}
+                  strokeWidth={15}
+                  color="#FF6B9E"
                   backgroundColor="rgba(255, 255, 255, 0.2)"
                 />
+                <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                  <span className="text-3xl font-bold text-white">
+                    {friendCompatibilityData?.totalScore || 83}
+                  </span>
+                  <span className="block text-sm text-pink-200 mt-2 ml-2">
+                    점
+                  </span>
+                </div>
               </div>
               <div className="flex flex-wrap justify-center gap-2 mt-4">
                 {friendCompatibilityData.hashtags.map((tag, i) => (
