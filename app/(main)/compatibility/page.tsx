@@ -461,6 +461,8 @@ export default function CompatibilityPage() {
   // 카카오톡 공유하기
   const shareToKakao = () => {
     console.log("Kakao 객체:", window.Kakao);
+    console.log("Kakao 초기화 여부:", window.Kakao?.isInitialized?.());
+    console.log("Kakao.Share 객체:", window.Kakao?.Share);
     if (!window.Kakao || !window.Kakao.Share) {
       toast.error("카카오톡 공유 기능을 불러오는데 실패했습니다.");
       return;
@@ -469,27 +471,45 @@ export default function CompatibilityPage() {
     const shareUrl = generateShareLink();
     if (!shareUrl) return; // 유효성 검사 실패 시 리턴
 
-    window.Kakao.Share.sendDefault({
-      objectType: "feed",
-      content: {
-        title: "궁합 테스트💑",
-        description: `${formData.person1.name}님과의 궁합을 확인해보라냥!💑 `,
-        imageUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/share.png`,
-        link: {
-          mobileWebUrl: shareUrl,
-          webUrl: shareUrl,
-        },
-      },
-      buttons: [
-        {
-          title: "궁합 테스트 참여하기",
+    // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
+    if (window.location.hostname === "localhost") {
+      toast.error(
+        "로컬 환경에서는 카카오 공유가 제대로 작동하지 않을 수 있습니다."
+      );
+    }
+
+    // 실제 도메인 사용 (개발 환경에서는 배포된 URL로 변경)
+    const webUrl = "https://v0-aifortune-rose.vercel.app";
+    const realShareUrl = shareUrl.replace(window.location.origin, webUrl);
+
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: "궁합 테스트💑",
+          description: `${formData.person1.name}님과의 궁합을 확인해보라냥!💑 `,
+          imageUrl: `${window.location.origin}/new_cat_love.png`,
           link: {
-            mobileWebUrl: shareUrl,
-            webUrl: shareUrl,
+            mobileWebUrl: realShareUrl,
+            webUrl: realShareUrl,
           },
         },
-      ],
-    });
+        buttons: [
+          {
+            title: "궁합 테스트 참여하기",
+            link: {
+              mobileWebUrl: realShareUrl,
+              webUrl: realShareUrl,
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("카카오 공유 에러:", error);
+      toast.error(
+        "카카오 공유 중 오류가 발생했습니다. 링크 복사를 이용해 주세요."
+      );
+    }
   };
 
   // 공유하기 버튼 클릭 핸들러

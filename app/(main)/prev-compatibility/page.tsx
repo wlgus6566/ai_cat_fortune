@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Heart, Star, Loader2, Clock } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import PageHeader from "@/app/components/PageHeader";
 
+// 호환성 결과 타입 정의
 type CompatibilityResult = {
   id: number;
   resultType: "love" | "friend";
@@ -26,10 +27,31 @@ declare global {
       init: (key: string) => void;
       isInitialized: () => boolean;
       Share: {
-        sendDefault: (options: any) => void;
+        sendDefault: (options: KakaoShareOptions) => void;
       };
     };
   }
+}
+
+// 카카오 공유 옵션 타입
+interface KakaoShareOptions {
+  objectType: string;
+  content: {
+    title: string;
+    description: string;
+    imageUrl: string;
+    link: {
+      mobileWebUrl: string;
+      webUrl: string;
+    };
+  };
+  buttons: {
+    title: string;
+    link: {
+      mobileWebUrl: string;
+      webUrl: string;
+    };
+  }[];
 }
 
 export default function PrevCompatibilityPage() {
@@ -248,29 +270,57 @@ export default function PrevCompatibilityPage() {
                   onClick={() => {
                     const url = `${window.location.origin}/friendship-compatibility`;
                     if (window.Kakao && window.Kakao.Share) {
-                      window.Kakao.Share.sendDefault({
-                        objectType: "feed",
-                        content: {
-                          title: "고양이 운세에서 친구 궁합을 확인해보세요!",
-                          description:
-                            "너와 나의 케미는 어떨까? 고양이 운세가 알려줄게!",
-                          imageUrl: `${window.location.origin}/new_cat_magic.png`,
-                          link: {
-                            mobileWebUrl: url,
-                            webUrl: url,
-                          },
-                        },
-                        buttons: [
-                          {
-                            title: "친구 궁합 보기",
+                      console.log("Kakao 객체:", window.Kakao);
+                      console.log(
+                        "Kakao 초기화 여부:",
+                        window.Kakao?.isInitialized?.()
+                      );
+                      console.log("Kakao.Share 객체:", window.Kakao?.Share);
+                      try {
+                        // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
+                        if (window.location.hostname === "localhost") {
+                          alert(
+                            "로컬 환경에서는 카카오 공유가 제대로 작동하지 않을 수 있습니다."
+                          );
+                        }
+
+                        // 실제 도메인 사용 (개발 환경에서는 배포된 URL로 변경)
+                        const webUrl = "https://v0-aifortune-rose.vercel.app";
+                        const realUrl = url.replace(
+                          window.location.origin,
+                          webUrl
+                        );
+
+                        window.Kakao.Share.sendDefault({
+                          objectType: "feed",
+                          content: {
+                            title: "고양이 운세에서 친구 궁합을 확인해보세요!",
+                            description:
+                              "너와 나의 케미는 어떨까? 고양이 운세가 알려줄게!",
+                            imageUrl: `${window.location.origin}/new_cat_magic.png`,
                             link: {
-                              mobileWebUrl: url,
-                              webUrl: url,
+                              mobileWebUrl: realUrl,
+                              webUrl: realUrl,
                             },
                           },
-                        ],
-                      });
+                          buttons: [
+                            {
+                              title: "친구 궁합 보기",
+                              link: {
+                                mobileWebUrl: realUrl,
+                                webUrl: realUrl,
+                              },
+                            },
+                          ],
+                        });
+                      } catch (error) {
+                        console.error("카카오 공유 에러:", error);
+                        alert(
+                          "카카오 공유 중 오류가 발생했습니다. 직접 접속해 주세요."
+                        );
+                      }
                     } else {
+                      console.error("Kakao SDK가 초기화되지 않았습니다.");
                       alert("카카오톡 공유 기능을 초기화할 수 없습니다.");
                     }
                   }}

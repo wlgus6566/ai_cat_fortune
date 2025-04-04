@@ -68,16 +68,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
             if (data) {
               setUserProfile({
-                id: data.id,
-                userId: data.id,
-                name: data.name || session.user.name || "",
+                id: data.id as string,
+                userId: data.id as string,
+                name:
+                  (data.name as string) || (session.user.name as string) || "",
                 gender: (data.gender as Gender) || null,
-                birthDate: data.birth_date || "",
+                birthDate: (data.birth_date as string) || "",
                 calendarType: (data.calendar_type as CalendarType) || null,
                 birthTime: (data.birth_time as BirthTime) || "모름",
-                profileImageUrl: data.profile_image_url || "",
-                createdAt: data.created_at,
-                updatedAt: data.updated_at,
+                profileImageUrl: (data.profile_image_url as string) || "",
+                createdAt: data.created_at as string,
+                updatedAt: data.updated_at as string,
               });
             }
           } catch (error) {

@@ -135,7 +135,7 @@ export const getTalismansByUserId = async (userId: string) => {
     const talismansWithUrls = data.map((talisman) => {
       const { data: publicUrlData } = supabase.storage
         .from("talismans")
-        .getPublicUrl(talisman.storagePath);
+        .getPublicUrl(talisman.storagePath as string);
 
       return {
         ...talisman,
@@ -192,7 +192,7 @@ export const deleteTalisman = async (talismanId: string, userId: string) => {
     // Storage에서 이미지 삭제
     const { error: storageError } = await supabase.storage
       .from("talismans")
-      .remove([talismanData.storagePath]);
+      .remove([talismanData.storagePath as string]);
 
     if (storageError) {
       console.error("부적 이미지 삭제 실패:", storageError);

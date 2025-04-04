@@ -9,7 +9,6 @@ import { useFriendCompatibility } from "@/app/context/FriendCompatibilityContext
 import { useUser } from "@/app/contexts/UserContext";
 import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
-import { Share2 } from "lucide-react";
 import ShareModal from "@/app/components/ShareModal";
 import { UserProfile } from "@/app/type/types";
 
@@ -230,7 +229,7 @@ export default function FriendshipCompatibilityPage() {
     ).padStart(2, "0")}`;
   };
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isSharedMode, setIsSharedMode] = useState(false);
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -246,6 +245,7 @@ export default function FriendshipCompatibilityPage() {
       // Kakao SDK 초기화
       if (window.Kakao && !window.Kakao.isInitialized()) {
         window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || "");
+        console.log("Kakao SDK 초기화 여부:", window.Kakao.isInitialized());
       }
     };
     document.body.appendChild(script);
@@ -447,68 +447,102 @@ export default function FriendshipCompatibilityPage() {
 
   // 공유 링크 생성
   const generateShareLink = () => {
-    try {
-      const encodedData = btoa(JSON.stringify(formData));
-      const baseUrl = window.location.origin;
-      return `${baseUrl}/friendship-compatibility?data=${encodedData}`;
-    } catch (error) {
-      console.error("링크 생성 에러:", error);
-      toast.error("링크 생성 중 오류가 발생했습니다.");
+    const { name, birthdate, gender, birthtime } = formData.person1;
+
+    // 필수 필드 체크
+    if (!name || !birthdate || !gender) {
+      setError("공유하려면 내 정보가 필요합니다. 프로필을 완성해주세요.");
       return "";
     }
+
+    const encodedName = encodeURIComponent(name);
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/friendship-compatibility?name=${encodedName}&birthdate=${birthdate}&gender=${gender}&birthtime=${
+      birthtime || ""
+    }&shared=true`;
   };
 
-  // 클립보드에 복사
+  // 링크 복사 기능
   const copyToClipboard = () => {
-    const shareLink = generateShareLink();
-    if (shareLink) {
-      navigator.clipboard
-        .writeText(shareLink)
-        .then(() => {
-          toast.success("링크가 클립보드에 복사되었습니다.");
-        })
-        .catch((error) => {
-          console.error("클립보드 복사 실패:", error);
-          toast.error("링크 복사에 실패했습니다.");
-        });
-    }
+    const shareUrl = generateShareLink();
+    if (!shareUrl) return; // 유효성 검사 실패 시 리턴
+
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        setShowShareModal(false);
+        toast.success(
+          "공유 링크가 복사되었습니다! 원하는 곳에 붙여넣기 하세요."
+        );
+      })
+      .catch((err) => {
+        console.error("링크 복사 실패:", err);
+        toast.error("링크 복사에 실패했습니다. 다시 시도해주세요.");
+      });
   };
 
-  // 카카오 공유
+  // 카카오톡 공유하기
   const shareToKakao = () => {
-    const shareLink = generateShareLink();
-    if (shareLink && window.Kakao && window.Kakao.Share) {
-      const shareTitle = `${formData.person1.name}님과 ${formData.person2.name}님의 친구 궁합`;
-      const shareDescription = "고양이 운세에서 친구 궁합을 확인해보세요!";
+    if (!window.Kakao || !window.Kakao.Share) {
+      toast.error("카카오톡 공유 기능을 불러오는데 실패했습니다.");
+      return;
+    }
+
+    const shareUrl = generateShareLink();
+    if (!shareUrl) return; // 유효성 검사 실패 시 리턴
+
+    try {
+      // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
+      if (window.location.hostname === "localhost") {
+        toast.error(
+          "로컬 환경에서는 카카오 공유가 제대로 작동하지 않을 수 있습니다."
+        );
+      }
+
+      // 실제 도메인 사용 (개발 환경에서는 배포된 URL로 변경)
+      const webUrl = "https://v0-aifortune-rose.vercel.app";
+      const realShareUrl = shareUrl.replace(window.location.origin, webUrl);
 
       window.Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
-          title: shareTitle,
-          description: shareDescription,
-          imageUrl: `${window.location.origin}/cat_magic.png`,
+          title: "친구 궁합 테스트",
+          description: `${formData.person1.name}님과의 친구 궁합을 확인해보라냥! 🍎`,
+          imageUrl: `${window.location.origin}/new_cat_friends.png`,
           link: {
-            mobileWebUrl: shareLink,
-            webUrl: shareLink,
+            mobileWebUrl: realShareUrl,
+            webUrl: realShareUrl,
           },
         },
         buttons: [
           {
-            title: "친구 궁합 확인하기",
+            title: "친구 궁합 테스트 참여하기",
             link: {
-              mobileWebUrl: shareLink,
-              webUrl: shareLink,
+              mobileWebUrl: realShareUrl,
+              webUrl: realShareUrl,
             },
           },
         ],
       });
-    } else {
-      toast.error("카카오 공유 초기화에 실패했습니다.");
+    } catch (error) {
+      console.error("카카오 공유 에러:", error);
+      toast.error(
+        "카카오 공유 중 오류가 발생했습니다. 링크 복사를 이용해 주세요."
+      );
     }
   };
 
-  // 공유 버튼 클릭 처리
-  const handleShareClick = () => {
+  // 모달 열기 함수
+  const openShareModal = () => {
+    const { name, birthdate, gender } = formData.person1;
+
+    // 필수 필드 체크
+    if (!name || !birthdate || !gender) {
+      setError("공유하려면 첫 번째 사람의 정보를 모두 입력해주세요.");
+      return;
+    }
+
+    // 모달 열기
     setShowShareModal(true);
   };
 
@@ -809,76 +843,77 @@ export default function FriendshipCompatibilityPage() {
                     모를 경우 &apos;모름&apos;을 선택하세요
                   </p>
                 </div>
-              </div>
 
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
-              >
-                친구 궁합 확인하기
-              </motion.button>
-
-              <div className="mt-8 pt-8 border-t border-purple-200">
-                <div className="text-center">
-                  <h3 className="text-lg font-medium text-[#3B2E7E] mb-6">
-                    친구들도 해볼 수 있게
-                    <br />이 테스트를 공유해주세요!
-                  </h3>
-                  <div className="flex justify-center gap-6 mb-4">
-                    <button
-                      onClick={shareToKakao}
-                      className="flex flex-col items-center border-none"
-                    >
-                      <div className="bg-yellow-400 w-16 h-16 rounded-full flex items-center justify-center mb-2">
-                        <svg
-                          className="w-8 h-8 text-black"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M12 3C7.0374 3 3 6.15827 3 10.0867C3 12.6044 4.7748 14.8144 7.39256 16.0467L6.4714 19.4322C6.39695 19.719 6.70314 19.9438 6.94205 19.7849L10.9047 17.1159C11.265 17.1546 11.6302 17.1735 12 17.1735C16.9626 17.1735 21 14.0152 21 10.0867C21 6.15827 16.9626 3 12 3Z" />
-                        </svg>
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        카카오톡
-                      </span>
-                    </button>
-                    <button
-                      onClick={copyToClipboard}
-                      className="flex flex-col items-center border-none"
-                    >
-                      <div className="bg-[#0070f3] w-16 h-16 rounded-full flex items-center justify-center mb-2">
-                        <svg
-                          className="w-8 h-8 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        링크 복사
-                      </span>
-                    </button>
+                {error && (
+                  <div className="mb-4 bg-red-50 border border-red-300 text-red-700 p-3 rounded-lg text-sm">
+                    {error}
                   </div>
-                  <p className="text-sm text-[#3B2E7E] mt-2">
-                    내 결과는 노출되지 않아요! 테스트 페이지만 공유됩니다.
-                  </p>
+                )}
+
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
+                >
+                  친구 궁합 확인하기
+                </motion.button>
+
+                <div className="mt-8 pt-8 border-t border-purple-200">
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium text-[#3B2E7E] mb-6">
+                      친구들도 해볼 수 있게
+                      <br />이 테스트를 공유해주세요!
+                    </h3>
+                    <div className="flex justify-center gap-6 mb-4">
+                      <button
+                        type="button"
+                        onClick={openShareModal}
+                        className="flex flex-col items-center border-none"
+                      >
+                        <div className="bg-yellow-400 w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                          <svg
+                            className="w-8 h-8 text-black"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M12 3C7.0374 3 3 6.15827 3 10.0867C3 12.6044 4.7748 14.8144 7.39256 16.0467L6.4714 19.4322C6.39695 19.719 6.70314 19.9438 6.94205 19.7849L10.9047 17.1159C11.265 17.1546 11.6302 17.1735 12 17.1735C16.9626 17.1735 21 14.0152 21 10.0867C21 6.15827 16.9626 3 12 3Z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          카카오톡
+                        </span>
+                      </button>
+                      <button
+                        onClick={copyToClipboard}
+                        className="flex flex-col items-center border-none"
+                      >
+                        <div className="bg-[#0070f3] w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                          <svg
+                            className="w-8 h-8 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          링크 복사
+                        </span>
+                      </button>
+                    </div>
+                    <p className="text-sm text-[#3B2E7E] mt-2">
+                      내 결과는 노출되지 않아요! 테스트 페이지만 공유됩니다.
+                    </p>
+                  </div>
                 </div>
               </div>
             </form>
