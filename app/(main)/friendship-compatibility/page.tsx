@@ -579,18 +579,6 @@ export default function FriendshipCompatibilityPage() {
         </AnimatePresence>
 
         <div className="bg-white rounded-2xl p-6 border border-purple-200 shadow-lg">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-purple-900">
-              친구 궁합 확인하기
-            </h2>
-            <button
-              onClick={handleShareClick}
-              className="p-2 text-purple-500 hover:text-purple-700 transition-colors"
-            >
-              <Share2 size={20} />
-            </button>
-          </div>
-
           <div className="flex justify-center mb-6">
             <div className="relative w-32 h-32">
               <Image
@@ -603,9 +591,9 @@ export default function FriendshipCompatibilityPage() {
           </div>
 
           <p className="text-center text-purple-700 mb-6">
-            친구와의 케미를 확인해볼까냥? 🐱✨
+            냥냥~ 너랑 친구의 정보만 있으면
             <br />
-            생년월일 정보를 입력하면 고양이 점성술사가 친구 궁합을 봐드려요!
+            케미 궁합 점치러 간다옹~! 😸💘🔮
           </p>
 
           {!isLoaded ? (
@@ -665,11 +653,10 @@ export default function FriendshipCompatibilityPage() {
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="mt-2 text-xs text-[#6E6491] text-right">
                   <button
-                    type="button"
-                    onClick={() => router.push("/profile/setup")}
-                    className="text-xs text-purple-600 hover:underline"
+                    onClick={() => router.push("/profile/edit")}
+                    className="text-[#990dfa] underline bg-transparent border-none"
                   >
                     프로필 수정하기
                   </button>
@@ -838,9 +825,62 @@ export default function FriendshipCompatibilityPage() {
               >
                 친구 궁합 확인하기
               </motion.button>
-              <p className="text-center text-purple-500 text-xs mt-4">
-                생년월일과 시간 정보는 정확한 궁합 분석을 위해 사용됩니다.
-              </p>
+
+              <div className="mt-8 pt-8 border-t border-purple-200">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium text-[#3B2E7E] mb-6">
+                    친구들도 해볼 수 있게
+                    <br />이 테스트를 공유해주세요!
+                  </h3>
+                  <div className="flex justify-center gap-6 mb-4">
+                    <button
+                      onClick={shareToKakao}
+                      className="flex flex-col items-center border-none"
+                    >
+                      <div className="bg-yellow-400 w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                        <svg
+                          className="w-8 h-8 text-black"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M12 3C7.0374 3 3 6.15827 3 10.0867C3 12.6044 4.7748 14.8144 7.39256 16.0467L6.4714 19.4322C6.39695 19.719 6.70314 19.9438 6.94205 19.7849L10.9047 17.1159C11.265 17.1546 11.6302 17.1735 12 17.1735C16.9626 17.1735 21 14.0152 21 10.0867C21 6.15827 16.9626 3 12 3Z" />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        카카오톡
+                      </span>
+                    </button>
+                    <button
+                      onClick={copyToClipboard}
+                      className="flex flex-col items-center border-none"
+                    >
+                      <div className="bg-[#0070f3] w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                        <svg
+                          className="w-8 h-8 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        링크 복사
+                      </span>
+                    </button>
+                  </div>
+                  <p className="text-sm text-[#3B2E7E] mt-2">
+                    내 결과는 노출되지 않아요! 테스트 페이지만 공유됩니다.
+                  </p>
+                </div>
+              </div>
             </form>
           )}
         </div>

@@ -10,7 +10,7 @@ import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
 import { useTalisman } from "@/app/contexts/TalismanContext";
 import { Talisman } from "@/app/type/types";
-import { Settings, Edit } from "lucide-react";
+import { Settings, Edit, Star, ChevronRight } from "lucide-react";
 
 export default function ProfilePage() {
   const { userProfile, isAuthenticated, isProfileComplete } = useUser();
@@ -156,7 +156,7 @@ export default function ProfilePage() {
         >
           {/* 프로필 정보 섹션 */}
           <div className="mb-6">
-            <div className="bg-white rounded-3xl overflow-hidden transition-all flex flex-col items-center py-6 px-4 mt-4 shadow-md">
+            <div className="bg-white rounded-xl overflow-hidden transition-all flex flex-col items-center py-6 px-4 mt-4 shadow-md">
               {isProfileComplete && userProfile ? (
                 <>
                   <div className="relative mb-3">
@@ -279,9 +279,44 @@ export default function ProfilePage() {
               )}
             </div>
           </div>
-
+          {/* 2025 친구 궁합 배너 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6"
+          >
+            <Link href="/compatibility">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#990dfa] to-[#7702c9] shadow-md">
+                <div className="absolute top-0 right-0 w-1/3 h-full opacity-20">
+                  <div className="absolute top-1/4 right-8 w-16 h-16 rounded-full bg-white opacity-20"></div>
+                  <div className="absolute bottom-1/4 right-4 w-8 h-8 rounded-full bg-white opacity-20"></div>
+                </div>
+                <div className="p-4 text-white">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs font-medium mb-1">특별 이벤트 🎉</p>
+                      <h3 className="text-lg font-bold mb-2">2025 친구 궁합</h3>
+                      <p className="text-sm mb-2">
+                        가장 어울리는 사람은 누구일까요?
+                      </p>
+                    </div>
+                    <div className="bg-white bg-opacity-20 rounded-full p-2">
+                      <Star className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex items-center mt-2">
+                    <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                      지금 확인하기
+                    </span>
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
           {/* 구독 섹션 */}
-          {isProfileComplete && (
+          {/* {isProfileComplete && (
             <motion.div className="mb-6" variants={itemVariants}>
               <div className="bg-purple-500 rounded-3xl shadow-md overflow-hidden p-4 text-white">
                 <div className="flex items-start gap-3">
@@ -315,12 +350,12 @@ export default function ProfilePage() {
                 </div>
               </div>
             </motion.div>
-          )}
+          )} */}
 
           {/* 부적 갤러리 미리보기 */}
           {isProfileComplete && (
             <motion.div className="mb-6" variants={itemVariants}>
-              <div className="bg-white rounded-3xl shadow-md overflow-hidden p-4">
+              <div className="bg-white rounded-xl shadow-md overflow-hidden p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     <span className="w-8 h-8 mr-3 flex items-center justify-center">
@@ -391,7 +426,7 @@ export default function ProfilePage() {
           {/* 메뉴 항목들 */}
           {isProfileComplete && (
             <motion.div className="mb-6" variants={itemVariants}>
-              <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+              <div className="bg-white rounded-xl shadow-md overflow-hidden">
                 <div>
                   <Link
                     href="/consultations"

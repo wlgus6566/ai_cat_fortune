@@ -2,17 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import CircularProgress from "@/app/components/CircularProgress";
-import {
-  Heart,
-  Star,
-  Sparkles,
-  Smile,
-  Gift,
-  ArrowRight,
-  BookOpen,
-} from "lucide-react";
+import { Heart, Star, Sparkles } from "lucide-react";
 import type { CompatibilityResult } from "@/app/lib/openai";
 
 interface LoveCompatibilityResultProps {
@@ -52,6 +44,7 @@ interface CategoryCardProps {
   delay?: number;
   icon?: React.ReactNode;
   color?: string;
+  index?: number;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -62,8 +55,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   delay = 0,
   icon,
   color = "rgba(153, 13, 250, 0.8)",
+  index = 0,
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(index === 0);
 
   return (
     <motion.div
@@ -311,7 +305,7 @@ export default function LoveCompatibilityResult({
                 color="rgb(255, 0, 0)"
               />
               <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <span className="text-3xl font-bold text-purple-700">
+                <span className="text-3xl font-bold text-gray-800">
                   {data.score}
                 </span>
               </div>
@@ -533,6 +527,7 @@ export default function LoveCompatibilityResult({
             delay={0.1}
             icon={<Sparkles className="h-6 w-6 text-white" />}
             color="rgba(153, 13, 250, 0.8)"
+            index={0}
           />
 
           {/* 연애 스타일 */}
@@ -544,6 +539,7 @@ export default function LoveCompatibilityResult({
             delay={0.2}
             icon={<Heart className="h-6 w-6 text-white" />}
             color="rgba(255, 77, 128, 0.8)"
+            index={1}
           />
 
           {/* 갈등 요소 */}
@@ -569,6 +565,7 @@ export default function LoveCompatibilityResult({
               </svg>
             }
             color="rgba(255, 159, 64, 0.8)"
+            index={2}
           />
 
           {/* 미래 전망 */}
@@ -594,6 +591,7 @@ export default function LoveCompatibilityResult({
               </svg>
             }
             color="rgba(72, 187, 120, 0.8)"
+            index={3}
           />
         </motion.div>
 
@@ -624,6 +622,11 @@ export default function LoveCompatibilityResult({
             <p className="text-sm text-gray-700">{data.recommendedDate}</p>
           </div>
         </motion.div>
+
+        <h2 className="text-xl font-bold mb-4 flex items-center text-[#3B2E7E]">
+          <Star className="h-5 w-5 text-[#990dfa] mr-2 fill-[#990dfa]" />
+          냥냥이 한마디
+        </h2>
 
         {/* 고양이 말풍선 */}
         <motion.div

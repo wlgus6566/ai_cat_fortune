@@ -52,6 +52,7 @@ interface CategoryCardProps {
   delay?: number;
   icon?: React.ReactNode;
   color?: string;
+  index?: number;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -61,8 +62,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   delay = 0,
   icon,
   color = "rgba(153, 13, 250, 0.8)",
+  index = 0,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(index === 0);
 
   return (
     <motion.div
@@ -225,13 +227,14 @@ export default function FriendCompatibilityResult({
   // UI 컴포넌트 렌더링 (기존 친구 궁합 결과 페이지 UI 사용)
   return (
     <div className="pb-10">
-      <Image
-        src="/new_cat_love.png"
-        alt="친구 궁합 결과"
-        width={100}
-        height={100}
-      />
-
+      <div className="mt-10 flex justify-center items-center">
+        <Image
+          src="/friend3.png"
+          alt="친구 궁합 결과"
+          width={160}
+          height={70}
+        />
+      </div>
       {/* 닉네임 및 점수 */}
       <motion.div
         className="text-center my-8"
@@ -349,6 +352,7 @@ export default function FriendCompatibilityResult({
             title={category.title}
             score={category.score}
             delay={index * 0.1}
+            index={index}
             icon={
               index === 0 ? (
                 <Brain className="w-5 h-5 text-[#990dfa]" />

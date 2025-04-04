@@ -7,6 +7,7 @@ const publicPaths = ["/auth/signin", "/auth/error", "/api/auth"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const fromPrev = request.nextUrl.searchParams.get("from") === "prev";
 
   // API 경로와 정적 파일은 무시
   if (
@@ -22,6 +23,18 @@ export async function middleware(request: NextRequest) {
   // 공개 경로는 인증 필요 없음
   if (publicPaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
+  }
+
+  // 컴패티빌리티 페이지 리다이렉션 처리
+  if (
+    (pathname === "/compatibility" ||
+      pathname === "/friendship-compatibility") &&
+    !fromPrev // 'from=prev' 쿼리가 없을 때만 리다이렉트
+  ) {
+    const targetPage = pathname.replace("/", "");
+    const url = new URL("/prev-compatibility", request.url);
+    url.searchParams.set("target", targetPage);
+    return NextResponse.redirect(url);
   }
 
   // API 요청 중 특별한 처리가 필요한 경로

@@ -93,7 +93,7 @@ export default function CompatibilityResultDetail() {
               목록으로 돌아가기
             </Link>
           </div>
-        ) : resultData ? (
+        ) : resultData?.person1Name ? (
           <div>
             {resultData.resultType === "love" ? (
               <LoveCompatibilityResult
@@ -130,16 +130,7 @@ export default function CompatibilityResultDetail() {
             )}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-[#3B2E7E] mb-4">결과를 찾을 수 없습니다.</p>
-            <Link
-              className="px-4 py-2 bg-[#990dfa] text-white rounded-lg flex items-center mx-auto"
-              href="/compatibility-results"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              목록으로 돌아가기
-            </Link>
-          </div>
+          <></>
         )}
       </div>
     </div>

@@ -90,6 +90,7 @@ interface CategoryCardProps {
   delay?: number;
   icon?: React.ReactNode;
   color?: string;
+  index?: number;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -98,9 +99,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   children,
   delay = 0,
   icon,
+  index = 0,
   color = "rgba(255, 107, 158, 0.8)",
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(index === 0);
 
   return (
     <motion.div

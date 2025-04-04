@@ -575,6 +575,24 @@ export interface CompatibilityResult {
 }
 
 /**
+ * 공통 궁합 요청 인터페이스
+ */
+export interface CompatibilityRequest {
+  person1: {
+    name: string;
+    birthdate: string;
+    gender?: string;
+    birthtime?: string;
+  };
+  person2: {
+    name: string;
+    birthdate: string;
+    gender?: string;
+    birthtime?: string;
+  };
+}
+
+/**
  * 두 사람의 사주 궁합을 분석하는 함수
  */
 export async function getCompatibilityAnalysis(

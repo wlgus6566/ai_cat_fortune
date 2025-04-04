@@ -79,6 +79,7 @@ interface CategoryCardProps {
   delay?: number;
   icon?: React.ReactNode;
   color?: string;
+  index?: number;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -88,8 +89,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   delay = 0,
   icon,
   color = "rgba(153, 13, 250, 0.8)",
+  index = 0,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(index === 0);
 
   return (
     <motion.div
@@ -288,13 +290,13 @@ export default function FriendshipCompatibilityResultPage() {
   const getLoadingImage = () => {
     switch (loadingStage) {
       case 1:
-        return "/new_cat_magic.png";
+        return "/friend1.png";
       case 2:
-        return "/new_cat_book.png";
+        return "/friend2.png";
       case 3:
-        return "/new_cat_love.png";
+        return "/friend3.png";
       default:
-        return "/new_cat_magic.png";
+        return "/friend1.png";
     }
   };
 
@@ -336,6 +338,10 @@ export default function FriendshipCompatibilityResultPage() {
 
   // 친구 궁합 데이터 로드
   useEffect(() => {
+    // 로딩 단계를 1,2,3을 순환하도록 설정 (추가)
+    const stageTimer = setInterval(() => {
+      setLoadingStage((prevStage) => (prevStage >= 3 ? 1 : prevStage + 1));
+    }, 2000);
     const loadFriendCompatibilityData = async () => {
       if (!state.person1.name || !state.person2.name) {
         setError("입력된 정보가 없습니다. 다시 시도해주세요.");
@@ -344,19 +350,11 @@ export default function FriendshipCompatibilityResultPage() {
       }
 
       try {
-        // 로딩 단계 표시를 위한 타이머 설정
-        const timer1 = setTimeout(() => setLoadingStage(2), 1500);
-        const timer2 = setTimeout(() => setLoadingStage(3), 3000);
-
         // 서버 API 엔드포인트 호출로 변경
         const result = await fetchFriendCompatibilityAnalysis({
           person1: state.person1,
           person2: state.person2,
         });
-
-        // 타이머 정리
-        clearTimeout(timer1);
-        clearTimeout(timer2);
 
         setFriendCompatibilityData(result);
         setLoading(false);
@@ -368,6 +366,10 @@ export default function FriendshipCompatibilityResultPage() {
     };
 
     loadFriendCompatibilityData();
+
+    return () => {
+      clearInterval(stageTimer);
+    };
   }, [state]);
 
   // 결과 데이터 가져오기
@@ -519,8 +521,8 @@ export default function FriendshipCompatibilityResultPage() {
             <Image
               src={getLoadingImage()}
               alt="로딩중"
-              width={80}
-              height={120}
+              width={120}
+              height={80}
               className="w-full h-full relative z-10 -rotate-12"
             />
           </motion.div>
@@ -565,12 +567,14 @@ export default function FriendshipCompatibilityResultPage() {
 
           {/* 결과 컨텐츠 */}
           <div className="container mx-auto px-4 pb-24 relative">
-            <Image
-              src="/new_cat_love.png"
-              alt="친구 궁합 결과"
-              width={100}
-              height={100}
-            />
+            <div className="mt-10 flex justify-center items-center">
+              <Image
+                src="/friend3.png"
+                alt="친구 궁합 결과"
+                width={160}
+                height={70}
+              />
+            </div>
             {/* 닉네임 및 점수 */}
             <motion.div
               className="text-center my-8"
@@ -760,11 +764,9 @@ export default function FriendshipCompatibilityResultPage() {
                 {/* 행운 아이템 */}
                 <div className="flex-1 p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
                   <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-[#F9F5FF] border border-[#990dfa]/20 flex items-center justify-center mr-3">
-                      <span className="text-xl">
-                        {friendCompatibilityData.bonus.luckyItem.emoji}
-                      </span>
-                    </div>
+                    <span className="text-xl mr-2">
+                      {friendCompatibilityData.bonus.luckyItem.emoji}
+                    </span>
                     <h3 className="text-lg font-medium text-[#3B2E7E]">
                       행운 아이템
                     </h3>
@@ -780,14 +782,9 @@ export default function FriendshipCompatibilityResultPage() {
                 {/* 추천 활동 */}
                 <div className="flex-1 p-4 rounded-xl bg-[#F9F5FF] border border-[#e6e6e6]">
                   <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 rounded-full bg-[#F9F5FF] border border-[#990dfa]/20 flex items-center justify-center mr-3">
-                      <span className="text-xl">
-                        {
-                          friendCompatibilityData.bonus.recommendedActivity
-                            .emoji
-                        }
-                      </span>
-                    </div>
+                    <span className="text-xl mr-2">
+                      {friendCompatibilityData.bonus.recommendedActivity.emoji}
+                    </span>
                     <h3 className="text-lg font-medium text-[#3B2E7E]">
                       추천 활동
                     </h3>
