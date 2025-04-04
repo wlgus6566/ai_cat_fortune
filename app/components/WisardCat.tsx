@@ -92,7 +92,6 @@ const WizardCat = ({
     useState<keyof typeof speechMessages>("origin");
   const [bubbleMessage, setBubbleMessage] = useState("");
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
-  const [isReady, setIsReady] = useState(false); // 이미지 로딩 완료 여부
 
   // 상태별 랜덤 메시지 선택
   const getRandomMessage = () => {
@@ -143,7 +142,6 @@ const WizardCat = ({
 
     // 이미지 preload 후 애니메이션 시작
     preloadImages(allCatImages).then(() => {
-      setIsReady(true);
       startAnimation();
     });
 
@@ -178,14 +176,6 @@ const WizardCat = ({
       setShowSpeechBubble(false);
     }, 4000);
   };
-
-  if (!isReady) {
-    return (
-      <div className="text-center text-[#3B2E7E] text-lg mt-10">
-        고양이 준비 중... 🐾
-      </div>
-    );
-  }
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-end overflow-visible">

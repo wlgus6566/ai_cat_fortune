@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { and, desc, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth";
 
 import { db } from "@/db";
 import { compatibilityResultsTable, userProfilesTable } from "@/db/schema";
@@ -56,14 +58,20 @@ async function getUserProfileId(sessionId: string): Promise<string> {
 // GET: 사용자의 모든 호환성 결과 조회
 export async function GET(request: Request) {
   try {
+    // Next-Auth 세션 확인
+    const authSession = await getServerSession(authOptions);
     const sessionId = await getSessionId();
 
-    if (!sessionId) {
+    // 쿠키 세션 또는 Next-Auth 세션 둘 중 하나라도 없으면 인증 실패
+    if (!sessionId && !authSession?.user?.id) {
       return NextResponse.json(
         { error: "인증되지 않은 사용자입니다." },
         { status: 401 }
       );
     }
+
+    // 사용할 사용자 ID 결정 (Next-Auth 우선)
+    const userId = authSession?.user?.id || sessionId;
 
     // URL 쿼리 파라미터에서 resultType 가져오기
     const { searchParams } = new URL(request.url);
@@ -72,7 +80,7 @@ export async function GET(request: Request) {
     let query = db
       .select()
       .from(compatibilityResultsTable)
-      .where(eq(compatibilityResultsTable.userId, sessionId))
+      .where(eq(compatibilityResultsTable.userId, userId as string))
       .orderBy(desc(compatibilityResultsTable.createdAt));
 
     // resultType이 지정된 경우 추가 필터링
@@ -82,7 +90,7 @@ export async function GET(request: Request) {
         .from(compatibilityResultsTable)
         .where(
           and(
-            eq(compatibilityResultsTable.userId, sessionId),
+            eq(compatibilityResultsTable.userId, userId as string),
             eq(compatibilityResultsTable.resultType, resultType)
           )
         )
@@ -104,12 +112,17 @@ export async function GET(request: Request) {
 // POST: 새 호환성 결과 저장
 export async function POST(request: Request) {
   try {
+    // Next-Auth 세션 확인
+    const authSession = await getServerSession(authOptions);
     let sessionId = await getSessionId();
 
     // 세션 ID가 없는 경우 임시 세션 생성
-    if (!sessionId) {
+    if (!sessionId && !authSession?.user?.id) {
       sessionId = Math.random().toString(36).substring(2, 15);
       console.log("임시 세션 ID 생성:", sessionId);
+    } else if (authSession?.user?.id) {
+      // Next-Auth 인증이 있으면 해당 ID 사용
+      sessionId = authSession.user.id as string;
     }
 
     const body = await request.json();
@@ -196,7 +209,7 @@ export async function POST(request: Request) {
 
     try {
       // 사용자 프로필 ID 가져오기 (없으면 생성)
-      const profileId = await getUserProfileId(sessionId);
+      const profileId = await getUserProfileId(sessionId as string);
 
       console.log("DB 삽입 시도:", {
         userId: profileId,
@@ -235,8 +248,17 @@ export async function POST(request: Request) {
       console.log("저장 성공:", result[0]);
       return NextResponse.json(result[0]);
     } catch (error) {
-      console.error("DB 작업 중 오류 발생:", error);
-      throw error; // 상위 catch 블록으로 전달
+      console.error("호환성 결과 저장 중 오류:", error);
+      // 오류 메시지 정리
+      const errorMessage =
+        error instanceof Error
+          ? `${error.name}: ${error.message}`
+          : String(error);
+
+      return NextResponse.json(
+        { error: "결과 저장 중 오류가 발생했습니다.", details: errorMessage },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error("결과 저장 중 오류 발생:", error);
