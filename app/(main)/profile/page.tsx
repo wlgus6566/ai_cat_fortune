@@ -414,7 +414,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className="text-center py-6 text-[#3B2E7E]/60">
                     <p>{t("settings.noTalismans")}</p>
-                    <button className="text-sm font-medium underline mt-2">
+                    <button className="border-none text-sm font-medium underline mt-2">
                       상담받고 부적 만들기
                     </button>
                   </div>

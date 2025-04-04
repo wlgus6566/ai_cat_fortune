@@ -153,7 +153,7 @@ export default function PrevCompatibilityPage() {
       <div className="container max-w-md mx-auto px-4 pt-4 pb-24">
         {/* 친구 궁합 유형 카드 */}
         <div className="w-full h-full flex justify-center items-center">
-          <Image src="/chemy.png" alt="궁합" width={300} height={300} />
+          <Image src="/chemy.png" alt="궁합" width={200} height={200} />
         </div>
 
         {/* 친구/연인 궁합 버튼 */}
@@ -164,7 +164,7 @@ export default function PrevCompatibilityPage() {
             onClick={goCompatibility}
             className="w-full py-4 px-6 bg-[#990dfa] text-white rounded-full font-medium flex items-center justify-center shadow-md"
           >
-            마법 궁합 확인하기 ✨
+            마법 궁합 보러가기 ✨
           </motion.button>
         </div>
 
@@ -187,17 +187,17 @@ export default function PrevCompatibilityPage() {
           </div>
         ) : results.length === 0 ? (
           <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-gray-100">
-            <Image
+            {/* <Image
               src="/new_cat.png"
               alt="결과 없음"
               width={80}
               height={80}
               className="mx-auto"
             />
-            <p className="text-gray-600 mt-4 mb-6">저장된 궁합 결과가 없어요</p>
+            <p className="text-gray-600 mt-4 mb-6">저장된 궁합 결과가 없어요</p> */}
 
             {/* 가이드 스텝 추가 */}
-            <div className="my-8 px-4">
+            <div className="px-4">
               <div className="flex items-center mb-5">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 text-xl font-bold text-[#3B2E7E]">
                   1
