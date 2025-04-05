@@ -334,7 +334,7 @@ export default function LoveCompatibilityResult({
             </div>
           </div>
 
-          <p className="text-center font-medium text-xl text-[#3B2E7E]">
+          <p className="text-center font-medium text-md text-[#3B2E7E]">
             {data.summary}
           </p>
         </motion.div>
@@ -349,7 +349,7 @@ export default function LoveCompatibilityResult({
           {data.details?.yinYangAnalysis && (
             <>
               <div className="text-left mb-6">
-                <h2 className="text-2xl font-bold text-[#3B2E7E]">
+                <h2 className="text-xl font-bold text-[#3B2E7E]">
                   음양오행 분석
                 </h2>
                 <p className="text-sm text-gray-600 mt-2 max-w-md mx-auto">

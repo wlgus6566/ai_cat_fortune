@@ -762,7 +762,7 @@ export default function CompatibilityResultPage() {
               </div>
             </div>
 
-            <p className="text-center font-medium text-xl text-[#3B2E7E]">
+            <p className="text-center font-medium text-md text-[#3B2E7E]">
               {compatibilityData?.summary ||
                 "함께 있을수록 더 빛나는 인연이다냥~"}
             </p>
@@ -771,7 +771,7 @@ export default function CompatibilityResultPage() {
           {/* 음양오행 분석 섹션 - 별도 섹션으로 추출 */}
           <motion.div variants={slideInUp} className="mb-24">
             <div className="text-left mb-6">
-              <h2 className="text-2xl font-bold text-[#3B2E7E]">
+              <h2 className="text-xl font-bold text-[#3B2E7E]">
                 음양오행 분석
               </h2>
               <p className="text-sm text-gray-600 mt-2 max-w-md mx-auto">

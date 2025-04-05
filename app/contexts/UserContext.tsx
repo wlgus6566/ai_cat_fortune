@@ -439,6 +439,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
 export function useUser() {
   const context = useContext(UserContext);
+
   if (context === undefined) {
     throw new Error("useUser는 UserProvider 내부에서 사용해야 합니다");
   }

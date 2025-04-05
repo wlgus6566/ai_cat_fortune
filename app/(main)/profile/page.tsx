@@ -286,7 +286,7 @@ export default function ProfilePage() {
             transition={{ duration: 0.5 }}
             className="mb-6"
           >
-            <Link href="/compatibility">
+            <Link href="/friendship-compatibility">
               <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#990dfa] to-[#7702c9] shadow-md">
                 <div className="absolute top-0 right-0 w-1/3 h-full opacity-20">
                   <div className="absolute top-1/4 right-8 w-16 h-16 rounded-full bg-white opacity-20"></div>

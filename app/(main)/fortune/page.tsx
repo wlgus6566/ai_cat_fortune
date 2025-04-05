@@ -733,20 +733,6 @@ export default function HomePage() {
                       <p className="text-gray-700 text-md">{fortune.advice}</p>
                     </div>
                   </div>
-
-                  {/* 별 장식 */}
-                  <div className="absolute -top-1 -right-1 text-[#FFD966]">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                    >
-                      <Star className="h-5 w-5 text-[#FFD966]" />
-                    </motion.div>
-                  </div>
                 </motion.div>
                 {/* 마지막 업데이트 시간 표시 */}
                 <motion.div className="text-right mt-3" variants={itemVariants}>

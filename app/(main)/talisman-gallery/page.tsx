@@ -208,7 +208,7 @@ export default function TalismanGalleryPage() {
             variants={itemVariants}
           >
             {isLoading ? (
-              <div className="flex justify-center items-center p-8">
+              <div className="min-h-[400px] flex justify-center items-center p-8">
                 <div
                   className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${
                     darkMode ? "border-purple-500" : "border-purple-600"
@@ -229,11 +229,8 @@ export default function TalismanGalleryPage() {
               </div>
             ) : talismans.length === 0 ? (
               <motion.div
-                className={`${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-gray-50 border-gray-200"
-                } border rounded-md p-6 m-4 text-left`}
+                className={`min-h-[400px] flex justify-center items-center
+                  rounded-md p-6 m-4 text-left`}
                 variants={itemVariants}
               >
                 <div className="flex items-start">
@@ -315,17 +312,6 @@ export default function TalismanGalleryPage() {
               </motion.div>
             )}
           </motion.section>
-
-          {/* 푸터 */}
-          <motion.footer
-            className={`text-left my-6 ${
-              darkMode ? "text-gray-400" : "text-gray-500"
-            } text-sm flex items-center`}
-            variants={itemVariants}
-          >
-            <span className="mr-2">🔄</span>
-            <p>Fortune AI - {t("fortune.updateInfo")}</p>
-          </motion.footer>
         </motion.div>
       </div>
     </div>

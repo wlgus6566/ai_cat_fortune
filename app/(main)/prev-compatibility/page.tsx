@@ -291,6 +291,8 @@ export default function PrevCompatibilityPage() {
                           webUrl
                         );
 
+                        console.log("realUrl", realUrl);
+
                         window.Kakao.Share.sendDefault({
                           objectType: "feed",
                           content: {
