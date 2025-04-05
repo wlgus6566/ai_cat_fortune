@@ -365,11 +365,11 @@ export default function CompatibilityResultPage() {
     if (typeof window === "undefined") return "";
 
     const baseUrl = window.location.origin;
-    const shareUrl = `${baseUrl}/compatibility?name=${encodeURIComponent(
-      state.person1.name
-    )}&birthdate=${state.person1.birthdate}&gender=${
-      state.person1.gender
-    }&birthtime=${state.person1.birthtime}&shared=true`;
+
+    // 사용자 ID 또는 세션 ID를 사용하여 공유 URL 생성
+    const userId = session?.user?.id || "anonymous";
+
+    const shareUrl = `${baseUrl}/compatibility?userId=${userId}&shared=true`;
 
     return shareUrl;
   };

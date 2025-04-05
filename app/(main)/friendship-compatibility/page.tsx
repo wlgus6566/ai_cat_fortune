@@ -234,6 +234,11 @@ export default function FriendshipCompatibilityPage() {
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // 공유된 링크 관련 상태 추가
+  const [sharedUserProfile, setSharedUserProfile] =
+    useState<UserProfile | null>(null);
+  const [isSharedLink, setIsSharedLink] = useState(false);
+
   // 카카오 SDK 초기화
   useEffect(() => {
     // 카카오 SDK 스크립트 로드
@@ -292,50 +297,65 @@ export default function FriendshipCompatibilityPage() {
     }
   }, [isLoaded, userProfile]);
 
-  // URL 파라미터로부터 공유 데이터 로드
-  useEffect(() => {
-    if (searchParams && searchParams.has("data")) {
-      try {
-        setIsSharedMode(true);
-        const data = JSON.parse(atob(searchParams.get("data") || ""));
-        setFormData(data);
+  // URL에서 공유된 사용자 ID 확인 및 프로필 로드
+  const loadSharedUserProfile = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/user-profile/${userId}`);
 
-        // Person1 데이터 설정
-        if (data.person1.birthdate) {
-          const parts = data.person1.birthdate.split("-");
-          if (parts.length === 3) {
-            setBirthYear1(parts[0]);
-            setBirthMonth1(String(parseInt(parts[1])));
-            setBirthDay1(String(parseInt(parts[2])));
-          }
-        }
-
-        // Person1 시간 설정
-        if (data.person1.birthtime) {
-          setKoreanBirthTime1(findClosestBirthTime(data.person1.birthtime));
-        }
-
-        // Person2 데이터 설정
-        if (data.person2.birthdate) {
-          const parts = data.person2.birthdate.split("-");
-          if (parts.length === 3) {
-            setBirthYear2(parts[0]);
-            setBirthMonth2(String(parseInt(parts[1])));
-            setBirthDay2(String(parseInt(parts[2])));
-          }
-        }
-
-        // Person2 시간 설정
-        if (data.person2.birthtime) {
-          setKoreanBirthTime2(findClosestBirthTime(data.person2.birthtime));
-        }
-
-        // 공유 모드에서는 공유 안내 표시
-        setShareGuideVisible(true);
-      } catch (error) {
-        console.error("공유 데이터 파싱 에러:", error);
-        toast.error("잘못된 공유 링크입니다.");
+      if (!response.ok) {
+        console.error("사용자 프로필을 가져오는데 실패했습니다.");
+        return;
       }
+
+      const data = await response.json();
+
+      if (data.profile) {
+        setSharedUserProfile(data.profile);
+
+        // 공유된 사용자 정보를 사용하여 폼 업데이트
+        const gender: "남" | "여" =
+          data.profile.gender === "남성" ? "남" : "여";
+
+        setFormData((prev) => ({
+          ...prev,
+          person1: {
+            name: data.profile.name || "",
+            birthdate: data.profile.birthDate || "",
+            gender,
+            birthtime:
+              data.profile.birthTime && data.profile.birthTime !== "모름"
+                ? data.profile.birthTime.match(/\((\d{2}):00-/)?.[1] + ":00" ||
+                  ""
+                : "",
+          },
+        }));
+
+        // 생년월일 파싱 및 설정
+        if (data.profile.birthDate) {
+          const [year, month, day] = data.profile.birthDate.split("-");
+          setBirthYear1(year);
+          setBirthMonth1(month);
+          setBirthDay1(day);
+        }
+
+        // 태어난 시간 파싱 및 설정
+        if (data.profile.birthTime && data.profile.birthTime !== "모름") {
+          setKoreanBirthTime1(data.profile.birthTime as BirthTime);
+        }
+      }
+    } catch (error) {
+      console.error("사용자 프로필을 가져오는 중 오류 발생:", error);
+    }
+  };
+
+  // URL 파라미터 확인
+  useEffect(() => {
+    const userId = searchParams.get("userId");
+    const shared = searchParams.get("shared");
+
+    if (userId && shared === "true") {
+      setIsSharedLink(true);
+      loadSharedUserProfile(userId);
     }
   }, [searchParams]);
 
@@ -447,19 +467,14 @@ export default function FriendshipCompatibilityPage() {
 
   // 공유 링크 생성
   const generateShareLink = () => {
-    const { name, birthdate, gender, birthtime } = formData.person1;
-
     // 필수 필드 체크
-    if (!name || !birthdate || !gender) {
-      setError("공유하려면 내 정보가 필요합니다. 프로필을 완성해주세요.");
+    if (!userProfile || !userProfile.id) {
+      setError("공유하려면 로그인이 필요합니다.");
       return "";
     }
 
-    const encodedName = encodeURIComponent(name);
     const baseUrl = window.location.origin;
-    return `${baseUrl}/friendship-compatibility?name=${encodedName}&birthdate=${birthdate}&gender=${gender}&birthtime=${
-      birthtime || ""
-    }&shared=true`;
+    return `${baseUrl}/friendship-compatibility?userId=${userProfile.id}&shared=true`;
   };
 
   // 링크 복사 기능
@@ -566,368 +581,354 @@ export default function FriendshipCompatibilityPage() {
   };
 
   return (
-    <div className="min-h-screen pb-20 bg-purple-50">
-      <PageHeader title="친구 궁합" />
-      <Toaster position="top-center" />
-      <div className="max-w-xl mx-auto px-4 pt-6">
-        <AnimatePresence>
-          {shareGuideVisible && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-purple-400/20"
-            >
-              <h3 className="text-lg font-medium text-purple-800 mb-2">
-                {isSharedMode
-                  ? "친구 궁합 정보가 공유되었어요"
-                  : "친구 궁합 링크 공유하기"}
-              </h3>
-              <p className="text-sm text-purple-700 mb-4">
-                {isSharedMode
-                  ? "공유받은 친구 궁합 정보로 궁합을 확인해보세요. 정보를 수정할 수도 있어요."
-                  : "현재 작성 중인 친구 궁합 정보를 공유할 수 있어요. 궁합을 보고 싶은 친구에게 링크를 보내세요!"}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={copyToClipboard}
-                  className="flex-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg py-2 text-sm font-medium transition-colors"
-                >
-                  링크 복사하기
-                </button>
-                <button
-                  onClick={shareToKakao}
-                  className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg py-2 text-sm font-medium transition-colors"
-                >
-                  카카오로 공유하기
-                </button>
-                <button
-                  onClick={() => setShareGuideVisible(false)}
-                  className="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-lg"
-                >
-                  ✕
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-50 to-white">
+      <Toaster />
+      <PageHeader
+        title="친구 궁합"
+        className="bg-white shadow-sm relative z-10"
+      />
 
-        <div className="bg-white rounded-2xl p-6 border border-purple-200 shadow-lg">
-          <div className="flex justify-center mb-6">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/new_cat_book.png"
-                alt="고양이 마법사"
-                fill
-                style={{ objectFit: "contain" }}
-              />
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8 flex-grow">
+        <motion.div
+          className="bg-white rounded-2xl shadow-md p-6 md:p-8 max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-[#3B2E7E] mb-8">
+            친구 궁합 테스트
+          </h1>
 
-          <p className="text-center text-purple-700 mb-6">
-            냥냥~ 너랑 친구의 정보만 있으면
-            <br />
-            케미 궁합 점치러 간다옹~! 😸💘🔮
-          </p>
-
-          {!isLoaded ? (
-            <div className="flex justify-center p-10">
-              <div className="animate-spin h-8 w-8 border-4 border-purple-500 rounded-full border-t-transparent"></div>
-            </div>
-          ) : !userProfile || !isProfileComplete ? (
-            <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg text-red-700">
-              <p className="font-medium">프로필 정보가 필요합니다!</p>
-              <p className="text-sm mb-4">
-                정확한 궁합 분석을 위해 프로필 설정에서 내 정보를 먼저
-                입력해주세요.
-              </p>
-              <button
-                onClick={() => router.push("/profile/setup")}
-                className="w-full px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
-              >
-                프로필 설정하러 가기
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              {/* 내 정보 표시 */}
-              <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
-                <h3 className="text-lg font-medium text-purple-900 mb-4">
-                  내 정보
-                </h3>
-
-                <div className="flex items-center space-x-4 mb-3">
-                  <div className="bg-purple-200 p-3 rounded-full">
-                    <svg
-                      className="w-6 h-6 text-purple-700"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-medium text-purple-900">
-                      {userProfile.name}
-                    </div>
-                    <div className="text-sm text-purple-700">
-                      {userProfile.birthDate
-                        ? new Date(userProfile.birthDate).toLocaleDateString(
-                            "ko-KR",
-                            { year: "numeric", month: "long", day: "numeric" }
-                          )
-                        : "생년월일 없음"}
-                      {userProfile.gender ? ` · ${userProfile.gender}` : ""}
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {/* 첫 번째 사람 정보 */}
+            <div className="border border-purple-100 rounded-xl p-4 md:p-6 bg-purple-50/50">
+              {!isLoaded ? (
+                <div className="flex justify-center p-10">
+                  <div className="animate-spin h-8 w-8 border-4 border-purple-500 rounded-full border-t-transparent"></div>
                 </div>
-                <div className="mt-2 text-xs text-[#6E6491] text-right">
+              ) : !userProfile || !isProfileComplete ? (
+                <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg text-red-700">
+                  <p className="font-medium">프로필 정보가 필요합니다!</p>
+                  <p className="text-sm mb-4">
+                    정확한 궁합 분석을 위해 프로필 설정에서 내 정보를 먼저
+                    입력해주세요.
+                  </p>
                   <button
-                    onClick={() => router.push("/profile/edit")}
-                    className="text-[#990dfa] underline bg-transparent border-none"
+                    onClick={() => router.push("/profile/setup")}
+                    className="w-full px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
                   >
-                    프로필 수정하기
+                    프로필 설정하러 가기
                   </button>
                 </div>
-              </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  {/* 내 정보 표시 */}
+                  <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+                    <h3 className="text-lg font-medium text-purple-900 mb-4">
+                      {isSharedLink ? "상대방 정보" : "내 정보"}
+                    </h3>
 
-              {/* 두 번째 사람(상대방) 정보 */}
-              <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
-                <h3 className="text-lg font-medium text-purple-900 mb-4">
-                  상대방 정보
-                </h3>
-
-                <div className="mb-4">
-                  <label
-                    htmlFor="person2-name"
-                    className="block text-sm font-medium text-purple-700 mb-1"
-                  >
-                    이름
-                  </label>
-                  <input
-                    type="text"
-                    id="person2-name"
-                    value={formData.person2.name}
-                    onChange={(e) =>
-                      handleInputChange("person2", "name", e.target.value)
-                    }
-                    placeholder="이름을 입력하세요"
-                    className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-sm font-medium text-purple-700">
-                      성별
-                    </label>
-                  </div>
-                  <div className="flex gap-4">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        checked={formData.person2.gender === "남"}
-                        onChange={() =>
-                          handleInputChange("person2", "gender", "남")
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
-                          formData.person2.gender === "남"
-                            ? "bg-purple-600 text-white"
-                            : "bg-white border border-purple-300 text-purple-700"
-                        }`}
-                      >
-                        남성
-                      </div>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        checked={formData.person2.gender === "여"}
-                        onChange={() =>
-                          handleInputChange("person2", "gender", "여")
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
-                          formData.person2.gender === "여"
-                            ? "bg-purple-600 text-white"
-                            : "bg-white border border-purple-300 text-purple-700"
-                        }`}
-                      >
-                        여성
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-purple-700 mb-1">
-                    생년월일
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={birthYear2}
-                      onChange={(e) => setBirthYear2(e.target.value)}
-                      className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                    >
-                      <option value="">년</option>
-                      {yearOptions.map((year) => (
-                        <option key={year} value={year}>
-                          {year}년
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={birthMonth2}
-                      onChange={(e) => setBirthMonth2(e.target.value)}
-                      className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                    >
-                      <option value="">월</option>
-                      {monthOptions.map((month) => (
-                        <option key={month} value={month}>
-                          {month}월
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={birthDay2}
-                      onChange={(e) => setBirthDay2(e.target.value)}
-                      className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                    >
-                      <option value="">일</option>
-                      {dayOptions2.map((day) => (
-                        <option key={day} value={day}>
-                          {day}일
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-purple-700 mb-1">
-                    태어난 시간
-                  </label>
-                  <select
-                    value={koreanBirthTime2}
-                    onChange={(e) =>
-                      setKoreanBirthTime2(e.target.value as BirthTime)
-                    }
-                    className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
-                  >
-                    <option value="모름">모름</option>
-                    <option value="자시(23:00-01:00)">자시(23:00-01:00)</option>
-                    <option value="축시(01:00-03:00)">축시(01:00-03:00)</option>
-                    <option value="인시(03:00-05:00)">인시(03:00-05:00)</option>
-                    <option value="묘시(05:00-07:00)">묘시(05:00-07:00)</option>
-                    <option value="진시(07:00-09:00)">진시(07:00-09:00)</option>
-                    <option value="사시(09:00-11:00)">사시(09:00-11:00)</option>
-                    <option value="오시(11:00-13:00)">오시(11:00-13:00)</option>
-                    <option value="미시(13:00-15:00)">미시(13:00-15:00)</option>
-                    <option value="신시(15:00-17:00)">신시(15:00-17:00)</option>
-                    <option value="유시(17:00-19:00)">유시(17:00-19:00)</option>
-                    <option value="술시(19:00-21:00)">술시(19:00-21:00)</option>
-                    <option value="해시(21:00-23:00)">해시(21:00-23:00)</option>
-                  </select>
-                  <p className="text-xs text-purple-500 mt-1">
-                    모를 경우 &apos;모름&apos;을 선택하세요
-                  </p>
-                </div>
-
-                {error && (
-                  <div className="mb-4 bg-red-50 border border-red-300 text-red-700 p-3 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
-
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
-                >
-                  친구 궁합 확인하기
-                </motion.button>
-              </div>
-              <div className="mt-8 pt-8">
-                <div className="text-center">
-                  <h3 className="text-lg font-medium text-[#3B2E7E] mb-6">
-                    친구들도 해볼 수 있게
-                    <br />이 테스트를 공유해주세요!
-                  </h3>
-                  <div className="flex justify-center gap-6 mb-4">
-                    <button
-                      type="button"
-                      onClick={openShareModal}
-                      className="flex flex-col items-center border-none bg-transparent"
-                    >
-                      <div className="bg-yellow-400 w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                    <div className="flex items-center space-x-4 mb-3">
+                      <div className="bg-purple-200 p-3 rounded-full">
                         <svg
-                          className="w-8 h-8 text-black"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M12 3C7.0374 3 3 6.15827 3 10.0867C3 12.6044 4.7748 14.8144 7.39256 16.0467L6.4714 19.4322C6.39695 19.719 6.70314 19.9438 6.94205 19.7849L10.9047 17.1159C11.265 17.1546 11.6302 17.1735 12 17.1735C16.9626 17.1735 21 14.0152 21 10.0867C21 6.15827 16.9626 3 12 3Z" />
-                        </svg>
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        카카오톡
-                      </span>
-                    </button>
-                    <button
-                      onClick={copyToClipboard}
-                      className="flex flex-col items-center border-none bg-transparent"
-                    >
-                      <div className="bg-[#0070f3] w-16 h-16 rounded-full flex items-center justify-center mb-2">
-                        <svg
-                          className="w-8 h-8 text-white"
+                          className="w-6 h-6 text-purple-700"
                           fill="none"
-                          stroke="currentColor"
                           viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                          stroke="currentColor"
                         >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                           />
                         </svg>
                       </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        링크 복사
-                      </span>
-                    </button>
+                      <div>
+                        <div className="font-medium text-purple-900">
+                          {userProfile.name}
+                        </div>
+                        <div className="text-sm text-purple-700">
+                          {userProfile.birthDate
+                            ? new Date(
+                                userProfile.birthDate
+                              ).toLocaleDateString("ko-KR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
+                            : "생년월일 없음"}
+                          {userProfile.gender ? ` · ${userProfile.gender}` : ""}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-[#6E6491] text-right">
+                      <button
+                        onClick={() => router.push("/profile/edit")}
+                        className="text-[#990dfa] underline bg-transparent border-none"
+                      >
+                        프로필 수정하기
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm text-[#3B2E7E] mt-2 mb-10">
-                    내 결과는 노출되지 않아요! 테스트 페이지만 공유됩니다.
-                  </p>
-                </div>
-              </div>
-            </form>
-          )}
-        </div>
 
-        {showShareModal && (
-          <ShareModal
-            isOpen={showShareModal}
-            onClose={() => setShowShareModal(false)}
-            onCopyLink={copyToClipboard}
-            onShareKakao={shareToKakao}
-          />
-        )}
+                  {/* 두 번째 사람(상대방) 정보 */}
+                  <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+                    <h3 className="text-lg font-medium text-purple-900 mb-4">
+                      {isSharedLink ? "내 정보" : "상대방 정보"}
+                    </h3>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="person2-name"
+                        className="block text-sm font-medium text-purple-700 mb-1"
+                      >
+                        이름
+                      </label>
+                      <input
+                        type="text"
+                        id="person2-name"
+                        value={formData.person2.name}
+                        onChange={(e) =>
+                          handleInputChange("person2", "name", e.target.value)
+                        }
+                        placeholder="이름을 입력하세요"
+                        className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-purple-300"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-sm font-medium text-purple-700">
+                          성별
+                        </label>
+                      </div>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            checked={formData.person2.gender === "남"}
+                            onChange={() =>
+                              handleInputChange("person2", "gender", "남")
+                            }
+                            className="sr-only"
+                          />
+                          <div
+                            className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
+                              formData.person2.gender === "남"
+                                ? "bg-purple-600 text-white"
+                                : "bg-white border border-purple-300 text-purple-700"
+                            }`}
+                          >
+                            남성
+                          </div>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            checked={formData.person2.gender === "여"}
+                            onChange={() =>
+                              handleInputChange("person2", "gender", "여")
+                            }
+                            className="sr-only"
+                          />
+                          <div
+                            className={`w-full px-6 py-3 rounded-lg text-center transition-colors ${
+                              formData.person2.gender === "여"
+                                ? "bg-purple-600 text-white"
+                                : "bg-white border border-purple-300 text-purple-700"
+                            }`}
+                          >
+                            여성
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-purple-700 mb-1">
+                        생년월일
+                      </label>
+                      <div className="flex gap-2">
+                        <select
+                          value={birthYear2}
+                          onChange={(e) => setBirthYear2(e.target.value)}
+                          className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                        >
+                          <option value="">년</option>
+                          {yearOptions.map((year) => (
+                            <option key={year} value={year}>
+                              {year}년
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={birthMonth2}
+                          onChange={(e) => setBirthMonth2(e.target.value)}
+                          className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                        >
+                          <option value="">월</option>
+                          {monthOptions.map((month) => (
+                            <option key={month} value={month}>
+                              {month}월
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={birthDay2}
+                          onChange={(e) => setBirthDay2(e.target.value)}
+                          className="flex-1 bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                        >
+                          <option value="">일</option>
+                          {dayOptions2.map((day) => (
+                            <option key={day} value={day}>
+                              {day}일
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-purple-700 mb-1">
+                        태어난 시간
+                      </label>
+                      <select
+                        value={koreanBirthTime2}
+                        onChange={(e) =>
+                          setKoreanBirthTime2(e.target.value as BirthTime)
+                        }
+                        className="w-full bg-white border border-purple-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-purple-700"
+                      >
+                        <option value="모름">모름</option>
+                        <option value="자시(23:00-01:00)">
+                          자시(23:00-01:00)
+                        </option>
+                        <option value="축시(01:00-03:00)">
+                          축시(01:00-03:00)
+                        </option>
+                        <option value="인시(03:00-05:00)">
+                          인시(03:00-05:00)
+                        </option>
+                        <option value="묘시(05:00-07:00)">
+                          묘시(05:00-07:00)
+                        </option>
+                        <option value="진시(07:00-09:00)">
+                          진시(07:00-09:00)
+                        </option>
+                        <option value="사시(09:00-11:00)">
+                          사시(09:00-11:00)
+                        </option>
+                        <option value="오시(11:00-13:00)">
+                          오시(11:00-13:00)
+                        </option>
+                        <option value="미시(13:00-15:00)">
+                          미시(13:00-15:00)
+                        </option>
+                        <option value="신시(15:00-17:00)">
+                          신시(15:00-17:00)
+                        </option>
+                        <option value="유시(17:00-19:00)">
+                          유시(17:00-19:00)
+                        </option>
+                        <option value="술시(19:00-21:00)">
+                          술시(19:00-21:00)
+                        </option>
+                        <option value="해시(21:00-23:00)">
+                          해시(21:00-23:00)
+                        </option>
+                      </select>
+                      <p className="text-xs text-purple-500 mt-1">
+                        모를 경우 &apos;모름&apos;을 선택하세요
+                      </p>
+                    </div>
+
+                    {error && (
+                      <div className="mb-4 bg-red-50 border border-red-300 text-red-700 p-3 rounded-lg text-sm">
+                        {error}
+                      </div>
+                    )}
+
+                    <motion.button
+                      type="submit"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-4 px-6 rounded-xl transition-colors shadow-lg shadow-purple-300/30"
+                    >
+                      친구 궁합 확인하기
+                    </motion.button>
+                  </div>
+                  <div className="mt-8 pt-8">
+                    <div className="text-center">
+                      <h3 className="text-lg font-medium text-[#3B2E7E] mb-6">
+                        친구들도 해볼 수 있게
+                        <br />이 테스트를 공유해주세요!
+                      </h3>
+                      <div className="flex justify-center gap-6 mb-4">
+                        <button
+                          type="button"
+                          onClick={openShareModal}
+                          className="flex flex-col items-center border-none bg-transparent"
+                        >
+                          <div className="bg-yellow-400 w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                            <svg
+                              className="w-8 h-8 text-black"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M12 3C7.0374 3 3 6.15827 3 10.0867C3 12.6044 4.7748 14.8144 7.39256 16.0467L6.4714 19.4322C6.39695 19.719 6.70314 19.9438 6.94205 19.7849L10.9047 17.1159C11.265 17.1546 11.6302 17.1735 12 17.1735C16.9626 17.1735 21 14.0152 21 10.0867C21 6.15827 16.9626 3 12 3Z" />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">
+                            카카오톡
+                          </span>
+                        </button>
+                        <button
+                          onClick={copyToClipboard}
+                          className="flex flex-col items-center border-none bg-transparent"
+                        >
+                          <div className="bg-[#0070f3] w-16 h-16 rounded-full flex items-center justify-center mb-2">
+                            <svg
+                              className="w-8 h-8 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                              />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">
+                            링크 복사
+                          </span>
+                        </button>
+                      </div>
+                      <p className="text-sm text-[#3B2E7E] mt-2 mb-10">
+                        내 결과는 노출되지 않아요! 테스트 페이지만 공유됩니다.
+                      </p>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </motion.div>
       </div>
+
+      {showShareModal && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          onCopyLink={copyToClipboard}
+          onShareKakao={shareToKakao}
+        />
+      )}
     </div>
   );
 }

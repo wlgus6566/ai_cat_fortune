@@ -29,7 +29,8 @@ export async function middleware(request: NextRequest) {
   if (
     (pathname === "/compatibility" ||
       pathname === "/friendship-compatibility") &&
-    !fromPrev // 'from=prev' 쿼리가 없을 때만 리다이렉트
+    !fromPrev && // 'from=prev' 쿼리가 없을 때만 리다이렉트
+    request.nextUrl.searchParams.get("shared") !== "true" // shared=true가 있을 때는 리다이렉트하지 않음
   ) {
     const targetPage = pathname.replace("/", "");
     const url = new URL("/prev-compatibility", request.url);

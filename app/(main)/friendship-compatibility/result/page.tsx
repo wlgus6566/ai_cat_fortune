@@ -23,6 +23,7 @@ import {
 import { toast, Toaster } from "react-hot-toast";
 import ShareModal from "@/app/components/ShareModal";
 import PageHeader from "@/app/components/PageHeader";
+import { useSession } from "next-auth/react";
 
 // 카카오 SDK 타입 정의
 declare global {
@@ -285,18 +286,20 @@ export default function FriendshipCompatibilityResultPage() {
   const [error, setError] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
   const [resultSaved, setResultSaved] = useState(false);
+  const { data: session } = useSession();
+  const [savedResultId, setSavedResultId] = useState<number | null>(null); // 저장된 결과 ID
 
   // 로딩 단계에 따른 이미지 반환 함수
   const getLoadingImage = () => {
     switch (loadingStage) {
       case 1:
-        return "/friend1.png";
+        return "/friend.png";
       case 2:
         return "/friend2.png";
       case 3:
         return "/friend3.png";
       default:
-        return "/friend1.png";
+        return "/friend.png";
     }
   };
 
@@ -429,6 +432,8 @@ export default function FriendshipCompatibilityResultPage() {
       }
 
       console.log("친구 궁합 결과가 저장되었습니다:", responseData);
+      // 저장된 ID 상태에 저장
+      setSavedResultId(responseData.id);
     } catch (error) {
       console.error("결과 저장 중 오류:", error);
     }
@@ -441,7 +446,23 @@ export default function FriendshipCompatibilityResultPage() {
     }
   }, [friendCompatibilityData, loading, error, saveFriendCompatibilityResult]);
 
-  // 카카오 공유 함수
+  // 공유 URL 생성 함수 추가
+  const generateShareUrl = () => {
+    if (typeof window === "undefined") return "";
+
+    const baseUrl = window.location.origin;
+
+    // 결과 저장 ID가 있으면 결과 저장 상세 페이지로 링크 생성
+    if (savedResultId) {
+      return `${baseUrl}/compatibility-results/${savedResultId}?shared=true`;
+    }
+
+    // 저장 ID가 없으면 기존 방식으로 친구 궁합 페이지 링크 생성
+    const userId = session?.user?.id || "anonymous";
+    return `${baseUrl}/friendship-compatibility?userId=${userId}&shared=true`;
+  };
+
+  // 카카오 공유 함수 수정
   const shareToKakao = () => {
     console.log("Kakao 객체:", window.Kakao);
     console.log("Kakao 초기화 여부:", window.Kakao?.isInitialized?.());
@@ -456,10 +477,12 @@ export default function FriendshipCompatibilityResultPage() {
         );
       }
 
+      // 공유 URL 생성
+      const shareUrl = generateShareUrl();
+
       // 실제 도메인 사용 (개발 환경에서는 배포된 URL로 변경)
       const webUrl = "https://v0-aifortune-rose.vercel.app";
-      const currentUrl = window.location.href;
-      const realShareUrl = currentUrl.replace(window.location.origin, webUrl);
+      const realShareUrl = shareUrl.replace(window.location.origin, webUrl);
 
       window.Kakao.Share.sendDefault({
         objectType: "feed",
@@ -490,10 +513,12 @@ export default function FriendshipCompatibilityResultPage() {
     }
   };
 
-  // 클립보드에 링크 복사
+  // 클립보드에 링크 복사 함수 수정
   const copyToClipboard = () => {
+    const shareUrl = generateShareUrl();
+
     navigator.clipboard
-      .writeText(window.location.href)
+      .writeText(shareUrl)
       .then(() => {
         toast.success("링크가 복사되었습니다!");
       })
@@ -540,9 +565,9 @@ export default function FriendshipCompatibilityResultPage() {
             <Image
               src={getLoadingImage()}
               alt="로딩중"
-              width={120}
+              width={180}
               height={80}
-              className="w-full h-full relative z-10 -rotate-12"
+              className="w-full h-full relative z-10"
             />
           </motion.div>
           <motion.h2

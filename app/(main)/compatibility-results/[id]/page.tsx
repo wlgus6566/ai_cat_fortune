@@ -2,13 +2,14 @@
 
 "use client";
 
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import PageHeader from "@/app/components/PageHeader";
 import FriendCompatibilityResult from "./FriendCompatibilityResult";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import LoveCompatibilityResult from "./LoveCompatibilityResult";
+import { toast, Toaster } from "react-hot-toast";
 
 interface CompatibilityResultData {
   id: number;
@@ -29,11 +30,29 @@ interface CompatibilityResultData {
 export default function CompatibilityResultDetail() {
   const params = useParams();
   const id = params?.id as string;
+  const searchParams = useSearchParams();
+  const isShared = searchParams.get("shared") === "true";
 
   const [resultData, setResultData] = useState<CompatibilityResultData | null>(
     null
   );
   const [error, setError] = useState("");
+  const [showedSharedToast, setShowedSharedToast] = useState(false);
+
+  // 이름에 맞는 조사 추가 함수
+  const getParticleSuffix = (name: string) => {
+    const lastChar = name.charAt(name.length - 1);
+    const uni = lastChar.charCodeAt(0);
+
+    // 한글 유니코드 범위 및 종성 확인
+    if (uni >= 44032 && uni <= 55203) {
+      // 종성이 있으면 '이', 없으면 '가'
+      return (uni - 44032) % 28 > 0 ? "이" : "가";
+    }
+
+    // 한글이 아닌 경우 기본값
+    return "이";
+  };
 
   const fetchConsultation = useCallback(async () => {
     try {
@@ -58,6 +77,31 @@ export default function CompatibilityResultDetail() {
     if (id) fetchConsultation();
   }, [id, fetchConsultation]);
 
+  // 공유로 접속했을 때 팝업 표시
+  useEffect(() => {
+    if (isShared && resultData && !showedSharedToast) {
+      const particle = getParticleSuffix(resultData.person1Name);
+      toast.success(
+        `너랑 ${resultData.person1Name}${particle} 궁합결과가 이렇대!`,
+        {
+          duration: 5000,
+          position: "top-center",
+          style: {
+            background: "#FFF8E1",
+            padding: "16px",
+            color: "#3B2E7E",
+            fontSize: "16px",
+            fontWeight: "bold",
+            border: "1px solid #FFE082",
+            borderRadius: "12px",
+          },
+          icon: "🎊",
+        }
+      );
+      setShowedSharedToast(true);
+    }
+  }, [isShared, resultData, showedSharedToast]);
+
   const createPersonData = (
     name: string,
     birthdate: string,
@@ -72,6 +116,7 @@ export default function CompatibilityResultDetail() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#F9F5FF] to-[#F0EAFF]">
+      <Toaster />
       <PageHeader
         title={
           resultData?.resultType === "love"
