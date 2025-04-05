@@ -3,8 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { motion } from "framer-motion";
 import { useFriendCompatibility } from "@/app/context/FriendCompatibilityContext";
 import { useUser } from "@/app/contexts/UserContext";
 import PageHeader from "@/app/components/PageHeader";
@@ -230,8 +229,6 @@ export default function FriendshipCompatibilityPage() {
   };
 
   const [error, setError] = useState<string | null>(null);
-  const [isSharedMode, setIsSharedMode] = useState(false);
-  const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
   // 공유된 링크 관련 상태 추가
@@ -662,14 +659,16 @@ export default function FriendshipCompatibilityPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-[#6E6491] text-right">
-                      <button
-                        onClick={() => router.push("/profile/edit")}
-                        className="text-[#990dfa] underline bg-transparent border-none"
-                      >
-                        프로필 수정하기
-                      </button>
-                    </div>
+                    {!isSharedLink && (
+                      <div className="mt-2 text-xs text-[#6E6491] text-right">
+                        <button
+                          onClick={() => router.push("/profile/edit")}
+                          className="text-[#990dfa] underline bg-transparent border-none"
+                        >
+                          프로필 수정하기
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* 두 번째 사람(상대방) 정보 */}

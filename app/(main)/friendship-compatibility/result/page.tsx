@@ -288,7 +288,8 @@ export default function FriendshipCompatibilityResultPage() {
   const [resultSaved, setResultSaved] = useState(false);
   const { data: session } = useSession();
   const [savedResultId, setSavedResultId] = useState<number | null>(null); // 저장된 결과 ID
-
+  // API 호출 여부를 추적하는 ref 추가
+  const hasCalledApi = useRef(false);
   // 로딩 단계에 따른 이미지 반환 함수
   const getLoadingImage = () => {
     switch (loadingStage) {
@@ -351,8 +352,11 @@ export default function FriendshipCompatibilityResultPage() {
         setLoading(false);
         return;
       }
-
+      // 이미 API를 호출했다면 함수 종료
+      if (hasCalledApi.current) return;
       try {
+        // API 호출 중임을 표시
+        hasCalledApi.current = true;
         // 서버 API 엔드포인트 호출로 변경
         const result = await fetchFriendCompatibilityAnalysis({
           person1: state.person1,
@@ -365,6 +369,8 @@ export default function FriendshipCompatibilityResultPage() {
         console.error("친구 궁합 분석 중 오류 발생:", err);
         setError("궁합 분석 중 오류가 발생했습니다. 다시 시도해주세요.");
         setLoading(false);
+        // 에러 발생 시 다시 API 호출 가능하도록 플래그 초기화
+        hasCalledApi.current = false;
       }
     };
 

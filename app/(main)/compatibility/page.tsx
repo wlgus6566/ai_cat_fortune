@@ -239,6 +239,9 @@ export default function CompatibilityPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  // 공유된 사용자 프로필을 저장할 상태 추가
+  const [sharedUserProfile, setSharedUserProfile] = useState(null);
+  const [isSharedLink, setIsSharedLink] = useState(false);
 
   // 카카오 SDK 초기화
   useEffect(() => {
@@ -262,43 +265,86 @@ export default function CompatibilityPage() {
     };
   }, []);
 
-  // URL 파라미터 처리 및 공유 모드 설정
-  useEffect(() => {
-    const shared = searchParams.get("shared");
-    if (shared === "true") {
-      const name = searchParams.get("name");
-      const birthdate = searchParams.get("birthdate");
-      const gender = searchParams.get("gender") as "남" | "여";
-      const birthtime = searchParams.get("birthtime");
+  // 공유된 사용자 정보 가져오는 함수
+  const loadSharedUserProfile = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/user-profile/${userId}`);
 
-      if (
-        name &&
-        birthdate &&
-        (gender === "남" || gender === "여") &&
-        birthtime
-      ) {
+      if (!response.ok) {
+        console.error("사용자 프로필을 가져오는데 실패했습니다.");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.profile) {
+        setSharedUserProfile(data.profile);
+
+        // 공유된 사용자 정보를 사용하여 폼 업데이트
+        const gender: "남" | "여" =
+          data.profile.gender === "남성" ? "남" : "여";
+
+        let birthtime = "";
+        if (data.profile.birthTime && data.profile.birthTime !== "모름") {
+          const timeMatch = data.profile.birthTime.match(/\((\d{2}):00-/);
+          if (timeMatch && timeMatch[1]) {
+            birthtime = `${timeMatch[1]}:00`;
+          }
+        }
+
         setFormData((prev) => ({
           ...prev,
           person1: {
-            name: decodeURIComponent(name),
-            birthdate,
+            name: data.profile.name || "",
+            birthdate: data.profile.birthDate || "",
             gender,
             birthtime,
           },
         }));
+
+        // 생년월일 파싱 및 설정
+        if (data.profile.birthDate) {
+          const [year, month, day] = data.profile.birthDate.split("-");
+          setBirthYear1(year);
+          setBirthMonth1(month);
+          setBirthDay1(day);
+        }
+
+        // 태어난 시간 파싱 및 설정
+        if (data.profile.birthTime && data.profile.birthTime !== "모름") {
+          setKoreanBirthTime1(data.profile.birthTime as BirthTime);
+        }
+      }
+    } catch (error) {
+      console.error("사용자 프로필을 가져오는 중 오류 발생:", error);
+    }
+  };
+
+  // URL 파라미터 처리 및 공유 모드 설정
+  useEffect(() => {
+    const shared = searchParams.get("shared");
+    const userId = searchParams.get("userId");
+
+    if (shared === "true") {
+      if (userId) {
+        // userId로 공유된 경우 - 사용자 정보를 API로 가져오기
+        loadSharedUserProfile(userId);
+        setIsSharedLink(true);
         setIsSharedMode(true);
         setShareGuideVisible(true);
-
-        // 5초 후에 안내 메시지 숨기기
-        setTimeout(() => {
-          setShareGuideVisible(false);
-        }, 5000);
       }
+      // 5초 후에 안내 메시지 숨기기
+      setTimeout(() => {
+        setShareGuideVisible(false);
+      }, 5000);
     }
   }, [searchParams]);
 
   // 사용자 프로필 정보로 폼 데이터 초기화
   useEffect(() => {
+    // 공유 링크로 접속한 경우에는 사용자 프로필로 초기화하지 않음
+    if (isSharedLink) return;
+
     if (userProfile && isLoaded) {
       // gender 형식 변환 ("남성"/"여성" -> "남"/"여")
       const gender =
@@ -346,7 +392,7 @@ export default function CompatibilityPage() {
         setKoreanBirthTime1(userProfile.birthTime);
       }
     }
-  }, [userProfile, isLoaded]);
+  }, [userProfile, isLoaded, isSharedLink]);
 
   // formData 변경 시 추가 상태 업데이트
   const updatePerson2FormData = () => {
@@ -426,17 +472,14 @@ export default function CompatibilityPage() {
 
   // 공유 링크 생성 함수
   const generateShareLink = () => {
-    const { name, birthdate, gender, birthtime } = formData.person1;
-
-    // 필수 필드 체크
-    if (!name || !birthdate || !gender || !birthtime) {
-      setError("공유하려면 첫 번째 사람의 정보를 모두 입력해주세요.");
+    // userId로 공유 방식으로 변경
+    if (!userProfile || !userProfile.id) {
+      setError("공유하려면 로그인이 필요합니다.");
       return "";
     }
 
-    const encodedName = encodeURIComponent(name);
     const baseUrl = window.location.origin;
-    return `${baseUrl}/compatibility?name=${encodedName}&birthdate=${birthdate}&gender=${gender}&birthtime=${birthtime}&shared=true`;
+    return `${baseUrl}/compatibility?userId=${userProfile.id}&shared=true`;
   };
 
   // 링크 복사 기능
@@ -638,7 +681,9 @@ export default function CompatibilityPage() {
                 variants={itemVariants}
                 className="mb-6 p-4 bg-[#F9F5FF] rounded-xl border border-[#E9E4F0]"
               >
-                <h3 className="font-semibold text-[#3B2E7E] mb-2">내 정보</h3>
+                <h3 className="font-semibold text-[#3B2E7E] mb-2">
+                  {isSharedLink ? "상대방 정보" : "내 정보"}
+                </h3>
                 <div className="flex items-center space-x-4">
                   <div className="bg-[#990dfa]/10 p-3 rounded-full">
                     <svg
@@ -670,14 +715,16 @@ export default function CompatibilityPage() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-2 text-xs text-[#6E6491] text-right">
-                  <button
-                    onClick={() => router.push("/profile/edit")}
-                    className="text-[#990dfa] underline bg-transparent border-none"
-                  >
-                    프로필 수정하기
-                  </button>
-                </div>
+                {!isSharedLink && (
+                  <div className="mt-2 text-xs text-[#6E6491] text-right">
+                    <button
+                      onClick={() => router.push("/profile/edit")}
+                      className="text-[#990dfa] underline bg-transparent border-none"
+                    >
+                      프로필 수정하기
+                    </button>
+                  </div>
+                )}
               </motion.div>
 
               <form onSubmit={handleSubmit}>
@@ -685,7 +732,7 @@ export default function CompatibilityPage() {
                   {/* 두 번째 사람 정보 */}
                   <div className="p-4 bg-[#F9F5FF] rounded-xl">
                     <h3 className="font-semibold text-[#3B2E7E] mb-4">
-                      상대방 정보
+                      {isSharedLink ? "내 정보" : "상대방 정보"}
                     </h3>
                     <div className="space-y-4">
                       <div>

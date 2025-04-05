@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,7 @@ import { toast, Toaster } from "react-hot-toast";
 import ShareModal from "@/app/components/ShareModal";
 import PageHeader from "@/app/components/PageHeader";
 import Lottie from "lottie-react";
+import { useSession } from "next-auth/react";
 
 // 카카오 SDK 타입 정의
 declare global {
@@ -188,6 +189,10 @@ export default function CompatibilityResultPage() {
   const [loadingStage, setLoadingStage] = useState(1); // 3단계 로딩 (1: 초기, 2: 분석중, 3: 완료)
   const [showShareModal, setShowShareModal] = useState(false);
   const [resultSaved, setResultSaved] = useState(false);
+  const { data: session } = useSession();
+  const [savedResultId, setSavedResultId] = useState<number | null>(null); // 저장된 결과 ID
+  // API 호출 여부를 추적하는 ref 추가
+  const hasCalledApi = useRef(false);
 
   // 로딩 단계에 따른 이미지 반환 함수
   const getLoadingImage = () => {
@@ -258,6 +263,50 @@ export default function CompatibilityResultPage() {
     loadAnimations();
   }, []);
 
+  // useCallback으로 감싸서 메모이제이션
+  const fetchCompatibility = useCallback(async () => {
+    // 이미 API를 호출했다면 함수 종료
+    if (hasCalledApi.current) return;
+
+    try {
+      // API 호출 중임을 표시
+      hasCalledApi.current = true;
+
+      // API 라우트를 사용하여 서버에서 OpenAI API 호출
+      const response = await fetch("/api/compatibility", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          person1: state.person1,
+          person2: state.person2,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "궁합 분석 중 오류가 발생했습니다.");
+      }
+
+      const result = await response.json();
+      setCompatibilityData(result);
+
+      // 데이터가 로드된 후 로딩 중지
+      setLoading(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "궁합 분석 중 오류가 발생했습니다.";
+      setError(errorMessage);
+      setLoading(false);
+
+      // 에러 발생 시 다시 API 호출 가능하도록 플래그 초기화
+      hasCalledApi.current = false;
+    }
+  }, [state.person1, state.person2]);
+
   useEffect(() => {
     // 사용자가 입력 데이터 없이 직접 URL 접근했을 경우 리다이렉트
     if (!state.person1.name || !state.person2.name) {
@@ -271,49 +320,13 @@ export default function CompatibilityResultPage() {
     }, 2000);
 
     // API 호출로 궁합 분석
-    const fetchCompatibility = async () => {
-      try {
-        // API 라우트를 사용하여 서버에서 OpenAI API 호출
-        const response = await fetch("/api/compatibility", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            person1: state.person1,
-            person2: state.person2,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || "궁합 분석 중 오류가 발생했습니다."
-          );
-        }
-
-        const result = await response.json();
-        setCompatibilityData(result);
-
-        // 데이터가 로드된 후 로딩 중지
-        setLoading(false);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "궁합 분석 중 오류가 발생했습니다.";
-        setError(errorMessage);
-        setLoading(false);
-      }
-    };
-
     fetchCompatibility();
 
     // 클린업 함수에서 인터벌 정리
     return () => {
       clearInterval(stageTimer);
     };
-  }, [state, router]);
+  }, [state, router, fetchCompatibility]);
 
   // useCallback으로 감싸서 메모이제이션
   const saveCompatibilityResult = useCallback(async () => {
@@ -347,31 +360,36 @@ export default function CompatibilityResultPage() {
         throw new Error(errorData.error || "결과 저장에 실패했습니다.");
       }
 
-      console.log("결과가 성공적으로 저장되었습니다.");
+      const responseData = await response.json();
+      console.log("결과가 성공적으로 저장되었습니다:", responseData);
+      // 저장된 ID 상태에 저장
+      setSavedResultId(responseData.id);
     } catch (error) {
       console.error("결과 저장 중 오류 발생:", error);
     }
   }, [compatibilityData, resultSaved, state.person1, state.person2]);
 
-  // 결과가 로드될 때 저장 로직 실행
+  // compatibilityData가 변경될 때만 결과 저장 로직 실행
   useEffect(() => {
-    if (compatibilityData && !loading && !error) {
+    if (compatibilityData && !loading && !error && !resultSaved) {
       saveCompatibilityResult();
     }
-  }, [compatibilityData, loading, error, saveCompatibilityResult]);
+  }, [compatibilityData, loading, error, saveCompatibilityResult, resultSaved]);
 
-  // 현재 URL 생성
+  // 공유 URL 생성 함수 추가
   const generateShareUrl = () => {
     if (typeof window === "undefined") return "";
 
     const baseUrl = window.location.origin;
 
-    // 사용자 ID 또는 세션 ID를 사용하여 공유 URL 생성
+    // 결과 저장 ID가 있으면 결과 저장 상세 페이지로 링크 생성
+    if (savedResultId) {
+      return `${baseUrl}/compatibility-results/${savedResultId}?shared=true`;
+    }
+
+    // 저장 ID가 없으면 기존 방식으로 궁합 페이지 링크 생성
     const userId = session?.user?.id || "anonymous";
-
-    const shareUrl = `${baseUrl}/compatibility?userId=${userId}&shared=true`;
-
-    return shareUrl;
+    return `${baseUrl}/compatibility?userId=${userId}&shared=true`;
   };
 
   // 링크 복사 기능
