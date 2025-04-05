@@ -65,8 +65,8 @@ export default function MainLayout({
       // 프로필이 완성되지 않았고, setup 페이지에 있지 않은 경우 리디렉션
       if (
         !isProfileComplete &&
-        !pathname.includes("/setup") &&
-        !pathname.includes("/auth/")
+        !pathname?.includes("/setup") &&
+        !pathname?.includes("/auth/")
       ) {
         console.log("프로필이 완성되지 않아 setup 페이지로 이동합니다.");
         router.push("/setup");
@@ -118,14 +118,14 @@ export default function MainLayout({
               <Link
                 href="/chat"
                 className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-                  pathname.includes("/chat")
+                  pathname?.includes("/chat")
                     ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
                     : "text-gray-600 hover:bg-[#990dfa]/5"
                 }`}
               >
                 <ChatBubbleOvalLeftIcon
                   className={`h-6 w-6 ${
-                    pathname.includes("/chat")
+                    pathname?.includes("/chat")
                       ? "text-[#990dfa]"
                       : "text-gray-600"
                   }`}
@@ -139,14 +139,14 @@ export default function MainLayout({
               <Link
                 href="/talisman-gallery"
                 className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-                  pathname.includes("/talisman-gallery")
+                  pathname?.includes("/talisman-gallery")
                     ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
                     : "text-gray-600 hover:bg-[#990dfa]/5"
                 }`}
               >
                 <SparklesIcon
                   className={`h-6 w-6 ${
-                    pathname.includes("/talisman-gallery")
+                    pathname?.includes("/talisman-gallery")
                       ? "text-[#990dfa]"
                       : "text-gray-600"
                   }`}
@@ -160,14 +160,14 @@ export default function MainLayout({
               <Link
                 href="/profile"
                 className={`flex flex-col items-center justify-center p-3 w-1/4 transition-all ${
-                  pathname.includes("/profile")
+                  pathname?.includes("/profile")
                     ? "text-[#990dfa] bg-gradient-to-b from-[#990dfa]/10 to-transparent"
                     : "text-gray-600 hover:bg-[#990dfa]/5"
                 }`}
               >
                 <UserIcon
                   className={`h-6 w-6 ${
-                    pathname.includes("/profile")
+                    pathname?.includes("/profile")
                       ? "text-[#990dfa]"
                       : "text-gray-600"
                   }`}

@@ -75,7 +75,7 @@ export async function GET(request: Request) {
 
     // URL 쿼리 파라미터에서 resultType 가져오기
     const { searchParams } = new URL(request.url);
-    const resultType = searchParams.get("type"); // "love" 또는 "friend" 또는 null (전체)
+    const resultType = searchParams?.get("type"); // "love" 또는 "friend" 또는 null (전체)
 
     let query = db
       .select()

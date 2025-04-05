@@ -31,7 +31,7 @@ export default function CompatibilityResultDetail() {
   const params = useParams();
   const id = params?.id as string;
   const searchParams = useSearchParams();
-  const isShared = searchParams.get("shared") === "true";
+  const isShared = searchParams?.get("shared") === "true";
 
   const [resultData, setResultData] = useState<CompatibilityResultData | null>(
     null

@@ -105,7 +105,8 @@ export default function PrevCompatibilityPage() {
   }, []);
 
   const goCompatibility = () => {
-    const targetPage = searchParams.get("target") || "friendship-compatibility";
+    const targetPage =
+      searchParams?.get("target") || "friendship-compatibility";
     router.push(`/${targetPage}?from=prev`);
   };
 
@@ -269,7 +270,7 @@ export default function PrevCompatibilityPage() {
                 <button
                   onClick={() => {
                     const url = `${window.location.origin}/${
-                      searchParams.get("target") || "friendship-compatibility"
+                      searchParams?.get("target") || "friendship-compatibility"
                     }`;
                     if (window.Kakao && window.Kakao.Share) {
                       console.log("Kakao 객체:", window.Kakao);

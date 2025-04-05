@@ -239,7 +239,7 @@ export default function CompatibilityPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [shareGuideVisible, setShareGuideVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  // 공유된 사용자 프로필을 저장할 상태 추가
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sharedUserProfile, setSharedUserProfile] = useState(null);
   const [isSharedLink, setIsSharedLink] = useState(false);
 
@@ -322,8 +322,8 @@ export default function CompatibilityPage() {
 
   // URL 파라미터 처리 및 공유 모드 설정
   useEffect(() => {
-    const shared = searchParams.get("shared");
-    const userId = searchParams.get("userId");
+    const shared = searchParams?.get("shared");
+    const userId = searchParams?.get("userId");
 
     if (shared === "true") {
       if (userId) {

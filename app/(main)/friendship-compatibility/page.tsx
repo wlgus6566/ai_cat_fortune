@@ -231,7 +231,7 @@ export default function FriendshipCompatibilityPage() {
   const [error, setError] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // 공유된 링크 관련 상태 추가
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sharedUserProfile, setSharedUserProfile] =
     useState<UserProfile | null>(null);
   const [isSharedLink, setIsSharedLink] = useState(false);
@@ -347,8 +347,8 @@ export default function FriendshipCompatibilityPage() {
 
   // URL 파라미터 확인
   useEffect(() => {
-    const userId = searchParams.get("userId");
-    const shared = searchParams.get("shared");
+    const userId = searchParams?.get("userId");
+    const shared = searchParams?.get("shared");
 
     if (userId && shared === "true") {
       setIsSharedLink(true);

@@ -13,11 +13,11 @@ export default function BottomNavigation() {
   useEffect(() => {
     if (pathname === "/") {
       setActiveTab("home");
-    } else if (pathname.includes("/chat")) {
+    } else if (pathname?.includes("/chat")) {
       setActiveTab("chat");
-    } else if (pathname.includes("/profile")) {
+    } else if (pathname?.includes("/profile")) {
       setActiveTab("profile");
-    } else if (pathname.includes("/consultations")) {
+    } else if (pathname?.includes("/consultations")) {
       setActiveTab("consultations");
     }
   }, [pathname]);

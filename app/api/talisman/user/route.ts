@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     // URL 쿼리 파라미터에서 userId 가져오기
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userId = searchParams?.get("userId");
 
     if (!userId) {
       return NextResponse.json(

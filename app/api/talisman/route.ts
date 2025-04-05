@@ -108,7 +108,7 @@ export async function DELETE(req: NextRequest) {
 
     const userId = session.user.id;
     const { searchParams } = new URL(req.url);
-    const talismanId = searchParams.get("id");
+    const talismanId = searchParams?.get("id");
 
     if (!talismanId) {
       return NextResponse.json(

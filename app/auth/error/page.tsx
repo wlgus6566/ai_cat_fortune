@@ -9,11 +9,11 @@ import { Suspense } from "react";
 function ErrorContent() {
   const t = useTranslations("auth");
   const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+  const error = searchParams?.get("error");
 
   console.log(
     "Auth Error Page Params:",
-    Object.fromEntries(searchParams.entries())
+    Object.fromEntries(searchParams?.entries() || [])
   );
 
   const getErrorMessage = (errorType: string | null) => {
@@ -40,7 +40,7 @@ function ErrorContent() {
           {t("errorTitle")}
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
-          {getErrorMessage(error)}
+          {getErrorMessage(error || null)}
         </p>
 
         {/* 디버깅 정보 */}

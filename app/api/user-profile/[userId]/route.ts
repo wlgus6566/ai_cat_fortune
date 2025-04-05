@@ -15,10 +15,11 @@ const createSupabaseServerClient = () => {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any
 ) {
   try {
-    const userId = params.userId;
+    const { userId } = context.params;
 
     if (!userId) {
       return NextResponse.json(
@@ -74,10 +75,14 @@ export async function GET(
         updatedAt: data.updated_at,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API 오류:", error);
     return NextResponse.json(
-      { error: `서버 오류가 발생했습니다: ${error.message}` },
+      {
+        error: `서버 오류가 발생했습니다: ${
+          error instanceof Error ? error.message : "알 수 없는 오류"
+        }`,
+      },
       { status: 500 }
     );
   }

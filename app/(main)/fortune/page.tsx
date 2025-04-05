@@ -226,7 +226,8 @@ export default function HomePage() {
   }, []);
   // URL 파라미터 확인을 위한 훅 추가
   const searchParams = useSearchParams();
-  const shouldShowFortune = searchParams.get("showFortune") === "true";
+  const showFortuneParam = searchParams?.get("showFortune");
+  const shouldShowFortune = showFortuneParam === "true";
 
   // 프로필 완성 여부에 따라 setup 페이지로 리디렉션
   useEffect(() => {

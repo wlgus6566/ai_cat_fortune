@@ -18,7 +18,7 @@ interface ConsultationWithTalisman extends SelectConsultation {
 
 export default function ConsultationDetailPage() {
   const params = useParams();
-  const id = params.id as string;
+  const id = params?.id as string;
   const { isProfileComplete } = useUser();
   const router = useRouter();
   const [consultation, setConsultation] =

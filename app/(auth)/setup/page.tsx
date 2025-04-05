@@ -47,9 +47,10 @@ const validateName = (
 function SetupContent() {
   const { isProfileComplete, createUserProfile } = useUser();
   const router = useRouter();
-  const searchParams = useSearchParams();
   // callbackUrl이 있으면 사용하고 없으면 fortune 페이지로 설정
-  const callbackUrl = searchParams.get("callbackUrl") || "/fortune";
+  const searchParams = useSearchParams();
+  const callbackUrlParam = searchParams?.get("callbackUrl");
+  const callbackUrl = callbackUrlParam ?? "/fortune";
 
   const [name, setName] = useState("");
   const [gender, setGender] = useState<Gender>("남성");

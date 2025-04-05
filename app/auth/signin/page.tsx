@@ -10,8 +10,8 @@ import Image from "next/image";
 function SignInContent() {
   const t = useTranslations("auth");
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const error = searchParams.get("error");
+  const callbackUrl = searchParams?.get("callbackUrl") || "/";
+  const error = searchParams?.get("error");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ function SignInContent() {
     console.log("SignIn Page Params:", {
       callbackUrl,
       error,
-      allParams: Object.fromEntries(searchParams.entries()),
+      allParams: Object.fromEntries(searchParams?.entries() || []),
     });
   }, [searchParams, callbackUrl, error, isLoading]);
 
