@@ -448,9 +448,6 @@ export default function FriendshipCompatibilityResultPage() {
     console.log("Kakao.Share 객체:", window.Kakao?.Share);
     if (!window.Kakao || !friendCompatibilityData) return;
 
-    // 이미지 URL은 실제 서비스에 맞게 조정 필요
-    const imageUrl = `${window.location.origin}/new_cat_friends.png`;
-
     try {
       // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
       if (window.location.hostname === "localhost") {
@@ -469,7 +466,7 @@ export default function FriendshipCompatibilityResultPage() {
         content: {
           title: `${state.person1.name}님과 ${state.person2.name}님의 친구 궁합`,
           description: friendCompatibilityData.nickname,
-          imageUrl: imageUrl,
+          imageUrl: `${window.location.origin}/chemy.png`,
           link: {
             mobileWebUrl: realShareUrl,
             webUrl: realShareUrl,

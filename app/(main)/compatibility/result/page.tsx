@@ -418,7 +418,7 @@ export default function CompatibilityResultPage() {
         content: {
           title: "궁합 테스트 결과",
           description: `${state.person1.name}님과 ${state.person2.name}님의 궁합 결과를 확인해보세요!`,
-          imageUrl: `${window.location.origin}/compatibility-header.png`, // 프로젝트에 있는 실제 이미지 사용
+          imageUrl: `${window.location.origin}/chemy.png`,
           link: {
             mobileWebUrl: realShareUrl,
             webUrl: realShareUrl,

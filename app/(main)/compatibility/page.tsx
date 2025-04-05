@@ -488,7 +488,7 @@ export default function CompatibilityPage() {
         content: {
           title: "궁합 테스트💑",
           description: `${formData.person1.name}님과의 궁합을 확인해보라냥!💑 `,
-          imageUrl: `${window.location.origin}/new_cat_love.png`,
+          imageUrl: `${window.location.origin}/chemy.png`,
           link: {
             mobileWebUrl: realShareUrl,
             webUrl: realShareUrl,

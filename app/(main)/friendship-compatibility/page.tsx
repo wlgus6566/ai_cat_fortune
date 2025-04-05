@@ -508,7 +508,7 @@ export default function FriendshipCompatibilityPage() {
         content: {
           title: "친구 궁합 테스트",
           description: `${formData.person1.name}님과의 친구 궁합을 확인해보라냥! 🍎`,
-          imageUrl: `${window.location.origin}/new_cat_friends.png`,
+          imageUrl: `${window.location.origin}/friends3.png`,
           link: {
             mobileWebUrl: realShareUrl,
             webUrl: realShareUrl,

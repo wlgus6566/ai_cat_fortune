@@ -268,7 +268,9 @@ export default function PrevCompatibilityPage() {
 
                 <button
                   onClick={() => {
-                    const url = `${window.location.origin}/friendship-compatibility`;
+                    const url = `${window.location.origin}/${
+                      searchParams.get("target") || "friendship-compatibility"
+                    }`;
                     if (window.Kakao && window.Kakao.Share) {
                       console.log("Kakao 객체:", window.Kakao);
                       console.log(
@@ -296,10 +298,9 @@ export default function PrevCompatibilityPage() {
                         window.Kakao.Share.sendDefault({
                           objectType: "feed",
                           content: {
-                            title: "고양이 운세에서 친구 궁합을 확인해보세요!",
-                            description:
-                              "너와 나의 케미는 어떨까? 고양이 운세가 알려줄게!",
-                            imageUrl: `${window.location.origin}/new_cat_magic.png`,
+                            title: "우린 얼마나 찰떡궁합일까? 궁금하지?",
+                            description: `궁합 결과를 확인해보세요!`,
+                            imageUrl: `${window.location.origin}/chemy.png`,
                             link: {
                               mobileWebUrl: realUrl,
                               webUrl: realUrl,
@@ -307,7 +308,7 @@ export default function PrevCompatibilityPage() {
                           },
                           buttons: [
                             {
-                              title: "친구 궁합 보기",
+                              title: "궁합 보기",
                               link: {
                                 mobileWebUrl: realUrl,
                                 webUrl: realUrl,

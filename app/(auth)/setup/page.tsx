@@ -66,7 +66,7 @@ function SetupContent() {
   // 프로필이 이미 완성된 경우 메인 페이지로 리다이렉트
   useEffect(() => {
     if (isProfileComplete) {
-      //router.push(callbackUrl);
+      router.push(callbackUrl);
     }
   }, [isProfileComplete, router, callbackUrl]);
 
