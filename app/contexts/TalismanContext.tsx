@@ -53,19 +53,6 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
   const [onTalismanDeleted, setOnTalismanDeleted] = useState<
     ((id: string) => void) | undefined
   >();
-  const [deletedTalismanId, setDeletedTalismanId] = useState<string | null>(
-    null
-  );
-
-  // 부적 삭제 완료 후 콜백 처리를 위한 useEffect
-  useEffect(() => {
-    if (deletedTalismanId && onTalismanDeleted) {
-      // 콜백 함수 실행
-      onTalismanDeleted(deletedTalismanId);
-      // 상태 초기화
-      setDeletedTalismanId(null);
-    }
-  }, [deletedTalismanId, onTalismanDeleted]);
 
   const openTalisman = ({
     imageUrl,
@@ -127,9 +114,6 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
           console.log("TalismanContext: onTalismanDeleted 콜백 직접 호출", id);
           onTalismanDeleted(id);
         }
-
-        // 상태 업데이트 (useEffect에서 두 번째 콜백 호출을 위해)
-        setDeletedTalismanId(id);
       }
 
       return result.success === true;

@@ -122,6 +122,7 @@ export default function TalismanGalleryPage() {
 
   // 부적 삭제 후 목록 갱신 함수 - 컴포넌트 레벨에서 정의
   const handleTalismanDeleted = (deletedId: string) => {
+    window.location.reload();
     if (!deletedId) {
       console.warn("삭제할 부적 ID가 없습니다.");
       return;

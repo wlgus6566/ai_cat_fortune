@@ -145,7 +145,7 @@ export default function FortuneChat({
   const welcomeMessages = useMemo(
     () => [
       {
-        text: `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
+        text: `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '포춘냥이' 다냥! 😺`,
       },
       { text: "너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!" },
       { text: "내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖" },
@@ -967,7 +967,7 @@ export default function FortuneChat({
                       disabled={!!typingMessageId}
                       className={`
                         px-4 py-2 rounded-full border transition-all duration-300
-                        ${option === "직접 입력하기" ? "bg-purple-500" : ""}
+                        ${option == "직접 입력하기" ? "bg-purple-500" : ""}
                         ${
                           selectedOption === option
                             ? "keyword-selected border-purple-500 shadow-md"
