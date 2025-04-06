@@ -17,7 +17,7 @@ import {
   Gift,
   Coffee,
   Zap,
-  Brain,
+  Handshake,
   Share2,
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
@@ -774,18 +774,28 @@ export default function FriendshipCompatibilityResultPage() {
                   delay={index * 0.1}
                   icon={
                     index === 0 ? (
-                      <Brain className="w-5 h-5 text-[#990dfa]" />
+                      <Handshake className="w-5 h-5 text-[#fff]" />
                     ) : index === 1 ? (
-                      <Star className="w-5 h-5 text-[#990dfa]" />
+                      <Star className="w-5 h-5 text-[#fff]" />
                     ) : index === 2 ? (
-                      <Coffee className="w-5 h-5 text-[#990dfa]" />
+                      <Coffee className="w-5 h-5 text-[#fff]" />
                     ) : index === 3 ? (
-                      <Heart className="w-5 h-5 text-[#990dfa]" />
+                      <Heart className="w-5 h-5 text-[#fff]" />
                     ) : (
-                      <Zap className="w-5 h-5 text-[#990dfa]" />
+                      <Zap className="w-5 h-5 text-[#fff]" />
                     )
                   }
-                  color={`rgba(153, 13, 250, ${0.1 + index * 0.05})`}
+                  color={
+                    index === 0
+                      ? "rgba(255, 77, 128, 0.8)"
+                      : index === 1
+                      ? "rgba(255, 159, 64, 0.8)"
+                      : index === 2
+                      ? "rgba(153, 13, 250, 0.8)"
+                      : index === 3
+                      ? "rgba(64, 93, 255, 0.8)"
+                      : "rgba(72, 187, 120, 0.8)"
+                  }
                 >
                   <div>
                     <p className="text-gray-700 mb-3">{category.analysis}</p>

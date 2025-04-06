@@ -125,9 +125,21 @@ export default function FortuneChat({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // 메시지가 변경될 때 스크롤
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 입력 영역이 표시될 때도 스크롤
+  useEffect(() => {
+    if (
+      currentStep === "DIRECT_INPUT" ||
+      (currentOptions.length > 0 && initialMessagesComplete && !typingMessageId)
+    ) {
+      scrollToBottom();
+    }
+  }, [currentStep, currentOptions, initialMessagesComplete, typingMessageId]);
 
   // 환영 메시지 배열 - useMemo로 감싸서 의존성 배열 경고 해결
   const welcomeMessages = useMemo(
@@ -146,7 +158,11 @@ export default function FortuneChat({
   // 타이핑 효과를 위한 함수
   const addMessageWithTypingEffect = useCallback(
     (
-      messageObj: { text?: string; imageUrl?: string },
+      messageObj: {
+        text?: string;
+        imageUrl?: string;
+        isFortuneResult?: boolean;
+      },
       delay: number = 1000,
       typingDelay: number = 1200
     ) => {
@@ -156,6 +172,8 @@ export default function FortuneChat({
           typeof messageObj === "string" ? messageObj : messageObj.text || "";
         const imageUrl =
           typeof messageObj === "object" ? messageObj.imageUrl : undefined;
+        const isFortuneResult =
+          typeof messageObj === "object" ? messageObj.isFortuneResult : false;
 
         // 먼저 타이핑 중인 메시지 추가
         const typingId = uuidv4();
@@ -163,6 +181,7 @@ export default function FortuneChat({
           id: typingId,
           sender: "system",
           text: "...",
+          isFortuneResult,
         };
 
         setTypingMessageId(typingId);
@@ -181,7 +200,9 @@ export default function FortuneChat({
           setTypingMessageId(null);
           setMessages((prev) =>
             prev.map((msg) =>
-              msg.id === typingId ? { ...msg, text, imageUrl } : msg
+              msg.id === typingId
+                ? { ...msg, text, imageUrl, isFortuneResult }
+                : msg
             )
           );
           scrollToBottom();
@@ -326,6 +347,47 @@ export default function FortuneChat({
     }
   };
 
+  // 운세 텍스트를 단락별로 나누어 메시지로 추가하는 함수
+  const handleFortuneTextByParagraphs = async (
+    fortuneText: string,
+    isLastMessageLoading: boolean = true
+  ) => {
+    // 이미 로딩 메시지가 있다면 제거
+    if (isLastMessageLoading) {
+      setMessages((prev) => [...prev.slice(0, -1)]);
+    }
+
+    // 텍스트를 문단으로 분리 (\n\n 기준)
+    const paragraphs = fortuneText.split("\n\n").filter((p) => p.trim() !== "");
+
+    // 각 문단에 대해 타이핑 효과 적용
+    for (let i = 0; i < paragraphs.length; i++) {
+      const isLastParagraph = i === paragraphs.length - 1;
+      let paragraphText = paragraphs[i].trim();
+
+      // 마지막 문단에만 고양이 이모티콘 추가
+      if (isLastParagraph) {
+        paragraphText += " 😽";
+      }
+
+      await addMessageWithTypingEffect(
+        {
+          text: paragraphText,
+          isFortuneResult: isLastParagraph, // 마지막 문단에만 운세 결과 메시지임을 표시
+        },
+        isLastParagraph ? 1000 : 500, // 마지막 문단은 더 오래 보여줌
+        Math.min(1200, paragraphText.length * 30) // 문단 길이에 비례한 타이핑 시간
+      );
+    }
+
+    // 부적 생성 버튼 표시 및 다시 상담하기 옵션 추가
+    setShowTalismanButton(true);
+    setTimeout(() => {
+      setCurrentOptions(["다시 상담하기"]);
+      setCurrentStep("FORTUNE_RESULT");
+    }, 1000);
+  };
+
   // 직접 입력 처리 함수
   const handleDirectInput = async (text: string) => {
     if (typingMessageId) return; // 타이핑 중이면 무시
@@ -354,7 +416,7 @@ export default function FortuneChat({
 
     // 로딩 메시지 추가 (타이핑 효과 적용)
     await addMessageWithTypingEffect(
-      { text: "고민을 살펴보고 있어요..." },
+      { text: "고민을 살펴보고 있다냥..." },
       500,
       1000
     );
@@ -380,27 +442,8 @@ export default function FortuneChat({
       const data = await response.json();
       const fortuneText = data.fortune;
 
-      // 운세 메시지를 먼저 표시 (고양이 이모티콘 추가)
-      const fortuneMessageId = uuidv4();
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        {
-          id: fortuneMessageId,
-          sender: "system",
-          text: fortuneText + " 😽", // 고양이 이모티콘 추가
-          isFortuneResult: true, // 운세 결과 메시지임을 표시하는 플래그 추가
-        },
-      ]);
-      scrollToBottom();
-
-      // 부적 생성 버튼 표시
-      setShowTalismanButton(true);
-
-      // 결과 화면에서 '다시 상담하기' 옵션 추가
-      setTimeout(() => {
-        setCurrentOptions(["다시 상담하기"]);
-        setCurrentStep("FORTUNE_RESULT");
-      }, 1000);
+      // 운세 텍스트를 단락별로 처리
+      await handleFortuneTextByParagraphs(fortuneText);
     } catch (error: unknown) {
       console.error(
         "오류 발생:",
@@ -594,26 +637,8 @@ export default function FortuneChat({
       const data = await response.json();
       const fortuneText = data.fortune;
 
-      // 운세 메시지를 먼저 표시 (고양이 이모티콘 추가)
-      const fortuneMessageId = uuidv4();
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        {
-          id: fortuneMessageId,
-          sender: "system",
-          text: fortuneText + " 😽", // 고양이 이모티콘 추가
-          isFortuneResult: true, // 운세 결과 메시지임을 표시하는 플래그 추가
-        },
-      ]);
-      scrollToBottom();
-
-      // 부적 생성 버튼 표시
-      setShowTalismanButton(true);
-
-      // 결과 화면에서 '다시 상담하기' 옵션 추가
-      setTimeout(() => {
-        setCurrentOptions(["다시 상담하기"]);
-      }, 1000);
+      // 운세 텍스트를 단락별로 처리
+      await handleFortuneTextByParagraphs(fortuneText);
     } catch (error: unknown) {
       console.error(
         "운세 생성 오류:",
@@ -755,7 +780,6 @@ export default function FortuneChat({
 
   // 특정 메시지 저장 핸들러 - 버튼 숨김 추가
   const handleSaveMessage = async (messageId: string) => {
-    setSavedMessageId(messageId);
     await handleSaveConsultation();
 
     // 저장 성공 메시지 표시
@@ -780,6 +804,7 @@ export default function FortuneChat({
         },
       }
     );
+    setSavedMessageId(messageId);
   };
 
   return (
@@ -838,7 +863,7 @@ export default function FortuneChat({
                   {savedMessageId !== message.id && (
                     <button
                       onClick={() => handleSaveMessage(message.id)}
-                      className={`flex items-center justify-center reaction-btn p-1 pr-3 rounded-full transition-all hover:bg-gray-100 text-gray-400`}
+                      className={`flex items-center justify-center reaction-btn p-1 pr-3 rounded-full transition-all bg-white text-gray-400`}
                       aria-label="상담 간직하기"
                     >
                       <div className="w-8 h-8 flex items-center justify-center">
@@ -886,7 +911,7 @@ export default function FortuneChat({
             onClick={handleGenerateTalisman}
             disabled={isGeneratingTalisman}
             className={`
-              px-5 py-2.5 rounded-lg flex items-center justify-center 
+              px-5 py-2.5 w-full rounded-lg flex items-center justify-center 
               ${
                 isGeneratingTalisman
                   ? "bg-gray-300 cursor-not-allowed"

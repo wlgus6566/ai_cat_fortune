@@ -306,9 +306,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center mt-2">
-                    <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                      지금 확인하기
-                    </span>
+                    <span className="text-xs">지금 확인하기</span>
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </div>
                 </div>
