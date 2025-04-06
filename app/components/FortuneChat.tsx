@@ -145,7 +145,7 @@ export default function FortuneChat({
   const welcomeMessages = useMemo(
     () => [
       {
-        text: `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '포춘냥이' 다냥! 😺`,
+        text: `안냥! ${userName}냥, 난 고민을 들어주는 고민마스터 '묘묘' 다냥! 😺`,
       },
       { text: "너의 비밀은 꼭꼭 지켜줄 테니 안심하라냥!" },
       { text: "내가 따뜻한 조언과 귀여운 응원을 보내줄 거라냥~! 💖" },
@@ -715,7 +715,7 @@ export default function FortuneChat({
     if (messages.length === 0) return;
 
     // 상담 제목 (사용자의 첫 고민 메시지 또는 선택한 고민)
-    const title = currentConcernText || "포춘냥이와의 상담";
+    const title = currentConcernText || "묘묘와의 상담";
 
     console.log("상담 내역 저장 준비:", {
       title,
@@ -811,7 +811,7 @@ export default function FortuneChat({
     <div className="flex flex-col flex-1 min-h-[calc(100vh-200px)]">
       <Toaster />
       {/* 채팅 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto mb-4 p-2 mt-2">
+      <div className="flex-1 overflow-y-auto my-4 p-2">
         {messages.map((message) => (
           <div key={message.id} className="mb-4">
             <ChatMessage
@@ -967,12 +967,12 @@ export default function FortuneChat({
                       disabled={!!typingMessageId}
                       className={`
                         px-4 py-2 rounded-full border transition-all duration-300
-                        ${option == "직접 입력하기" ? "bg-purple-500" : ""}
-                        ${
-                          selectedOption === option
-                            ? "keyword-selected border-purple-500 shadow-md"
-                            : "bg-white border-purple-300 hover:bg-purple-50"
-                        }
+                         ${
+                           selectedOption === option
+                             ? "keyword-selected border-purple-500 shadow-md"
+                             : "border-purple-300 hover:bg-purple-50"
+                         }
+                        ${option == "직접 입력하기" ? "bg-purple-300" : ""}
                         ${
                           typingMessageId ? "opacity-50 cursor-not-allowed" : ""
                         }

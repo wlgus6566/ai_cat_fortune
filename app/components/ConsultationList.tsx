@@ -43,7 +43,7 @@ export default function ConsultationList({
           아직 상담 내역이 없어요
         </h3>
         <p className="text-gray-600 mb-6">
-          고민이 있다면 포춘냥이와 상담을 시작해보세요!
+          고민이 있다면 묘묘와 상담을 시작해보세요!
         </p>
         <Link href="/chat">
           <button className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors">

@@ -385,9 +385,7 @@ export default function HomePage() {
           />
         </div>
         <motion.button
-          className={`btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1 ${
-            loading ? "btn-magic-loading" : ""
-          }`}
+          className={`btn-magic w-full max-w-md py-4 text-lg font-medium relative z-1`}
           onClick={fetchDailyFortune}
           disabled={loading}
           whileTap={{ scale: 0.98 }}
@@ -894,7 +892,7 @@ export default function HomePage() {
                   운세 상담
                 </h4>
                 <p className="text-sm text-gray-600">
-                  포춘냥이와 운세 기반 고민 상담
+                  묘묘와 운세 기반 고민 상담
                 </p>
               </motion.div>
             </Link>
