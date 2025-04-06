@@ -245,6 +245,14 @@ export default function ProfileEditPage() {
     setIsSaving(true);
 
     try {
+      // 프로필 변경 여부 확인 (이미지 외 데이터가 변경되었는지)
+      const isProfileDataChanged =
+        userProfile?.name !== name ||
+        userProfile?.gender !== gender ||
+        userProfile?.birthDate !== birthDate ||
+        userProfile?.calendarType !== calendarType ||
+        userProfile?.birthTime !== birthTime;
+
       // 프로필 업데이트
       await updateUserProfile({
         name,
@@ -255,8 +263,18 @@ export default function ProfileEditPage() {
         profileImageUrl: profileImage,
       });
 
-      // 저장된 운세 데이터 삭제 (새로운 프로필 정보로 운세를 다시 불러오기 위함)
-      clearStoredFortune();
+      // 이미지 외 다른 데이터가 변경된 경우에만 저장된 운세 데이터 삭제
+      if (isProfileDataChanged) {
+        // 저장된 운세 데이터 삭제 (새로운 프로필 정보로 운세를 다시 불러오기 위함)
+        clearStoredFortune();
+        console.log(
+          "프로필 데이터가 변경되어 저장된 운세 데이터를 삭제했습니다."
+        );
+      } else {
+        console.log(
+          "프로필 이미지만 변경되어 저장된 운세 데이터를 유지합니다."
+        );
+      }
 
       setMessage(t("saveSuccess"));
 

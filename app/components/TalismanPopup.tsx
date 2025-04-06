@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { X, Download } from "lucide-react";
+import { X, Download, Flame } from "lucide-react";
 
 interface TalismanPopupProps {
   imageUrl: string;
@@ -32,6 +32,8 @@ export default function TalismanPopup({
   const [isFullyVisible, setIsFullyVisible] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [isBurning, setIsBurning] = useState(false);
+  const [isBurned, setIsBurned] = useState(false);
   useEffect(() => {
     // Animation sequence starts when popup is mounted
     const timer1 = setTimeout(() => {
@@ -119,6 +121,26 @@ export default function TalismanPopup({
       setTimeout(() => setSaveMessage(null), 3000);
     }
   };
+
+  // 부적 태우기 함수
+  const handleBurnTalisman = () => {
+    setIsBurning(true);
+  };
+
+  // 부적 태우기 애니메이션 완료 후 실행
+  useEffect(() => {
+    if (isBurning) {
+      const timer = setTimeout(() => {
+        alert("내가 잘 처리했다냥!");
+        setIsBurned(true);
+        setTimeout(() => {
+          handleClose();
+        }, 500);
+      }, 3000); // 애니메이션 지속 시간
+
+      return () => clearTimeout(timer);
+    }
+  }, [isBurning]);
 
   // 부적 제목 생성
   const getTalismanTitle = () => {
@@ -240,11 +262,14 @@ export default function TalismanPopup({
                   alt={"행운의 부적"}
                   fill
                   quality={90}
-                  className={`object-contain rounded-lg transition-all duration-1000 ${
-                    isFullyVisible
-                      ? "scale-100 filter-none"
-                      : "scale-105 blur-sm"
-                  }`}
+                  className={`object-contain rounded-lg transition-all duration-1000 
+                    ${
+                      isFullyVisible
+                        ? "scale-100 filter-none"
+                        : "scale-105 blur-sm"
+                    }
+                    ${isBurning ? "burning-animation" : ""}
+                    ${isBurned ? "opacity-0" : ""}`}
                   style={{
                     transform: isFullyVisible
                       ? "translateY(0)"
@@ -286,8 +311,8 @@ export default function TalismanPopup({
                 })}
               </p>
 
-              {/* 저장 버튼 */}
-              <div className="mt-4 w-full flex justify-center pb-6">
+              {/* 저장 및 태우기 버튼 */}
+              <div className="mt-4 w-full flex justify-center gap-2 pb-6">
                 <button
                   onClick={handleSaveImage}
                   className={`
@@ -302,6 +327,26 @@ export default function TalismanPopup({
                 >
                   <Download className="w-5 h-5" />
                   <span>이미지 저장</span>
+                </button>
+
+                <button
+                  onClick={handleBurnTalisman}
+                  disabled={isBurning || isBurned}
+                  className={`
+                    flex items-center justify-center space-x-2 px-4 py-2 rounded-full
+                    ${
+                      darkMode
+                        ? "bg-red-700 text-white hover:bg-red-600"
+                        : "bg-red-500 text-white hover:bg-red-600"
+                    }
+                    ${
+                      (isBurning || isBurned) && "opacity-50 cursor-not-allowed"
+                    }
+                    transition-all shadow-md
+                  `}
+                >
+                  <Flame className="w-5 h-5" />
+                  <span>부적 태우기</span>
                 </button>
               </div>
 
@@ -323,6 +368,85 @@ export default function TalismanPopup({
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes burn {
+          0% {
+            clip-path: inset(0 0 0 0);
+            filter: brightness(1) sepia(0);
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+          20% {
+            filter: brightness(1.2) sepia(0.3) hue-rotate(10deg);
+            transform: scale(1.02) rotate(1deg);
+          }
+          40% {
+            clip-path: polygon(
+              20% 0%,
+              80% 0%,
+              100% 20%,
+              100% 80%,
+              80% 100%,
+              20% 100%,
+              0% 80%,
+              0% 20%
+            );
+            filter: brightness(1.3) sepia(0.5) hue-rotate(20deg);
+            transform: scale(1.03) rotate(-1deg);
+            opacity: 0.9;
+          }
+          60% {
+            clip-path: polygon(
+              30% 0%,
+              70% 0%,
+              100% 30%,
+              100% 70%,
+              70% 100%,
+              30% 100%,
+              0% 70%,
+              0% 30%
+            );
+            filter: brightness(1.4) sepia(0.7) hue-rotate(30deg);
+            transform: scale(1.01) rotate(2deg);
+            opacity: 0.7;
+          }
+          80% {
+            clip-path: polygon(
+              40% 0%,
+              60% 0%,
+              100% 40%,
+              100% 60%,
+              60% 100%,
+              40% 100%,
+              0% 60%,
+              0% 40%
+            );
+            filter: brightness(1.6) sepia(0.8) hue-rotate(40deg);
+            transform: scale(0.98) rotate(-2deg);
+            opacity: 0.4;
+          }
+          100% {
+            clip-path: polygon(
+              50% 0%,
+              50% 0%,
+              100% 50%,
+              50% 100%,
+              50% 100%,
+              50% 100%,
+              0% 50%,
+              50% 0%
+            );
+            filter: brightness(1.8) sepia(1) hue-rotate(50deg);
+            transform: scale(0.95) rotate(0deg);
+            opacity: 0;
+          }
+        }
+
+        .burning-animation {
+          animation: burn 3s forwards;
+        }
+      `}</style>
     </div>
   );
 }
