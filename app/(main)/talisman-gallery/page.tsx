@@ -126,10 +126,21 @@ export default function TalismanGalleryPage() {
       console.warn("삭제할 부적 ID가 없습니다.");
       return;
     }
-    console.log(`부적 ID ${deletedId} 삭제 완료, 목록 갱신됨`);
-    setTalismans((prevTalismans) =>
-      prevTalismans.filter((item) => item.id !== deletedId)
+    console.log(
+      `TalismanGallery: 부적 ID ${deletedId} 삭제 완료, 목록 갱신 시작`
     );
+    setTalismans((prevTalismans) => {
+      console.log(
+        "TalismanGallery: 이전 부적 목록 길이:",
+        prevTalismans.length
+      );
+      const newTalismans = prevTalismans.filter(
+        (item) => item.id !== deletedId
+      );
+      console.log("TalismanGallery: 새 부적 목록 길이:", newTalismans.length);
+      return newTalismans;
+    });
+    console.log(`TalismanGallery: 부적 ID ${deletedId} 삭제 후 화면 갱신 완료`);
   };
 
   // 부적 클릭 핸들러 수정 - 이제 Context API를 사용하면서 추가 정보 전달

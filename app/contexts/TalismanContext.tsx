@@ -118,8 +118,17 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
 
       const result = await response.json();
 
-      // 삭제 성공 시 deletedTalismanId 상태 업데이트
+      // 삭제 성공 시 콜백 직접 호출 후 상태 업데이트
       if (result.success === true) {
+        console.log("TalismanContext: 부적 삭제 성공", id);
+
+        // 콜백이 있는 경우 직접 호출
+        if (onTalismanDeleted) {
+          console.log("TalismanContext: onTalismanDeleted 콜백 직접 호출", id);
+          onTalismanDeleted(id);
+        }
+
+        // 상태 업데이트 (useEffect에서 두 번째 콜백 호출을 위해)
         setDeletedTalismanId(id);
       }
 
