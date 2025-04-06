@@ -14,6 +14,8 @@ interface TalismanPopupProps {
   createdAt?: string;
   concern?: string;
   translatedPhrase?: string;
+  talismanId?: string;
+  onBurn?: (id: string) => Promise<boolean>;
 }
 
 export default function TalismanPopup({
@@ -25,6 +27,8 @@ export default function TalismanPopup({
   createdAt,
   concern,
   translatedPhrase,
+  talismanId,
+  onBurn,
 }: TalismanPopupProps) {
   const t = useTranslations("talisman");
   const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +38,11 @@ export default function TalismanPopup({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isBurning, setIsBurning] = useState(false);
   const [isBurned, setIsBurned] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletionAttempted, setDeletionAttempted] = useState(false);
+
   useEffect(() => {
     // Animation sequence starts when popup is mounted
     const timer1 = setTimeout(() => {
@@ -124,6 +133,10 @@ export default function TalismanPopup({
 
   // 부적 태우기 함수
   const handleBurnTalisman = () => {
+    // talismanId가 없으면 삭제 기능을 실행하지 않음
+    if (!talismanId) {
+      console.warn("부적 ID가 없어 태우기만 실행됩니다:", talismanId);
+    }
     setIsBurning(true);
   };
 
@@ -131,16 +144,50 @@ export default function TalismanPopup({
   useEffect(() => {
     if (isBurning) {
       const timer = setTimeout(() => {
-        alert("내가 잘 처리했다냥!");
+        setShowAlert(true);
         setIsBurned(true);
+
+        // 부적 삭제 처리 - 아직 시도되지 않은 경우에만 실행
+        if (talismanId && onBurn && !deletionAttempted) {
+          console.log("부적 삭제 시작:", talismanId);
+          setIsDeleting(true);
+          setDeletionAttempted(true); // 삭제 시도 표시
+
+          onBurn(talismanId)
+            .then((success) => {
+              if (!success) {
+                setDeleteError("부적 삭제에 실패했습니다.");
+                console.warn("부적 삭제 실패:", talismanId);
+              } else {
+                console.log("부적 삭제 성공:", talismanId);
+              }
+            })
+            .catch((error) => {
+              console.error("부적 삭제 실패:", error);
+              setDeleteError("부적 삭제 중 오류가 발생했습니다.");
+            })
+            .finally(() => {
+              setIsDeleting(false);
+            });
+        } else if (deletionAttempted) {
+          console.log("이미 부적 삭제가 시도되었습니다.");
+        } else {
+          console.log("부적 ID 또는 삭제 함수가 없음:", {
+            talismanId,
+            hasBurnFn: !!onBurn,
+          });
+        }
+
+        // 삭제 결과와 상관없이 3초 후 팝업 닫기
         setTimeout(() => {
+          setShowAlert(false);
           handleClose();
-        }, 500);
+        }, 3000);
       }, 3000); // 애니메이션 지속 시간
 
       return () => clearTimeout(timer);
     }
-  }, [isBurning]);
+  }, [isBurning, talismanId, onBurn, deletionAttempted]);
 
   // 부적 제목 생성
   const getTalismanTitle = () => {
@@ -331,7 +378,7 @@ export default function TalismanPopup({
 
                 <button
                   onClick={handleBurnTalisman}
-                  disabled={isBurning || isBurned}
+                  disabled={isBurning || isBurned || isDeleting}
                   className={`
                     flex items-center justify-center space-x-2 px-4 py-2 rounded-full
                     ${
@@ -340,13 +387,14 @@ export default function TalismanPopup({
                         : "bg-red-500 text-white hover:bg-red-600"
                     }
                     ${
-                      (isBurning || isBurned) && "opacity-50 cursor-not-allowed"
+                      (isBurning || isBurned || isDeleting) &&
+                      "opacity-50 cursor-not-allowed"
                     }
                     transition-all shadow-md
                   `}
                 >
                   <Flame className="w-5 h-5" />
-                  <span>부적 태우기</span>
+                  <span>{isDeleting ? "삭제 중..." : "부적 태우기"}</span>
                 </button>
               </div>
 
@@ -364,10 +412,35 @@ export default function TalismanPopup({
                   {saveMessage}
                 </div>
               )}
+
+              {/* 삭제 에러 메시지 */}
+              {deleteError && (
+                <div className="mt-2 text-sm text-red-500">{deleteError}</div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* 커스텀 알림 UI */}
+      {showAlert && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full z-10 transform transition-all duration-300 ease-in-out scale-100 opacity-100">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mr-4">
+                <span className="text-2xl">😺</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  부적 태우기 완료!
+                </h3>
+                <p className="text-gray-700">내가 잘 처리했다냥!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
         @keyframes burn {

@@ -25,9 +25,27 @@ function TalismanPopupContainer() {
     darkMode,
     closeTalisman,
     translatedPhrase,
+    talismanId,
+    deleteTalisman,
+    onTalismanDeleted,
   } = useTalisman();
 
   if (!isOpen || !imageUrl) return null;
+
+  // 부적 삭제 핸들러 - 삭제 후 콜백 호출 처리
+  const handleBurn = async (id: string) => {
+    try {
+      const success = await deleteTalisman(id);
+      if (success && onTalismanDeleted) {
+        // 성공 시 콜백 직접 호출
+        onTalismanDeleted(id);
+      }
+      return success;
+    } catch (error) {
+      console.error("부적 삭제 오류:", error);
+      return false;
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={closeTalisman} zIndex={100}>
@@ -38,6 +56,8 @@ function TalismanPopupContainer() {
         title={title}
         translatedPhrase={translatedPhrase}
         darkMode={darkMode}
+        talismanId={talismanId}
+        onBurn={handleBurn} // 래퍼 함수 전달
       />
     </Modal>
   );

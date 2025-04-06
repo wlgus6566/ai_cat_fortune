@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface TalismanContextType {
   isOpen: boolean;
@@ -11,6 +17,8 @@ interface TalismanContextType {
   createdAt?: string;
   concern?: string;
   translatedPhrase?: string;
+  talismanId?: string;
+  onTalismanDeleted?: (id: string) => void;
   openTalisman: (params: {
     imageUrl: string;
     userName?: string;
@@ -19,8 +27,11 @@ interface TalismanContextType {
     createdAt?: string;
     concern?: string;
     translatedPhrase?: string;
+    talismanId?: string;
+    onTalismanDeleted?: (id: string) => void;
   }) => void;
   closeTalisman: () => void;
+  deleteTalisman: (id: string) => Promise<boolean>;
 }
 
 const TalismanContext = createContext<TalismanContextType | undefined>(
@@ -38,6 +49,23 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
   const [translatedPhrase, setTranslatedPhrase] = useState<
     string | undefined
   >();
+  const [talismanId, setTalismanId] = useState<string | undefined>();
+  const [onTalismanDeleted, setOnTalismanDeleted] = useState<
+    ((id: string) => void) | undefined
+  >();
+  const [deletedTalismanId, setDeletedTalismanId] = useState<string | null>(
+    null
+  );
+
+  // 부적 삭제 완료 후 콜백 처리를 위한 useEffect
+  useEffect(() => {
+    if (deletedTalismanId && onTalismanDeleted) {
+      // 콜백 함수 실행
+      onTalismanDeleted(deletedTalismanId);
+      // 상태 초기화
+      setDeletedTalismanId(null);
+    }
+  }, [deletedTalismanId, onTalismanDeleted]);
 
   const openTalisman = ({
     imageUrl,
@@ -47,6 +75,8 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     createdAt,
     concern,
     translatedPhrase,
+    talismanId,
+    onTalismanDeleted,
   }: {
     imageUrl: string;
     userName?: string;
@@ -55,6 +85,8 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     createdAt?: string;
     concern?: string;
     translatedPhrase?: string;
+    talismanId?: string;
+    onTalismanDeleted?: (id: string) => void;
   }) => {
     setImageUrl(imageUrl);
     setUserName(userName);
@@ -63,11 +95,39 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     setCreatedAt(createdAt);
     setConcern(concern);
     setTranslatedPhrase(translatedPhrase);
+    setTalismanId(talismanId);
+    setOnTalismanDeleted(onTalismanDeleted);
     setIsOpen(true);
   };
 
   const closeTalisman = () => {
     setIsOpen(false);
+  };
+
+  const deleteTalisman = async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/talisman?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("부적 삭제 실패:", errorData);
+        return false;
+      }
+
+      const result = await response.json();
+
+      // 삭제 성공 시 deletedTalismanId 상태 업데이트
+      if (result.success === true) {
+        setDeletedTalismanId(id);
+      }
+
+      return result.success === true;
+    } catch (error) {
+      console.error("부적 삭제 중 오류 발생:", error);
+      return false;
+    }
   };
 
   return (
@@ -81,8 +141,11 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
         createdAt,
         concern,
         translatedPhrase,
+        talismanId,
+        onTalismanDeleted,
         openTalisman,
         closeTalisman,
+        deleteTalisman,
       }}
     >
       {children}

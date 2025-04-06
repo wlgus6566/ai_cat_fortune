@@ -9,11 +9,21 @@ interface UserTalismansProps {
   userId: string;
 }
 
+// 부적 타입 정의 추가
+interface Talisman {
+  id: string;
+  publicUrl: string;
+  concern?: string;
+  createdAt: string;
+}
+
 export default function UserTalismans({ userId }: UserTalismansProps) {
-  const [talismans, setTalismans] = useState<string[]>([]);
+  const [talismans, setTalismans] = useState<Talisman[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTalisman, setSelectedTalisman] = useState<string | null>(null);
+  const [selectedTalisman, setSelectedTalisman] = useState<Talisman | null>(
+    null
+  );
   const [showPopup, setShowPopup] = useState(false);
   const t = useTranslations();
 
@@ -50,8 +60,17 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
     fetchTalismans();
   }, [userId]);
 
-  const handleTalismanClick = (imageUrl: string) => {
-    setSelectedTalisman(imageUrl);
+  // 부적 삭제 후 목록 갱신 함수 추가
+  const handleTalismanDeleted = async (talismanId: string) => {
+    setTalismans((prevTalismans) =>
+      prevTalismans.filter((talisman) => talisman.id !== talismanId)
+    );
+    setShowPopup(false);
+    return true;
+  };
+
+  const handleTalismanClick = (talisman: Talisman) => {
+    setSelectedTalisman(talisman);
     setShowPopup(true);
   };
 
@@ -83,19 +102,19 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
     <div className="my-6">
       <h2 className="text-xl font-bold mb-4">나의 부적 이미지</h2>
       <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {talismans.map((talismanUrl, index) => (
+        {talismans.map((talisman) => (
           <div
-            key={index}
+            key={talisman.id}
             className="border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => handleTalismanClick(talismanUrl)}
+            onClick={() => handleTalismanClick(talisman)}
           >
             <div
               className="relative w-full overflow-hidden rounded-md"
               style={{ aspectRatio: "9/16" }}
             >
               <Image
-                src={talismanUrl}
-                alt={`부적 이미지 ${index + 1}`}
+                src={talisman.publicUrl}
+                alt={`부적 이미지 ${talisman.id}`}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover"
@@ -108,8 +127,12 @@ export default function UserTalismans({ userId }: UserTalismansProps) {
       {/* 부적 팝업 */}
       {showPopup && selectedTalisman && (
         <TalismanPopup
-          imageUrl={selectedTalisman}
+          imageUrl={selectedTalisman.publicUrl}
           onClose={() => setShowPopup(false)}
+          talismanId={selectedTalisman.id}
+          onBurn={handleTalismanDeleted}
+          concern={selectedTalisman.concern}
+          createdAt={new Date(selectedTalisman.createdAt).toLocaleDateString()}
         />
       )}
     </div>

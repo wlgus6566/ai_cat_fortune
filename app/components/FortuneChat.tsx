@@ -811,7 +811,7 @@ export default function FortuneChat({
     <div className="flex flex-col flex-1 min-h-[calc(100vh-200px)]">
       <Toaster />
       {/* 채팅 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto mb-4 p-2">
+      <div className="flex-1 overflow-y-auto mb-4 p-2 mt-2">
         {messages.map((message) => (
           <div key={message.id} className="mb-4">
             <ChatMessage
@@ -967,6 +967,7 @@ export default function FortuneChat({
                       disabled={!!typingMessageId}
                       className={`
                         px-4 py-2 rounded-full border transition-all duration-300
+                        ${option === "직접 입력하기" ? "bg-purple-500" : ""}
                         ${
                           selectedOption === option
                             ? "keyword-selected border-purple-500 shadow-md"

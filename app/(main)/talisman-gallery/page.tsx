@@ -120,17 +120,21 @@ export default function TalismanGalleryPage() {
     fetchTalismans();
   }, [userProfile?.id]);
 
+  // 부적 삭제 후 목록 갱신 함수 - 컴포넌트 레벨에서 정의
+  const handleTalismanDeleted = (deletedId: string) => {
+    if (!deletedId) {
+      console.warn("삭제할 부적 ID가 없습니다.");
+      return;
+    }
+    console.log(`부적 ID ${deletedId} 삭제 완료, 목록 갱신됨`);
+    setTalismans((prevTalismans) =>
+      prevTalismans.filter((item) => item.id !== deletedId)
+    );
+  };
+
   // 부적 클릭 핸들러 수정 - 이제 Context API를 사용하면서 추가 정보 전달
   const handleTalismanClick = (talisman: Talisman) => {
-    console.log(1111, {
-      imageUrl: talisman.publicUrl,
-      userName: userProfile?.name,
-      title: t("talisman.popup.title"),
-      darkMode,
-      createdAt: formatDate(talisman.createdAt),
-      concern: talisman.concern,
-      translatedPhrase: talisman.translatedPhrase,
-    });
+    // 콜백 함수를 이미 컴포넌트 레벨에서 정의했으므로 여기서는 사용만 함
     openTalisman({
       imageUrl: talisman.publicUrl,
       userName: userProfile?.name,
@@ -139,6 +143,8 @@ export default function TalismanGalleryPage() {
       createdAt: formatDate(talisman.createdAt),
       concern: talisman.concern,
       translatedPhrase: talisman.translatedPhrase,
+      talismanId: talisman.id,
+      onTalismanDeleted: handleTalismanDeleted,
     });
   };
 
