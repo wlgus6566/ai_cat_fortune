@@ -218,7 +218,7 @@ export default function TalismanPopup({
               <div
                 className={`relative w-full`}
                 style={{
-                  aspectRatio: "9/16",
+                  aspectRatio: "4/5",
                   maxWidth: "350px",
                   maxHeight: "80vh",
                   overflow: "hidden",

@@ -382,6 +382,14 @@ advice 역시 같은 톤을 유지하되, talisman보다 조금 더 조언적인
 }
 
 /**
+ * 응답에서 HTML br 태그를 제거하는 함수
+ */
+function removeBrTags(response: string): string {
+  // <br>, <br/>, <br /> 등의 모든 br 태그 변형을 제거
+  return response.replace(/<br\s*\/?>/gi, "\n");
+}
+
+/**
  * 선택형 고민 상담 응답 함수 (4단계 세부 고민)
  */
 export async function getFortuneResponse(
@@ -414,14 +422,14 @@ export async function getFortuneResponse(
           
           2. **내용 구성**: 아래 구조로 자연스럽고 따뜻하게 말해줘야 한다냥~
           
-          [😺 지금 흐름이 어떤지 알려줄게냥~]  
+          😺 지금 흐름이 어떤지 알려줄게냥~
           - 사용자의 사주를 기반으로 현재 기운과 운세의 흐름을 부드럽게 설명해줘냥~
           
-          [🔍 고민에 대해 해줄 말이 있다옹~]  
+          🔍 고민에 대해 해줄 말이 있다옹~  
           - 고민을 진심으로 공감하면서 현실적인 조언을 건네줘야 해냥~  
           - 너무 딱딱하지 않게, 마치 친구처럼 부드럽게 말해줘냥!
           
-          [🌈 힘이 되는 따뜻한 한마디다냥~]  
+          🌈 힘이 되는 따뜻한 한마디다냥~  
           - 사용자가 위로받고 미소 지을 수 있도록 응원과 희망을 전해줘냥~  
           - 적절한 이모티콘도 함께 써주면 더 좋다냥! (예: 😻, ✨, 🐱)
           
@@ -431,10 +439,11 @@ export async function getFortuneResponse(
           
           5. **주의사항**: 고양이 말투를 빠뜨리면 안 된다냥! 꼭! 전부 "~냥", "~다냥", "~옹"으로 끝내야 한다냥!
 
-          각 섹션은 반드시 줄바꿈<br/>을 활용해 시각적으로 구분해줘야 한다냥!  
+          각 섹션은 반드시 줄바꿈으로 구분해줘야 한다냥!  
           섹션 제목([😺 ...])은 한 줄 위에 띄우고, 볼드체로 강조되면 더 좋아냥~  
           문단이 한 덩어리처럼 보이지 않게 **세 단락으로 깔끔하게 나눠서 출력**해줘야 한다냥!
-
+          
+          중요: HTML 태그 <br/>이나 <br>를 절대 사용하지 마라냥! 대신 일반 줄바꿈만 사용해야 한다냥!
           `,
         },
         {
@@ -445,10 +454,12 @@ export async function getFortuneResponse(
       ],
     });
 
-    return (
+    const content =
       response.choices[0].message.content ||
-      "죄송합니다, 운세를 볼 수 없습니다."
-    );
+      "죄송합니다, 운세를 볼 수 없습니다.";
+
+    // HTML br 태그 제거
+    return removeBrTags(content);
   } catch (error) {
     console.error("OpenAI API 호출 중 오류 발생:", error);
     return "죄송합니다, 지금은 운세를 볼 수 없습니다. 잠시 후 다시 시도해주세요.";
@@ -485,14 +496,14 @@ export async function getDirectFortuneResponse(
     
     2. **내용 구성**: 아래 구조로 자연스럽고 따뜻하게 말해줘야 한다냥~
     
-    [😺 지금 흐름이 어떤지 알려줄게냥~]  
+    😺 지금 흐름이 어떤지 알려줄게냥~ 
     - 사용자의 사주를 기반으로 현재 기운과 운세의 흐름을 부드럽게 설명해줘냥~
     
-    [🔍 고민에 대해 해줄 말이 있다옹~]  
+    🔍 고민에 대해 해줄 말이 있다옹~ 
     - 고민을 진심으로 공감하면서 현실적인 조언을 건네줘야 해냥~  
     - 너무 딱딱하지 않게, 마치 친구처럼 부드럽게 말해줘냥!
     
-    [🌈 힘이 되는 따뜻한 한마디다냥~]  
+    🌈 힘이 되는 따뜻한 한마디다냥~
     - 사용자가 위로받고 미소 지을 수 있도록 응원과 희망을 전해줘냥~  
     - 적절한 이모티콘도 함께 써주면 더 좋다냥! (예: 😻, ✨, 🐱)
     
@@ -501,6 +512,8 @@ export async function getDirectFortuneResponse(
     4. **이모티콘**: 과하지 않게, 적절히 사용해서 친근함을 더해줘냥~ 🐾
     
     5. **주의사항**: 고양이 말투를 빠뜨리면 안 된다냥! 꼭! 전부 "~냥", "~다냥", "~옹"으로 끝내야 한다냥!
+
+    중요: HTML 태그 <br/>이나 <br>를 절대 사용하지 마라냥! 대신 일반 줄바꿈만 사용해야 한다냥!
     `,
         },
         {
@@ -511,10 +524,12 @@ export async function getDirectFortuneResponse(
       ],
     });
 
-    return (
+    const content =
       response.choices[0].message.content ||
-      "죄송합니다, 운세를 볼 수 없습니다."
-    );
+      "죄송합니다, 운세를 볼 수 없습니다.";
+
+    // HTML br 태그 제거
+    return removeBrTags(content);
   } catch (error) {
     console.error("OpenAI API 호출 중 오류 발생:", error);
     return "죄송합니다, 지금은 운세를 볼 수 없습니다. 잠시 후 다시 시도해주세요.";
@@ -626,7 +641,7 @@ export async function getCompatibilityAnalysis(
 
 {
   "score": 83, // 총점 (0-100)
-  "summary": "함께 있을수록 더 빛나는 인연이야, 냥~",
+  "summary": "함께 있을수록 더 빛나는 인연이다냥~",
   "magicTitle": "별빛 아래 운명의 실타래",
   "compatibilityTheme": "상생의 기운",
   "details": {

@@ -8,29 +8,29 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-// 다양한 부적 프롬프트 템플릿
 const talismanTemplates = {
   default: () =>
-    `A modern pastel illustration of a Japanese-style lucky charm (omamori) with a cute, chubby cat character. The charm includes Japanese aesthetic elements, decorative knots, and spiritual symbols. Style: Kawaii, pastel colors, soft edges, warm and magical feeling. Aspect ratio 9:16. No text in image.`,
+    `A cute pastel Korean-style talisman illustration featuring a chubby, round-faced cat character. The cat is surrounded by lucky floating symbols (like clovers, stars, sparkles). Style: Korean cartoon, soft pastel colors, bold outlines, warm and magical. No text in image. Aspect ratio 9:16.`,
 
   romance: () =>
-    `A beautifully designed Japanese love charm (omamori) with heart motifs and soft pink/red colors. Features a cute cat character and romantic symbols. Style: Romantic, dreamy, kawaii, with soft pastel colors. Aspect ratio 9:16. No text in image.`,
+    `A pastel Korean-style love talisman illustration featuring a cute cat character holding a heart or surrounded by romantic motifs like roses, sparkles, or hearts. Style: Dreamy, kawaii, pink/red pastel tones, soft glow. No text in image. Aspect ratio 9:16.`,
 
   career: () =>
-    `A professional-looking Japanese success charm (omamori) with elements symbolizing career growth and achievement. Features a determined-looking cat character in business attire. Style: Professional with playful elements, blue and gold color scheme. Aspect ratio 9:16. No text in image.`,
+    `A Korean-style career talisman illustration with a determined cat character in office attire (like glasses, headset, or holding a notepad). Surrounded by stars or motivational symbols. Style: Playful and inspiring, pastel blue/yellow palette. No text in image. Aspect ratio 9:16.`,
 
   money: () =>
-    `A prosperity-focused Japanese wealth charm (omamori) with gold coins, money symbols and lucky elements. Features a happy cat character with a coin. Style: Abundant, prosperous, with green and gold colors. Aspect ratio 9:16. No text in image.`,
+    `A Korean-style money talisman illustration featuring a cheerful cat holding or surrounded by gold coins, money bags, and lucky symbols. Style: Joyful, abundant, pastel gold and green colors. No text in image. Aspect ratio 9:16.`,
 
   psychology: () =>
-    `A calming Japanese healing charm (omamori) with elements symbolizing mental peace and balance. Features a meditating cat character with serene expression. Style: Serene, soothing, with purples and blues. Aspect ratio 9:16. No text in image.`,
+    `A calm and soothing Korean-style healing talisman featuring a meditating cat with closed eyes. Surrounded by nature elements like leaves, clouds, or gentle waves. Style: Minimal, relaxing, pastel blue and purple tones. No text in image. Aspect ratio 9:16.`,
 
   relationships: () =>
-    `A harmonious Japanese friendship charm (omamori) with elements symbolizing connection and social bonds. Features multiple cute cat characters together. Style: Warm, connected, with yellows and oranges. Aspect ratio 9:16. No text in image.`,
+    `A warm Korean-style friendship talisman illustration with multiple cute cat characters playing or hugging. Surrounded by hearts, musical notes, or stars. Style: Connected, pastel orange/yellow palette. No text in image. Aspect ratio 9:16.`,
 
   lifestyle: () =>
-    `A balanced Japanese lifestyle charm (omamori) with elements symbolizing harmony and life enjoyment. Features a content cat character engaged in various activities. Style: Harmonious, diverse, with balanced color palette. Aspect ratio 9:16. No text in image.`,
+    `A Korean-style lifestyle talisman illustration showing a content cat enjoying daily life — eating, walking, or stretching. Background includes minimal decorative icons. Style: Wholesome, balanced, pastel color scheme. No text in image. Aspect ratio 9:16.`,
 };
+
 // const encouragingPhrases: Record<string, string[]> = {
 //   romance: [
 //     "Love is blooming for you 🌸",
@@ -249,7 +249,7 @@ export async function POST(request: Request) {
       model: "black-forest-labs/flux-dev",
       input: {
         prompt: prompt,
-        aspect_ratio: "9:16",
+        aspect_ratio: "4:5",
         num_outputs: 1,
         go_fast: true,
         megapixels: "1",

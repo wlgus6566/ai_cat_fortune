@@ -6,7 +6,7 @@ export const loveCompatibilityPrompt = `당신은 사주와 운세에 특화된 
 
 {
   "score": 83, // 총점 (0-100)
-  "summary": "함께 있을수록 더 빛나는 인연이야, 냥~",
+  "summary": "함께 있을수록 더 빛나는 인연이다냥~",
   "magicTitle": "별빛 아래 운명의 실타래",
   "compatibilityTheme": "상생의 기운",
   "details": {
