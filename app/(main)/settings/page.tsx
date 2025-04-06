@@ -98,7 +98,7 @@ export default function SettingsPage() {
 
       // 인증된 사용자인 경우
       if (isAuthenticated) {
-        // 1. 프로필 데이터 삭제
+        // 1. 프로필 데이터 삭제 (회원 탈퇴 시에는 DB에서 사용자 프로필을 완전히 삭제함)
         await clearUserProfile();
 
         // 2. NextAuth 로그아웃 (세션 삭제)

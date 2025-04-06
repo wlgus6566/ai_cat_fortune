@@ -365,7 +365,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         console.log("로컬 스토리지에서 프로필 삭제 완료");
       }
 
-      // Supabase에서 프로필 삭제 (인증된 사용자인 경우)
+      // Supabase에서 프로필 삭제 (인증된 사용자인 경우) - 회원 탈퇴 시에만 실행
       if (session?.user?.id) {
         try {
           const supabase = createSupabaseClient();
@@ -408,7 +408,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (isAuthenticated) {
         await signOut({ callbackUrl: "/" });
       }
-      await clearUserProfile();
+      // 로그아웃 시 프로필 데이터 삭제하지 않음
+      // 로컬 상태는 초기화
+      setUserProfile(null);
+      // 로컬 스토리지에서 프로필 삭제 (세션 없을 때 사용하는 데이터)
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(USER_PROFILE_KEY);
+      }
     } catch (error) {
       console.error("로그아웃 중 오류가 발생했습니다:", error);
       throw error;
