@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useUser } from "@/app/context/UserContext";
 import FortuneChat from "@/app/components/FortuneChat";
 import { UserProfile } from "@/app/type/types";
-import { Calendar } from "lucide-react";
+//import { Calendar } from "lucide-react";
 
 export default function ChatPage() {
   const { userProfile, isProfileComplete } = useUser();
   const [loading, setLoading] = useState(true);
-  const [currentDate, setCurrentDate] = useState("");
+  //const [currentDate, setCurrentDate] = useState("");
 
   // 날짜 포맷팅 함수
   const formatDate = () => {
@@ -27,7 +27,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     // 현재 날짜 설정
-    setCurrentDate(formatDate());
+    //setCurrentDate(formatDate());
 
     // 프로필이 완성된 경우 로딩 상태 업데이트
     if (isProfileComplete) {
