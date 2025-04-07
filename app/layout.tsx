@@ -9,8 +9,8 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AI 운세",
-  description: "AI가 알려주는 당신의 운세",
+  title: "AI 운세, 궁합 & 상담",
+  description: "AI가 알려주는 당신의 운세, 궁합 & 상담",
   icons: {
     icon: "/favicon.ico",
   },
