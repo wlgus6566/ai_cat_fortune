@@ -9,26 +9,26 @@ const replicate = new Replicate({
 });
 
 const talismanTemplates = {
-  default: () =>
-    `A cute pastel Korean-style talisman illustration featuring a chubby, round-faced cat character. The cat is surrounded by lucky floating symbols (like clovers, stars, sparkles). Style: Korean cartoon, soft pastel colors, bold outlines, warm and magical. No text in image. Aspect ratio 9:16.`,
+  default: (phrase: string) =>
+    `A vintage-style tarot card illustration featuring an anthropomorphic white cat in a mystical pose. The cat wears ornate medieval clothing and stands at the center of a symbolic magical scene. The card includes the phrase: "${phrase}" written in elegant calligraphy within the design. Style: Classic tarot, painterly details, fantasy European atmosphere, no modern text overlay. No written text in the image. Aspect ratio 9:16.`,
 
-  romance: () =>
-    `A pastel Korean-style love talisman illustration featuring a cute cat character holding a heart or surrounded by romantic motifs like roses, sparkles, or hearts. Style: Dreamy, kawaii, pink/red pastel tones, soft glow. No text in image. Aspect ratio 9:16.`,
+  romance: (phrase: string) =>
+    `A romantic tarot card illustration featuring a cat in flowing robes, holding a rose under a glowing sky. The background includes romantic symbols like hearts, flowers, and stars. The phrase: "${phrase}" is subtly incorporated into the design in a handwritten calligraphy style. Style: Vintage tarot, dreamy and warm tones. No written text in the image. Aspect ratio 9:16.`,
 
-  career: () =>
-    `A Korean-style career talisman illustration with a determined cat character in office attire (like glasses, headset, or holding a notepad). Surrounded by stars or motivational symbols. Style: Playful and inspiring, pastel blue/yellow palette. No text in image. Aspect ratio 9:16.`,
+  career: (phrase: string) =>
+    `A tarot card of a cat emperor in regal attire, seated on a throne with symbols of ambition like scrolls and a scepter. Mountains in the background represent strength and achievement. Includes the phrase: "${phrase}" in ornamental script within the design. Style: Classic European tarot, rich colors. No written text in the image. Aspect ratio 9:16.`,
 
-  money: () =>
-    `A Korean-style money talisman illustration featuring a cheerful cat holding or surrounded by gold coins, money bags, and lucky symbols. Style: Joyful, abundant, pastel gold and green colors. No text in image. Aspect ratio 9:16.`,
+  money: (phrase: string) =>
+    `A tarot-style illustration of a noble cat surrounded by coins, treasure, and golden light. The cat looks joyful and content. The phrase: "${phrase}" is artistically included in the card frame or background scroll. Style: Medieval tarot painting, prosperous golden tones. No written text in the image. Aspect ratio 9:16.`,
 
-  psychology: () =>
-    `A calm and soothing Korean-style healing talisman featuring a meditating cat with closed eyes. Surrounded by nature elements like leaves, clouds, or gentle waves. Style: Minimal, relaxing, pastel blue and purple tones. No text in image. Aspect ratio 9:16.`,
+  psychology: (phrase: string) =>
+    `A tranquil tarot card with a calm cat meditating by a river under a night sky. Surrounded by flowers, clouds, and calming water. The phrase: "${phrase}" is embedded in the scenery or border in elegant script. Style: Soft tarot painting, peaceful color palette. No written text in the image. Aspect ratio 9:16.`,
 
-  relationships: () =>
-    `A warm Korean-style friendship talisman illustration with multiple cute cat characters playing or hugging. Surrounded by hearts, musical notes, or stars. Style: Connected, pastel orange/yellow palette. No text in image. Aspect ratio 9:16.`,
+  relationships: (phrase: string) =>
+    `A tarot card of two cats facing each other joyfully, exchanging flowers or holding paws. Background shows vines, doves, and a peaceful sky. Includes the phrase: "${phrase}" written in gentle, flowing handwriting within the card layout. Style: Vintage love tarot, warm tones. No written text in the image. Aspect ratio 9:16.`,
 
-  lifestyle: () =>
-    `A Korean-style lifestyle talisman illustration showing a content cat enjoying daily life — eating, walking, or stretching. Background includes minimal decorative icons. Style: Wholesome, balanced, pastel color scheme. No text in image. Aspect ratio 9:16.`,
+  lifestyle: (phrase: string) =>
+    `A tarot card of a cat enjoying daily life — dancing, eating, or relaxing under the sun. Surrounded by joyful symbols of leisure like plants, food, and books. The phrase: "${phrase}" is included naturally in the composition in elegant calligraphy. Style: Wholesome classic tarot, light and colorful. No written text in the image. Aspect ratio 9:16.`,
 };
 
 // const encouragingPhrases: Record<string, string[]> = {
@@ -249,7 +249,7 @@ export async function POST(request: Request) {
       model: "black-forest-labs/flux-dev",
       input: {
         prompt: prompt,
-        aspect_ratio: "4:5",
+        aspect_ratio: "9:16",
         num_outputs: 1,
         go_fast: true,
         megapixels: "1",
