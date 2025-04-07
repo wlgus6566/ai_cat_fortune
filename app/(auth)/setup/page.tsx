@@ -222,7 +222,7 @@ function SetupContent() {
         ? `${callbackUrl}?showFortune=true`
         : callbackUrl;
 
-    //router.push(destinationUrl);
+    router.push(destinationUrl);
   };
 
   // 단계별 컴포넌트 렌더링
@@ -436,7 +436,7 @@ function SetupContent() {
         <p className="text-purple-700 text-xs text-center absolute -top-[28px] left-10 w-full">
           당신의 정보는 더 정확한 운세 결과를 위해서만 사용됩니다.
         </p>
-        <div className="absolute -top-[88px] left-5 -z-1">
+        <div className="absolute -top-[88px] left-0 -z-1">
           <Image src="/new_cat_thumb.png" alt="logo" width={70} height={70} />
         </div>
         {/* 진행 표시기 */}

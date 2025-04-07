@@ -1,4 +1,4 @@
-import { loveCompatibilityPrompt } from "./compatibility-prompts";
+import { loveCompatibilityPrompt } from "./compatibilityPrompts";
 import OpenAI from "openai";
 
 // OpenAI 클라이언트 초기화
@@ -86,7 +86,7 @@ export async function handleCompatibilityRequest(
 
     // OpenAI API 호출
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: customPrompt || prompt },
         { role: "user", content: prompt2 },

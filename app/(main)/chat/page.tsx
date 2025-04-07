@@ -68,16 +68,16 @@ export default function ChatPage() {
       <header className="fixed top-0 left-0 right-0 w-full h-[81px] z-10 bg-white border-b border-gray-200 py-4 px-4 text-center shadow-sm">
         <h1 className="text-xl font-semibold text-gray-800">묘묘</h1>
         <p className="text-sm text-gray-600">고민을 편하게 말해보라냥😸</p>
-      </header>
-
-      <div className="container relative mx-auto pt-[81px] z-0 px-4 py-4 min-h-[calc(100vh-84px)] pb-20 max-w-lg">
         {/* 날짜 표시 UI */}
-        <div className="flex items-center justify-center mt-4">
+        {/* <div className="flex items-center justify-center mt-4">
           <div className="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-full">
             <Calendar className="w-4 h-4 mr-2 text-gray-600" />
             <span className="text-sm font-medium">{currentDate}</span>
           </div>
-        </div>
+        </div> */}
+      </header>
+
+      <div className="container relative mx-auto pt-[81px] z-0 px-4 py-4 min-h-[calc(100vh-84px)] pb-20 max-w-lg">
         <FortuneChat
           userName={userProfile?.name || "사용자"}
           userProfile={userProfile || defaultProfile}

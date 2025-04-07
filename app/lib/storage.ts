@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import supabaseAdmin from "./supabase-admin";
+import supabaseAdmin from "./supabaseAdmin";
 import { db } from "@/db";
 import { talismansTable } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -89,14 +89,14 @@ export async function saveTalismanImage(
 
     // 파일 이름 생성
     const fileId = uuidv4();
-    const fileName = `${userId}/${fileId}.jpg`;
+    const fileName = `${userId}/${fileId}.webp`;
 
     console.log("Supabase Storage에 업로드 시작:", fileName);
     // 이미지 저장
     const { error } = await supabaseAdmin.storage
       .from(TALISMAN_BUCKET)
       .upload(fileName, imageBuffer, {
-        contentType: "image/jpeg",
+        contentType: "image/webp",
         upsert: false,
         ...(metadata && { metadata }),
       });
@@ -124,9 +124,9 @@ export async function saveTalismanImage(
         .values({
           userId: userId,
           storagePath: fileName,
-          fileName: `talisman-${new Date().toISOString()}.jpg`,
+          fileName: `talisman-${new Date().toISOString()}.webp`,
           fileSize: imageBuffer.byteLength.toString(),
-          fileType: "image/jpeg",
+          fileType: "image/webp",
           concern: metadata?.concern || "",
           translatedPhrase: metadata?.translatedPhrase || "",
           generatedBy: "AI",

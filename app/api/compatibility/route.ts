@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
-import { createAiPrompt } from "@/app/lib/compatibility-utils";
+import { createAiPrompt } from "@/app/lib/compatibilityUtils";
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     // OpenAI API 호출
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: prompt },
         { role: "user", content: prompt2 },
