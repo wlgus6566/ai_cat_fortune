@@ -28,16 +28,16 @@ export default function ChatMessage({
           </div>
         </div>
       )}
-      <div className="flex flex-col min-w-[80px]">
+      <div className={`flex flex-col ${isSystem ? "min-w-[80px]" : ""}`}>
         {isSystem && (
           <span className="text-xs text-gray-800 font-medium my-1">묘묘</span>
         )}
         <div
           className={`
-          relative max-w-[80%] p-3 rounded-lg 
+          relative p-3 rounded-lg 
           ${
             isSystem
-              ? "bg-purple-100 rounded-bl-none"
+              ? "bg-purple-100 rounded-bl-none max-w-[80%] "
               : "bg-blue-100 rounded-br-none text-right"
           }
           ${isImageOnly ? "px-0 py-0 bg-transparent" : ""}

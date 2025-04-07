@@ -786,7 +786,7 @@ export default function FortuneChat({
     toast.success(
       "상담이 간직되었다냥! 상담내용은 상담보관함에서 확인해보라냥~",
       {
-        duration: 3000,
+        duration: 4000,
         position: "bottom-center",
         style: {
           background: "#f0f9ff",
@@ -797,6 +797,8 @@ export default function FortuneChat({
           fontWeight: "500",
           borderRadius: "8px",
           boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+          zIndex: 9999,
+          marginTop: "60px",
         },
         iconTheme: {
           primary: "#0ea5e9",
@@ -809,7 +811,22 @@ export default function FortuneChat({
 
   return (
     <div className="flex flex-col flex-1 min-h-[calc(100vh-200px)]">
-      <Toaster />
+      <Toaster
+        position="bottom-center"
+        containerStyle={{
+          bottom: 120,
+          zIndex: 9999,
+        }}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#f0f9ff",
+            color: "#0369a1",
+            border: "1px solid #38bdf8",
+            zIndex: 9999,
+          },
+        }}
+      />
       {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto my-4 p-2">
         {messages.map((message) => (

@@ -92,33 +92,54 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteTalisman = async (id: string): Promise<boolean> => {
+    if (!id) {
+      console.warn("TalismanContext: 삭제할 부적 ID가 제공되지 않았습니다.");
+      return false;
+    }
+
     try {
+      console.log("TalismanContext: 부적 삭제 API 요청 시작:", id);
+
       const response = await fetch(`/api/talisman?id=${id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("부적 삭제 실패:", errorData);
+        console.error("TalismanContext: 부적 삭제 실패:", errorData);
         return false;
       }
 
       const result = await response.json();
+      console.log("TalismanContext: 부적 삭제 API 응답:", result);
 
-      // 삭제 성공 시 콜백 직접 호출 후 상태 업데이트
+      // 삭제 성공 시 콜백 직접 호출
       if (result.success === true) {
         console.log("TalismanContext: 부적 삭제 성공", id);
 
-        // 콜백이 있는 경우 직접 호출
+        // 콜백이 있는 경우 직접 호출 (setTimeout으로 래핑하여 이벤트 루프의 다음 틱에서 실행)
         if (onTalismanDeleted) {
-          console.log("TalismanContext: onTalismanDeleted 콜백 직접 호출", id);
-          onTalismanDeleted(id);
+          console.log(
+            "TalismanContext: onTalismanDeleted 콜백 직접 호출 준비:",
+            id
+          );
+          setTimeout(() => {
+            console.log("TalismanContext: onTalismanDeleted 콜백 실행:", id);
+            onTalismanDeleted(id);
+          }, 0);
+        } else {
+          console.warn(
+            "TalismanContext: onTalismanDeleted 콜백이 없습니다:",
+            id
+          );
         }
+
+        return true;
       }
 
-      return result.success === true;
+      return false;
     } catch (error) {
-      console.error("부적 삭제 중 오류 발생:", error);
+      console.error("TalismanContext: 부적 삭제 중 오류 발생:", error);
       return false;
     }
   };

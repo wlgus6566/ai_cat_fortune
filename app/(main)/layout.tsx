@@ -34,15 +34,43 @@ function TalismanPopupContainer() {
 
   // 부적 삭제 핸들러 - 삭제 후 콜백 호출 처리
   const handleBurn = async (id: string) => {
+    if (!id) {
+      console.warn("Layout: 부적 ID가 없어 삭제할 수 없습니다.");
+      return false;
+    }
+
+    console.log("Layout: 부적 삭제 핸들러 호출:", id);
+
     try {
-      const success = await deleteTalisman(id);
-      if (success && onTalismanDeleted) {
-        // 성공 시 콜백 직접 호출
-        onTalismanDeleted(id);
+      // onTalismanDeleted 존재 여부 로깅
+      if (!onTalismanDeleted) {
+        console.warn(
+          "Layout: onTalismanDeleted 콜백이 없습니다. 삭제 후 화면이 갱신되지 않을 수 있습니다."
+        );
+      } else {
+        console.log(
+          "Layout: onTalismanDeleted 콜백이 존재합니다:",
+          typeof onTalismanDeleted
+        );
       }
+
+      const success = await deleteTalisman(id);
+      console.log("Layout: deleteTalisman 결과:", success);
+
+      // 콜백이 있고 삭제에 성공했다면 setTimeout으로 콜백 호출
+      if (success && onTalismanDeleted) {
+        console.log("Layout: onTalismanDeleted 콜백 호출 준비");
+
+        // 이벤트 루프의 다음 틱에서 실행하여 상태 업데이트 충돌 방지
+        setTimeout(() => {
+          console.log("Layout: onTalismanDeleted 콜백 실행");
+          onTalismanDeleted(id);
+        }, 100);
+      }
+
       return success;
     } catch (error) {
-      console.error("부적 삭제 오류:", error);
+      console.error("Layout: 부적 삭제 오류:", error);
       return false;
     }
   };

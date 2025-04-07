@@ -135,7 +135,7 @@ export default function TalismanPopup({
   const handleBurnTalisman = () => {
     // talismanId가 없으면 삭제 기능을 실행하지 않음
     if (!talismanId) {
-      console.warn("부적 ID가 없어 태우기만 실행됩니다:", talismanId);
+      console.warn("부적 ID가 없어 태우기만 실행됩니다");
     }
     setIsBurning(true);
   };
@@ -171,11 +171,10 @@ export default function TalismanPopup({
             });
         } else if (deletionAttempted) {
           console.log("이미 부적 삭제가 시도되었습니다.");
-        } else {
-          console.log("부적 ID 또는 삭제 함수가 없음:", {
-            talismanId,
-            hasBurnFn: !!onBurn,
-          });
+        } else if (!talismanId) {
+          console.log("부적 ID가 없어 삭제를 시도하지 않습니다.");
+        } else if (!onBurn) {
+          console.log("삭제 함수가 없어 삭제를 시도하지 않습니다.");
         }
 
         // 삭제 결과와 상관없이 3초 후 팝업 닫기
@@ -216,12 +215,7 @@ export default function TalismanPopup({
         {/* 닫기 버튼 */}
         <button
           onClick={handleClose}
-          className={`absolute top-2 right-2 z-50 p-2 rounded-full flex items-center justify-center
-            ${
-              darkMode
-                ? "bg-gray-800 text-white hover:bg-gray-700"
-                : "bg-white text-gray-800 hover:bg-gray-100"
-            }
+          className={`absolute top-2 border-none right-[20px] z-50 p-2 rounded-full flex items-center justify-center
             shadow-lg transition-all`}
           aria-label="Close"
         >
