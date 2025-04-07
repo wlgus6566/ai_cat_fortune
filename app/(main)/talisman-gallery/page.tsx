@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { useTalisman } from "@/app/contexts/TalismanContext";
+import { useTalisman } from "@/app/context/TalismanContext";
 import PageHeader from "@/app/components/PageHeader";
 import { Talisman } from "@/app/type/types";
 

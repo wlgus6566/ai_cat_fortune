@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import FortuneChat from "@/app/components/FortuneChat";
 import { UserProfile } from "@/app/type/types";
 import { Calendar } from "lucide-react";

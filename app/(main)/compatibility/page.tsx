@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 // eslint-disable-next-line
 import Image from "next/image";
 import { useCompatibility } from "@/app/context/CompatibilityContext";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
 import { Share2 } from "lucide-react";

@@ -2,7 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
-import { UserProvider } from "./contexts/UserContext";
+import { UserProvider } from "./context/UserContext";
 import { CompatibilityProvider } from "./context/CompatibilityContext";
 import { FriendCompatibilityProvider } from "./context/FriendCompatibilityContext";
 

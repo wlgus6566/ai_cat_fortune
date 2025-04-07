@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";

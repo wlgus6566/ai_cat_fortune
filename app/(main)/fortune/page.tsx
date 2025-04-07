@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import Link from "next/link";
 import { DailyFortune } from "@/app/lib/openai";
 import { useTranslations } from "next-intl";

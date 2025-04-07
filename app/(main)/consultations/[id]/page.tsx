@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import { useRouter, useParams } from "next/navigation";
 import ConsultationDetail from "@/app/components/ConsultationDetail";
 import { SelectConsultation } from "@/db/schema";

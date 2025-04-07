@@ -9,9 +9,9 @@ import {
   UserIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import { useTranslations } from "next-intl";
-import { TalismanProvider, useTalisman } from "@/app/contexts/TalismanContext";
+import { TalismanProvider, useTalisman } from "@/app/context/TalismanContext";
 import TalismanPopup from "@/app/components/TalismanPopup";
 import Modal from "@/app/components/Modal";
 

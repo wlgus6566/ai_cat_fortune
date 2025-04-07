@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useFriendCompatibility } from "@/app/context/FriendCompatibilityContext";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import PageHeader from "@/app/components/PageHeader";
 import { toast, Toaster } from "react-hot-toast";
 import ShareModal from "@/app/components/ShareModal";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import ConsultationList from "@/app/components/ConsultationList";
 import PageHeader from "@/app/components/PageHeader";
 import { SelectConsultation } from "@/db/schema";

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/app/contexts/UserContext";
+import { useUser } from "@/app/context/UserContext";
 import { Gender, CalendarType, BirthTime } from "@/app/type/types";
 import { useTranslations } from "next-intl";
 import Image from "next/image";

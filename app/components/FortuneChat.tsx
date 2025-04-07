@@ -11,7 +11,7 @@ import {
 import { CONCERN_TYPES, DETAILED_CONCERNS } from "../data";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CONCERN_TYPES_EN, DETAILED_CONCERNS_EN } from "../data.en"; // 영어 데이터 필요 시 사용
-import { useTalisman } from "../contexts/TalismanContext";
+import { useTalisman } from "../context/TalismanContext";
 import { toast, Toaster } from "react-hot-toast";
 
 // 직접 입력창 컴포넌트
