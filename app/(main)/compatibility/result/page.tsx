@@ -746,7 +746,7 @@ export default function CompatibilityResultPage() {
                   strokeWidth={10}
                   color="rgb(255, 0, 0)"
                 />
-                <div className="absolute flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                <div className="absolute inset-0 flex items-center justify-center text-center">
                   <span className="text-3xl font-bold text-purple-700">
                     {compatibilityData?.score || 83}
                   </span>

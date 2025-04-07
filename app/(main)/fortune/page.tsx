@@ -364,7 +364,7 @@ export default function HomePage() {
   if (!hasViewedFortune) {
     return (
       <motion.div
-        className="container max-w-screen-md mx-auto px-4 py-6 relative z-1 min-h-screen flex flex-col items-center justify-center"
+        className="relative container max-w-screen-md mx-auto px-4 py-6 relative z-1 min-h-screen flex flex-col items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -378,6 +378,7 @@ export default function HomePage() {
             priority
           />
         </div>
+
         <div className="relative">
           <WisardCat
             hasViewedFortune={hasViewedFortune}
@@ -395,7 +396,11 @@ export default function HomePage() {
             {loading ? "운세를 확인하는 중이다냥...🐾" : "오늘의 운세 보기😽"}
           </span>
         </motion.button>
-
+        {loading && (
+          <div className="absolute z-10 bg-[rgba(0,0,0,0.5)] inset-0 w-full h-full flex justify-center items-center">
+            <div className="animate-spin h-12 w-12 border-4 border-[#990dfa] rounded-full border-t-transparent"></div>
+          </div>
+        )}
         {error && (
           <div className="mt-4 text-red-500 text-center">
             <p>{error}</p>
@@ -476,6 +481,7 @@ export default function HomePage() {
             src="/new_cat_magic.png"
             alt="마법사 고양이"
             fill
+            priority
             className="w-full h-full object-contain"
           />
         </motion.div>

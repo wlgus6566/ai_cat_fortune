@@ -237,6 +237,7 @@ const WizardCat = ({
           key="origin"
           src={getCatImage(catState)}
           alt="마법사 고양이"
+          priority
           className="w-full h-full object-contain"
         />
       </motion.div>

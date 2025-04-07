@@ -81,6 +81,7 @@ const CategoryPopup: React.FC<CategoryPopupProps> = ({
             <Image
               src={"/new_cat_thumb.png"}
               alt="부적"
+              priority
               width={70}
               height={70}
               className="object-contain absolute left-0 bottom-0"
