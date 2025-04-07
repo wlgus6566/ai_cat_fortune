@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@/app/contexts/UserContext";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -120,54 +120,49 @@ export default function TalismanGalleryPage() {
     fetchTalismans();
   }, [userProfile?.id]);
 
-  // 부적 삭제 후 목록 갱신 함수 - 컴포넌트 레벨에서 정의
-  const handleTalismanDeleted = (deletedId: string) => {
-    if (!deletedId) {
-      console.warn("삭제할 부적 ID가 없습니다.");
-      return;
-    }
-    console.log(
-      `TalismanGallery: 부적 ID ${deletedId} 삭제 완료, 목록 갱신 시작`
-    );
+  // 부적 삭제 후 목록 갱신 함수 - useCallback으로 래핑하여 안정적인 함수 참조 유지
+  const handleTalismanDeleted = useCallback(
+    (deletedId: string) => {
+      if (!deletedId) {
+        console.warn("TalismanGallery: 삭제할 부적 ID가 없습니다.");
+        return;
+      }
 
-    // 현재 talismans 배열에서 해당 ID 찾기
-    const exists = talismans.some((item) => item.id === deletedId);
-    if (!exists) {
-      console.warn(
-        `부적 ID ${deletedId}를 현재 목록에서 찾을 수 없습니다.`,
-        talismans.map((t) => t.id)
-      );
-    }
-
-    // 상태 업데이트 (React 배치 업데이트로 인한 지연 방지를 위해 setTimeout 사용)
-    setTimeout(() => {
-      setTalismans((prevTalismans) => {
-        console.log(
-          "TalismanGallery: 이전 부적 목록 길이:",
-          prevTalismans.length
-        );
-        const newTalismans = prevTalismans.filter(
-          (item) => item.id !== deletedId
-        );
-        console.log("TalismanGallery: 새 부적 목록 길이:", newTalismans.length);
-
-        if (prevTalismans.length === newTalismans.length) {
-          console.warn(
-            `부적 ID ${deletedId} 필터링 후에도 목록 길이 변화 없음`
-          );
-        }
-
-        return newTalismans;
-      });
       console.log(
-        `TalismanGallery: 부적 ID ${deletedId} 삭제 후 화면 갱신 완료`
+        `TalismanGallery: 부적 ID ${deletedId} 삭제 완료, 목록 갱신 시작`
       );
-    }, 100);
-  };
+
+      // 현재 talismans 배열에서 해당 ID 찾기
+      const exists = talismans.some((item) => item.id === deletedId);
+      if (!exists) {
+        console.warn(
+          `TalismanGallery: 부적 ID ${deletedId}를 현재 목록에서 찾을 수 없습니다.`,
+          talismans.map((t) => t.id)
+        );
+      }
+
+      // 상태 업데이트 (React 배치 업데이트로 인한 지연 방지를 위해 setTimeout 사용)
+      setTimeout(() => {
+        setTalismans((prevTalismans) => {
+          console.log(
+            "TalismanGallery: 이전 부적 목록 길이:",
+            prevTalismans.length
+          );
+          const newTalismans = prevTalismans.filter(
+            (item) => item.id !== deletedId
+          );
+          return newTalismans;
+        });
+      }, 100);
+    },
+    [] // 의존성 배열 제거 - 함수 안에서 최신 talismans를 직접 참조
+  );
 
   // 부적 클릭 핸들러 수정 - 이제 Context API를 사용하면서 추가 정보 전달
   const handleTalismanClick = (talisman: Talisman) => {
     // 콜백 함수를 이미 컴포넌트 레벨에서 정의했으므로 여기서는 사용만 함
+    const callback = handleTalismanDeleted;
+
     openTalisman({
       imageUrl: talisman.publicUrl,
       userName: userProfile?.name,
@@ -177,7 +172,7 @@ export default function TalismanGalleryPage() {
       concern: talisman.concern,
       translatedPhrase: talisman.translatedPhrase,
       talismanId: talisman.id,
-      onTalismanDeleted: handleTalismanDeleted,
+      onTalismanDeleted: callback, // handleTalismanDeleted 대신 직접 함수 참조
     });
   };
 

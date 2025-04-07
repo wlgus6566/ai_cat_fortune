@@ -30,6 +30,17 @@ function TalismanPopupContainer() {
     onTalismanDeleted,
   } = useTalisman();
 
+  // 디버깅: 컴포넌트 마운트 시 중요 상태 로깅
+  useEffect(() => {
+    if (isOpen) {
+      console.log("TalismanPopupContainer: 컴포넌트 마운트됨", {
+        talismanId,
+        hasCallback: !!onTalismanDeleted,
+        callbackType: typeof onTalismanDeleted,
+      });
+    }
+  }, [isOpen, talismanId, onTalismanDeleted]);
+
   if (!isOpen || !imageUrl) return null;
 
   // 부적 삭제 핸들러 - 삭제 후 콜백 호출 처리
@@ -42,7 +53,7 @@ function TalismanPopupContainer() {
     console.log("Layout: 부적 삭제 핸들러 호출:", id);
 
     try {
-      // onTalismanDeleted 존재 여부 로깅
+      // 컴포넌트 스코프에서 이미 얻은 onTalismanDeleted 사용
       if (!onTalismanDeleted) {
         console.warn(
           "Layout: onTalismanDeleted 콜백이 없습니다. 삭제 후 화면이 갱신되지 않을 수 있습니다."
@@ -56,17 +67,6 @@ function TalismanPopupContainer() {
 
       const success = await deleteTalisman(id);
       console.log("Layout: deleteTalisman 결과:", success);
-
-      // 콜백이 있고 삭제에 성공했다면 setTimeout으로 콜백 호출
-      if (success && onTalismanDeleted) {
-        console.log("Layout: onTalismanDeleted 콜백 호출 준비");
-
-        // 이벤트 루프의 다음 틱에서 실행하여 상태 업데이트 충돌 방지
-        setTimeout(() => {
-          console.log("Layout: onTalismanDeleted 콜백 실행");
-          onTalismanDeleted(id);
-        }, 100);
-      }
 
       return success;
     } catch (error) {

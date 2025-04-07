@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useRef,
 } from "react";
 
 interface TalismanContextType {
@@ -50,9 +51,15 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     string | undefined
   >();
   const [talismanId, setTalismanId] = useState<string | undefined>();
-  const [onTalismanDeleted, setOnTalismanDeleted] = useState<
-    ((id: string) => void) | undefined
-  >();
+
+  // onTalismanDeleted 함수를 useRef로 관리하여 함수 참조 유지
+  const callbackRef = useRef<((id: string) => void) | undefined>(undefined);
+
+  // onTalismanDeleted 접근자 함수
+  const getCallback = () => callbackRef.current;
+  const setCallback = (cb: ((id: string) => void) | undefined) => {
+    callbackRef.current = cb;
+  };
 
   const openTalisman = ({
     imageUrl,
@@ -75,6 +82,14 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     talismanId?: string;
     onTalismanDeleted?: (id: string) => void;
   }) => {
+    // 로그 추가 - 콜백 확인
+    console.log("TalismanContext: openTalisman 호출", {
+      talismanId,
+      hasCallback: !!onTalismanDeleted,
+      callbackType: typeof onTalismanDeleted,
+    });
+
+    // 상태 업데이트
     setImageUrl(imageUrl);
     setUserName(userName);
     setTitle(title);
@@ -83,7 +98,10 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
     setConcern(concern);
     setTranslatedPhrase(translatedPhrase);
     setTalismanId(talismanId);
-    setOnTalismanDeleted(onTalismanDeleted);
+
+    // 콜백 함수를 ref에 직접 저장
+    setCallback(onTalismanDeleted);
+
     setIsOpen(true);
   };
 
@@ -117,19 +135,33 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
       if (result.success === true) {
         console.log("TalismanContext: 부적 삭제 성공", id);
 
-        // 콜백이 있는 경우 직접 호출 (setTimeout으로 래핑하여 이벤트 루프의 다음 틱에서 실행)
-        if (onTalismanDeleted) {
-          console.log(
-            "TalismanContext: onTalismanDeleted 콜백 직접 호출 준비:",
-            id
-          );
-          setTimeout(() => {
-            console.log("TalismanContext: onTalismanDeleted 콜백 실행:", id);
-            onTalismanDeleted(id);
-          }, 0);
+        // ref에서 콜백 가져오기 - 함수 참조 복사
+        const callback = callbackRef.current;
+        console.log("TalismanContext: 현재 콜백 상태:", !!callback);
+
+        // 콜백이 있는 경우 직접 호출
+        if (callback && typeof callback === "function") {
+          console.log("TalismanContext: 콜백 직접 호출 준비:", id);
+          try {
+            // 즉시 실행
+            callback(id);
+            console.log("TalismanContext: 콜백 호출 성공");
+
+            // 안전장치: 조금 지연시켜 한번 더 호출
+            setTimeout(() => {
+              try {
+                callback(id);
+                console.log("TalismanContext: 지연된 콜백 호출 성공");
+              } catch (error) {
+                console.error("TalismanContext: 지연된 콜백 호출 실패:", error);
+              }
+            }, 100);
+          } catch (error) {
+            console.error("TalismanContext: 콜백 호출 실패:", error);
+          }
         } else {
           console.warn(
-            "TalismanContext: onTalismanDeleted 콜백이 없습니다:",
+            `TalismanContext: 콜백이 없거나 유효하지 않습니다: ${typeof callback}`,
             id
           );
         }
@@ -156,7 +188,7 @@ export function TalismanProvider({ children }: { children: ReactNode }) {
         concern,
         translatedPhrase,
         talismanId,
-        onTalismanDeleted,
+        onTalismanDeleted: getCallback(),
         openTalisman,
         closeTalisman,
         deleteTalisman,

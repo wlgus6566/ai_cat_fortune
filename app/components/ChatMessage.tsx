@@ -37,7 +37,7 @@ export default function ChatMessage({
           relative p-3 rounded-lg 
           ${
             isSystem
-              ? "bg-purple-100 rounded-bl-none max-w-[80%] "
+              ? "bg-purple-100 rounded-bl-none max-w-[80%]"
               : "bg-blue-100 rounded-br-none text-right"
           }
           ${isImageOnly ? "px-0 py-0 bg-transparent" : ""}

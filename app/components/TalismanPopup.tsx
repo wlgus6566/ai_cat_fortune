@@ -135,58 +135,79 @@ export default function TalismanPopup({
   const handleBurnTalisman = () => {
     // talismanId가 없으면 삭제 기능을 실행하지 않음
     if (!talismanId) {
-      console.warn("부적 ID가 없어 태우기만 실행됩니다");
+      console.warn("TalismanPopup: 부적 ID가 없어 태우기만 실행됩니다");
+    } else {
+      console.log("TalismanPopup: 부적 태우기 시작:", talismanId);
     }
+
+    // 어떤 경우든 애니메이션은 시작
     setIsBurning(true);
   };
 
   // 부적 태우기 애니메이션 완료 후 실행
   useEffect(() => {
     if (isBurning) {
-      const timer = setTimeout(() => {
+      let burnTimer: NodeJS.Timeout;
+      let alertTimer: NodeJS.Timeout;
+
+      burnTimer = setTimeout(() => {
         setShowAlert(true);
         setIsBurned(true);
 
         // 부적 삭제 처리 - 아직 시도되지 않은 경우에만 실행
         if (talismanId && onBurn && !deletionAttempted) {
-          console.log("부적 삭제 시작:", talismanId);
+          console.log("TalismanPopup: 부적 삭제 시작:", talismanId);
           setIsDeleting(true);
           setDeletionAttempted(true); // 삭제 시도 표시
 
-          onBurn(talismanId)
-            .then((success) => {
-              if (!success) {
-                setDeleteError("부적 삭제에 실패했습니다.");
-                console.warn("부적 삭제 실패:", talismanId);
-              } else {
-                console.log("부적 삭제 성공:", talismanId);
-              }
-            })
-            .catch((error) => {
-              console.error("부적 삭제 실패:", error);
-              setDeleteError("부적 삭제 중 오류가 발생했습니다.");
-            })
-            .finally(() => {
-              setIsDeleting(false);
-            });
+          // 삭제 함수 호출
+          try {
+            onBurn(talismanId)
+              .then((success) => {
+                if (!success) {
+                  setDeleteError("부적 삭제에 실패했습니다.");
+                  console.warn("TalismanPopup: 부적 삭제 실패:", talismanId);
+                } else {
+                  console.log("TalismanPopup: 부적 삭제 성공:", talismanId);
+                }
+              })
+              .catch((error) => {
+                console.error("TalismanPopup: 부적 삭제 오류:", error);
+                setDeleteError("부적 삭제 중 오류가 발생했습니다.");
+              })
+              .finally(() => {
+                setIsDeleting(false);
+              });
+          } catch (error) {
+            console.error("TalismanPopup: 부적 삭제 함수 호출 오류:", error);
+            setDeleteError("부적 삭제 중 오류가 발생했습니다.");
+            setIsDeleting(false);
+          }
         } else if (deletionAttempted) {
-          console.log("이미 부적 삭제가 시도되었습니다.");
+          console.log("TalismanPopup: 이미 부적 삭제가 시도되었습니다.");
         } else if (!talismanId) {
-          console.log("부적 ID가 없어 삭제를 시도하지 않습니다.");
+          console.log(
+            "TalismanPopup: 부적 ID가 없어 삭제를 시도하지 않습니다."
+          );
         } else if (!onBurn) {
-          console.log("삭제 함수가 없어 삭제를 시도하지 않습니다.");
+          console.log(
+            "TalismanPopup: 삭제 함수가 없어 삭제를 시도하지 않습니다."
+          );
         }
 
         // 삭제 결과와 상관없이 3초 후 팝업 닫기
-        setTimeout(() => {
+        alertTimer = setTimeout(() => {
           setShowAlert(false);
           handleClose();
-        }, 3000);
-      }, 3000); // 애니메이션 지속 시간
+        }, 2000);
+      }, 2000); // 애니메이션 지속 시간
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(burnTimer);
+        clearTimeout(alertTimer);
+      };
     }
-  }, [isBurning, talismanId, onBurn, deletionAttempted]);
+  }, [isBurning, talismanId, onBurn, deletionAttempted, handleClose]);
 
   // 부적 제목 생성
   const getTalismanTitle = () => {
