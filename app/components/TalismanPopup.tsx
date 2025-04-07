@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { X, Download, Flame } from "lucide-react";
@@ -73,8 +73,8 @@ export default function TalismanPopup({
     };
   }, []);
 
-  // Handle close animation
-  const handleClose = () => {
+  // Handle close animation - useCallback으로 감싸기
+  const handleClose = useCallback(() => {
     setIsFullyVisible(false);
     setIsUnrolling(false);
     setTimeout(() => {
@@ -83,7 +83,7 @@ export default function TalismanPopup({
         onClose();
       }, 300);
     }, 500);
-  };
+  }, [onClose]);
 
   // 이미지 저장 함수
   const handleSaveImage = async () => {
@@ -147,10 +147,8 @@ export default function TalismanPopup({
   // 부적 태우기 애니메이션 완료 후 실행
   useEffect(() => {
     if (isBurning) {
-      let burnTimer: NodeJS.Timeout;
-      let alertTimer: NodeJS.Timeout;
-
-      burnTimer = setTimeout(() => {
+      // 타이머 변수 선언
+      const burnTimer = setTimeout(() => {
         setShowAlert(true);
         setIsBurned(true);
 
@@ -196,16 +194,15 @@ export default function TalismanPopup({
         }
 
         // 삭제 결과와 상관없이 3초 후 팝업 닫기
-        alertTimer = setTimeout(() => {
+        const alertTimer = setTimeout(() => {
           setShowAlert(false);
           handleClose();
-        }, 2000);
-      }, 2000); // 애니메이션 지속 시간
+        }, 3000);
 
-      return () => {
-        clearTimeout(burnTimer);
-        clearTimeout(alertTimer);
-      };
+        return () => clearTimeout(alertTimer);
+      }, 3000); // 애니메이션 지속 시간
+
+      return () => clearTimeout(burnTimer);
     }
   }, [isBurning, talismanId, onBurn, deletionAttempted, handleClose]);
 

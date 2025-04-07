@@ -151,11 +151,28 @@ export default function TalismanGalleryPage() {
           const newTalismans = prevTalismans.filter(
             (item) => item.id !== deletedId
           );
+          console.log(
+            "TalismanGallery: 새 부적 목록 길이:",
+            newTalismans.length,
+            "변경:",
+            prevTalismans.length - newTalismans.length
+          );
+
+          if (prevTalismans.length === newTalismans.length) {
+            console.warn(
+              `TalismanGallery: 부적 ID ${deletedId} 필터링 후에도 목록 길이 변화 없음`,
+              prevTalismans.map((t) => t.id)
+            );
+          }
+
           return newTalismans;
         });
+        console.log(
+          `TalismanGallery: 부적 ID ${deletedId} 삭제 후 화면 갱신 완료`
+        );
       }, 100);
     },
-    [] // 의존성 배열 제거 - 함수 안에서 최신 talismans를 직접 참조
+    [talismans] // 의존성 배열에 talismans 추가
   );
 
   // 부적 클릭 핸들러 수정 - 이제 Context API를 사용하면서 추가 정보 전달
