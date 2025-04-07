@@ -170,7 +170,7 @@ function getTemplateByCategory(category: string): {
     talismanTemplates.default;
 
   return {
-    prompt: templateFn(),
+    prompt: templateFn(phrase),
     phrase,
   };
 }
