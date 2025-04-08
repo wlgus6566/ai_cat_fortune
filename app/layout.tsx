@@ -1,10 +1,9 @@
 import { Nanum_Gothic, Noto_Sans_KR } from "next/font/google";
 import "./style/globals.css";
-import { NextIntlClientProvider } from "next-intl";
-import { messages } from "./i18n";
 import { Providers } from "./providers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import ClientLayout from "./components/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,9 +41,7 @@ export default function RootLayout({
         className={`${notoSansKr.variable} ${nanumGothic.variable} antialiased ${inter.className}`}
       >
         <Providers>
-          <NextIntlClientProvider locale="ko" messages={messages["ko"]}>
-            {children}
-          </NextIntlClientProvider>
+          <ClientLayout>{children}</ClientLayout>
         </Providers>
       </body>
     </html>

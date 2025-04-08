@@ -1,21 +1,21 @@
 {
   "fortune": {
-    "pageTitle": "Daily Fortune",
+    "pageTitle": "Today's Fortune",
     "headerTitle": "Today's Fortune",
-    "forUser": "Daily fortune for {name}, {date}",
+    "forUser": "{name}'s Fortune for {date}",
     "loading": "Loading your fortune...",
-    "error": "Unable to load your fortune",
+    "error": "Could not load your fortune",
     "tryAgain": "Try Again",
     "overall": "Overall Fortune",
     "fortuneScore": "Fortune Score",
-    "categoryTitle": "Categories",
-    "luckyElements": "Lucky Elements",
+    "categoryTitle": "Fortune by Category",
+    "luckyElements": "🍀 Lucky Elements",
     "luckyColor": "Lucky Color",
     "luckyNumber": "Lucky Number",
     "luckySong": "Lucky Song",
     "luckyItem": "Lucky Item",
-    "advice": "Today's Advice",
-    "updateInfo": "* Updated daily at midnight",
+    "advice": "💡 Today's Advice",
+    "updateInfo": "* Updates daily at midnight",
     "categories": {
       "love": {
         "title": "Love"
@@ -34,15 +34,15 @@
       "title": "Quick Menu",
       "chat": {
         "title": "Fortune Chat",
-        "description": "Chat with AI about your fortune"
+        "description": "Chat with Meow about your fortune"
       },
       "profile": {
         "title": "My Profile",
-        "description": "View and edit your profile"
+        "description": "View and edit profile"
       },
       "talisman": {
         "title": "My Talisman Gallery",
-        "description": "View your collection of lucky talismans"
+        "description": "Collection of lucky talismans"
       }
     }
   },
@@ -89,7 +89,7 @@
     "headerTitle": "Edit Profile",
     "name": "Name",
     "gender": "Gender",
-    "birthDate": "Birth Date",
+    "birthDate": "Date of Birth",
     "calendarType": "Calendar Type",
     "birthTime": "Birth Time",
     "save": "Save",
@@ -98,21 +98,21 @@
     "changeImage": "Change Image",
     "removeImage": "Remove",
     "addImage": "Add Photo",
-    "imageHelp": "Upload JPG or PNG image, maximum 5MB.",
+    "imageHelp": "Upload JPG or PNG image, max 5MB.",
     "imageSuccess": "Image successfully updated.",
     "profileDataUsage": "Your information is used only for more accurate fortune results.",
     "delete": "Delete Profile",
     "deleteConfirmTitle": "Confirm Profile Deletion",
-    "deleteConfirmMessage": "Deleting your profile will reset all settings. Do you want to continue?",
+    "deleteConfirmMessage": "Deleting your profile will reset all settings. Continue?",
     "deleting": "Deleting...",
     "deleteError": "An error occurred while deleting profile.",
     "createProfileTitle": "Create Your Profile",
-    "createProfileMessage": "Profile information is needed to use the fortune service. Enter your birth date and time for more accurate fortune readings.",
+    "createProfileMessage": "Profile information is needed for fortune services. Enter your birth date and time for more accurate results.",
     "createProfileButton": "Create New Profile",
     "imageError": {
-      "size": "Image size must be less than 5MB.",
-      "type": "Only image files can be uploaded.",
-      "upload": "An error occurred while uploading the image."
+      "size": "Image must be less than 5MB.",
+      "type": "Only image files are allowed.",
+      "upload": "An error occurred while uploading image."
     },
     "genderOptions": {
       "male": "Male",
@@ -127,16 +127,16 @@
     "nameValidation": {
       "required": "Please enter your name",
       "tooShort": "Name must be at least 2 characters",
-      "invalidFormat": "Name can only contain letters (no special characters)",
-      "incompleteCharacter": "Please enter complete characters only"
+      "invalidFormat": "Name can only contain letters (Korean or English)",
+      "incompleteCharacter": "Please enter complete Korean characters"
     },
     "dateValidation": {
-      "required": "Please select your full date of birth",
+      "required": "Please select all date fields",
       "invalid": "Invalid date",
-      "future": "Future dates cannot be selected"
+      "future": "Future dates are not allowed"
     },
-    "saveSuccess": "Profile has been updated successfully",
-    "saveError": "An error occurred while updating your profile"
+    "saveSuccess": "Profile successfully updated",
+    "saveError": "An error occurred while updating profile"
   },
   "navigation": {
     "home": "Home",
@@ -145,29 +145,20 @@
     "talisman": "Talisman"
   },
   "talisman": {
-    "pageTitle": "Talisman Gallery",
     "headerTitle": "My Talisman Gallery",
-    "description": "Collection of lucky talismans",
-    "loading": "Loading talismans...",
-    "empty": "No talismans have been created yet.",
-    "error": "Failed to load talismans.",
-    "yourName": "Lucky Talisman",
-    "lucky": "Lucky Talisman",
-    "saveButton": "Save Image",
-    "saving": "Saving image...",
-    "saved": "Image has been saved.",
-    "saveFailed": "Failed to save image.",
-    "saveNewTab": "Image opened in new tab. Long press to save.",
-    "bringLuck": "Carrying this talisman will bring you luck.",
+    "description": "Collection of Lucky Talismans",
     "collectionTitle": "My Lucky Talisman Collection",
-    "collectionDescription": "View all your lucky talismans created through AI fortune consultations.",
-    "emptyState": "No talisman images have been created yet.",
-    "emptyStateDescription": "Create lucky talismans through chat consultations!",
+    "collectionDescription": "View talismans generated through AI fortune consultations.",
+    "emptyState": "No talisman images yet.",
+    "emptyStateDescription": "Create talismans through chat consultations!",
     "talismanNumber": "Lucky Talisman #{number}",
+    "saveButton": "Save",
+    "bringLuck": "Having this talisman brings you luck!",
     "popup": {
       "title": "Lucky Talisman",
       "close": "Close"
-    }
+    },
+    "concernTags": "Concern Tags"
   },
   "auth": {
     "signIn": "Sign In",
@@ -175,19 +166,79 @@
     "signOut": "Sign Out",
     "signInWith": "Continue with {provider}",
     "signingIn": "Signing in...",
-    "orContinueWith": "or continue with",
+    "orContinueWith": "Or continue with",
     "errorTitle": "Authentication Error",
     "tryAgain": "Try Again",
     "errorCode": "Error Code",
     "bgAlt": "Login background image",
-    "catWizardAlt": "Cat Wizard",
+    "catWizardAlt": "Cat wizard",
     "errors": {
       "default": "An error occurred during authentication",
       "accessDenied": "Access denied. Please check your account permissions",
-      "callback": "There was a problem with the authentication callback",
-      "oauthSignin": "There was a problem with the OAuth sign-in",
-      "oauthCallback": "There was a problem with the OAuth callback",
-      "sessionRequired": "You need to be signed in to access this page"
+      "callback": "An error occurred while processing authentication callback",
+      "oauthSignin": "An error occurred while starting social login",
+      "oauthCallback": "An error occurred while processing social login callback",
+      "sessionRequired": "You must be logged in to access this page"
+    }
+  },
+  "compatibility": {
+    "pageTitle": "Love Compatibility Test",
+    "headerTitle": "AI Love Compatibility",
+    "description": "Check your love compatibility based on your birth information.",
+    "formTitle": "Enter Birth Information",
+    "submitButton": "Check Compatibility",
+    "loadingMessage": "Analyzing your compatibility...",
+    "errorMessage": "An error occurred while analyzing compatibility.",
+    "tryAgainButton": "Try Again",
+    "infoMessage": "The more accurate the information, the more accurate the results.",
+    "result": {
+      "title": "Compatibility Result",
+      "overallScore": "Overall Compatibility",
+      "personalityTitle": "Personality Match",
+      "loveStyleTitle": "Love Style",
+      "conflictTitle": "Potential Conflicts",
+      "futureTitle": "Future Outlook",
+      "elementAnalysis": "Element Analysis",
+      "advice": "Cat's Advice",
+      "luckyItem": "Lucky Item",
+      "recommendedDate": "Recommended Date"
+    }
+  },
+  "friendshipCompatibility": {
+    "pageTitle": "Friendship Compatibility Test",
+    "headerTitle": "AI Friendship Compatibility",
+    "description": "Check your friendship compatibility based on your birth information.",
+    "formTitle": "Enter Birth Information",
+    "submitButton": "Check Compatibility",
+    "loadingMessage": "Analyzing your friendship compatibility...",
+    "errorMessage": "An error occurred while analyzing compatibility.",
+    "tryAgainButton": "Try Again",
+    "infoMessage": "The more accurate the information, the more accurate the results.",
+    "result": {
+      "title": "Friendship Compatibility Result",
+      "overallScore": "Overall Compatibility",
+      "personalityTitle": "Personality Chemistry",
+      "valueTitle": "Value Alignment",
+      "communicationTitle": "Communication Style",
+      "emotionalTitle": "Emotional Connection",
+      "energyTitle": "Energy Match",
+      "elementAnalysis": "Element Analysis",
+      "advice": "Cat's Advice",
+      "luckyItem": "Lucky Item",
+      "recommendedActivity": "Recommended Activity"
+    }
+  },
+  "validation": {
+    "name": {
+      "required": "Please enter a name",
+      "tooShort": "Name must be at least 2 characters",
+      "invalidFormat": "Name can only contain letters (Korean or English)",
+      "incompleteCharacter": "Please enter complete Korean characters"
+    },
+    "birthDate": {
+      "required": "Please select all date fields",
+      "invalid": "Invalid date",
+      "future": "Future dates are not allowed"
     }
   }
 }

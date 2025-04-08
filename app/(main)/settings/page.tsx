@@ -59,10 +59,11 @@ export default function SettingsPage() {
     }
   }, [darkMode]);
 
-  // 언어 변경 처리
-  const handleLanguageChange = (language: string) => {
-    setSelectedLanguage(language);
-    localStorage.setItem(LANGUAGE_PREFERENCE_KEY, language);
+  // 언어 변경 핸들러
+  const handleLanguageChange = (newLanguage: string) => {
+    setSelectedLanguage(newLanguage);
+    localStorage.setItem(LANGUAGE_PREFERENCE_KEY, newLanguage);
+    // 페이지 새로고침하여 언어 변경 적용
     window.location.reload();
   };
 
