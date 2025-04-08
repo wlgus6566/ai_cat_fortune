@@ -96,6 +96,7 @@ export const compatibilityResultsTable = pgTable("compatibility_results", {
   resultData: jsonb("result_data").notNull(),
   totalScore: integer("total_score").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  shareToken: text("share_token").unique(), // 공유 토큰
 });
 
 // 관계 정의

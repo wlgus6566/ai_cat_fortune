@@ -544,6 +544,7 @@ export interface CompatibilityResult {
   summary: string; // 궁합 요약
   magicTitle: string; // 마법 제목 (예: "별빛 아래 운명의 실타래")
   compatibilityTheme: string; // 궁합 테마 (예: "상생의 기운")
+  shareToken?: string; // 공유 토큰
   details: {
     personalityCompatibility: {
       score: number; // 0-100 점수
@@ -746,6 +747,7 @@ export interface FriendCompatibilityResult {
   nickname: string; // 궁합 닉네임 (이모지 포함 가능)
   totalScore: number; // 전체 친구 궁합 점수 (0~100 정수)
   hashtags: string[]; // 해시태그 배열
+  shareToken?: string; // 공유 토큰
   elements: {
     user: {
       name: string;

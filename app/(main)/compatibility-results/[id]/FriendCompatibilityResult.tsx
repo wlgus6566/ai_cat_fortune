@@ -226,7 +226,7 @@ export default function FriendCompatibilityResult({
 }: FriendCompatibilityResultProps) {
   // UI 컴포넌트 렌더링 (기존 친구 궁합 결과 페이지 UI 사용)
   return (
-    <div className="pb-10">
+    <div>
       <div className="mt-10 flex justify-center items-center">
         <Image
           src="/friend3.png"
@@ -243,14 +243,14 @@ export default function FriendCompatibilityResult({
         transition={{ duration: 0.5 }}
       >
         <>
-          <h1 className="text-3xl font-bold text-[#3B2E7E] mb-2">
+          <h1 className="text-2xl font-bold text-[#3B2E7E] mb-2">
             {getScoreNickname(data.totalScore).nickname}
           </h1>
-          <p className="text-[#990dfa] text-lg mb-4">
+          <p className="text-[#990dfa] text-md mb-4">
             {getScoreNickname(data.totalScore).catComment}
           </p>
         </>
-        <div className="flex justify-center relative items-center my-4">
+        <div className="flex justify-center relative items-center my-8">
           <CircularProgress
             percentage={data.totalScore}
             size={200}
@@ -381,8 +381,8 @@ export default function FriendCompatibilityResult({
             <div>
               <p className="text-gray-700 mb-3">{category.analysis}</p>
               <div className="flex items-start mt-2 text-[#990dfa]">
-                <div className="flex-shrink-0 mr-2 mt-1">🐱</div>
-                <p className="italic text-sm">{category.catComment}</p>
+                <div className="flex-shrink-0 mr-2">🐱</div>
+                <p className="font-dodamdodam text-sm">{category.catComment}</p>
               </div>
             </div>
           </CategoryCard>
@@ -456,7 +456,7 @@ export default function FriendCompatibilityResult({
             className="object-contain"
           />
         </div>
-        <p className="text-gray-700 text-lg italic whitespace-pre-line">
+        <p className="text-gray-700 text-lg font-dodamdodam whitespace-pre-line">
           {data.finalCatComment}
         </p>
       </motion.div>

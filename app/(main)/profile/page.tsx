@@ -194,7 +194,7 @@ export default function ProfilePage() {
                           <p className="text-sm text-[#3B2E7E]/70">
                             {t("profile.gender")}
                           </p>
-                          <p className="text-sm font-medium text-[#3B2E7E]">
+                          <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                             {userProfile?.gender
                               ? t(
                                   `profile.genderOptions.${
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                           <p className="text-sm text-[#3B2E7E]/70">
                             {t("profile.birthDate")}
                           </p>
-                          <p className="text-sm font-medium text-[#3B2E7E]">
+                          <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                             {userProfile?.birthDate
                               ? userProfile.birthDate
                               : "-"}
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                           <p className="text-sm text-[#3B2E7E]/70">
                             {t("profile.calendarType")}
                           </p>
-                          <p className="text-sm font-medium text-[#3B2E7E]">
+                          <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                             {userProfile?.calendarType
                               ? t(
                                   `profile.calendarOptions.${
@@ -236,7 +236,7 @@ export default function ProfilePage() {
                           <p className="text-sm text-[#3B2E7E]/70">
                             {t("profile.birthTime")}
                           </p>
-                          <p className="text-sm font-medium text-[#3B2E7E]">
+                          <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                             {userProfile?.birthTime ||
                               t("profile.birthTimeUnknown")}
                           </p>

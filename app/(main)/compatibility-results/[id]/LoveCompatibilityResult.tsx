@@ -145,7 +145,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                 borderColor: color.replace(/0\.8/g, "0.2"),
               }}
             >
-              <p className="text-sm font-medium text-[#3B2E7E]">🐾 {tip}</p>
+              <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
+                🐾 {tip}
+              </p>
             </div>
           </div>
         </div>
@@ -241,7 +243,7 @@ export default function LoveCompatibilityResult({
 
   // UI 컴포넌트 렌더링 (기존 운세 궁합 결과 페이지 UI 사용)
   return (
-    <div className="pb-10">
+    <div className="">
       {/* 결과 컨테이너 */}
       <motion.div
         variants={containerVariants}
@@ -366,7 +368,7 @@ export default function LoveCompatibilityResult({
                 {/* 두 사람의 오행 정보 */}
                 <div className="flex flex-col md:flex-row gap-4 relative z-10 p-4">
                   {/* 첫 번째 사람 카드 */}
-                  <div className="flex-1 bg-[#e8eaff] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
+                  <div className="flex-1 bg-[#e8eaff] rounded-xl p-3 border border-[#e6e6e6] relative overflow-hidden">
                     <div className="flex items-center gap-4 mb-4">
                       <div className="text-xl">
                         {getElementEmoji(
@@ -404,7 +406,7 @@ export default function LoveCompatibilityResult({
                     </div>
 
                     <div className="bg-white rounded-lg p-4">
-                      <p className="italic text-sm text-gray-700">
+                      <p className="font-dodamdodam text-sm text-gray-700">
                         &ldquo;
                         {data.details.yinYangAnalysis.user?.description}
                         &rdquo;
@@ -467,7 +469,7 @@ export default function LoveCompatibilityResult({
                     </div>
 
                     <div className="bg-white rounded-lg p-4">
-                      <p className="italic text-sm text-gray-700">
+                      <p className="font-dodamdodam text-sm text-gray-700">
                         &ldquo;
                         {data.details.yinYangAnalysis.partner?.description}
                         &rdquo;
@@ -497,7 +499,7 @@ export default function LoveCompatibilityResult({
 
                   <div className="bg-white rounded-lg p-4 flex items-center">
                     <span className="text-lg mr-2">🐾</span>
-                    <p className="text-sm italic text-[#990dfa]">
+                    <p className="text-sm font-dodamdodam text-[#990dfa]">
                       {data.details.yinYangAnalysis.compatibility?.catComment}
                     </p>
                   </div>
@@ -651,7 +653,7 @@ export default function LoveCompatibilityResult({
               border-l-transparent border-r-transparent border-t-[#FFF7EA]"
               ></div>
             </div>
-            <span className="mt-5 absolute left-12">
+            <span className="mt-5 absolute left-10">
               <Image
                 src="/new_cat.png"
                 alt="냥냥이"

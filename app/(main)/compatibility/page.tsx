@@ -630,7 +630,7 @@ export default function CompatibilityPage() {
       <div className="container max-w-md mx-auto px-4 py-6 relative pb-24">
         {/* 메인 컨텐츠 */}
         <motion.div
-          className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+          className="bg-white rounded-2xl shadow-lg py-6 px-3 mb-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"

@@ -342,7 +342,6 @@ export default function CompatibilityResultPage() {
         body: JSON.stringify({
           resultType: "love",
           resultData: compatibilityData,
-          // 개별 필드로 보내서 API가 정확히 처리할 수 있도록 함
           person1Name: state.person1.name,
           person1Birthdate: state.person1.birthdate,
           person1Gender: state.person1.gender,
@@ -361,9 +360,34 @@ export default function CompatibilityResultPage() {
       }
 
       const responseData = await response.json();
-      console.log("결과가 성공적으로 저장되었습니다:", responseData);
+      console.log("저장된 결과:", responseData);
+
       // 저장된 ID 상태에 저장
       setSavedResultId(responseData.id);
+
+      // API 응답의 resultData에서 shareToken 추출
+      const savedShareToken =
+        responseData.shareToken ||
+        (responseData.resultData && responseData.resultData.shareToken);
+
+      console.log("서버에서 받은 shareToken:", savedShareToken);
+
+      // compatibilityData 상태 업데이트
+      if (savedShareToken) {
+        setCompatibilityData((prevData) => {
+          if (!prevData) return null;
+          console.log("compatibilityData 업데이트:", {
+            ...prevData,
+            shareToken: savedShareToken,
+          });
+          return {
+            ...prevData,
+            shareToken: savedShareToken,
+          };
+        });
+      } else {
+        console.warn("서버에서 shareToken을 받지 못했습니다");
+      }
     } catch (error) {
       console.error("결과 저장 중 오류 발생:", error);
     }
@@ -376,18 +400,25 @@ export default function CompatibilityResultPage() {
     }
   }, [compatibilityData, loading, error, saveCompatibilityResult, resultSaved]);
 
-  // 공유 URL 생성 함수 추가
+  // 공유 URL 생성 함수 수정
   const generateShareUrl = () => {
     if (typeof window === "undefined") return "";
 
     const baseUrl = window.location.origin;
 
-    // 결과 저장 ID가 있으면 결과 저장 상세 페이지로 링크 생성
-    if (savedResultId) {
-      return `${baseUrl}/compatibility-results/${savedResultId}?shared=true`;
+    // shareToken 확인 및 로깅
+    console.log("현재 compatibilityData:", compatibilityData);
+    console.log("공유 토큰:", compatibilityData?.shareToken);
+
+    // shareToken이 있는 경우 /share/[token] 형식의 URL 생성
+    if (compatibilityData?.shareToken) {
+      const shareUrl = `${baseUrl}/share/${compatibilityData.shareToken}`;
+      console.log("생성된 공유 URL:", shareUrl);
+      return shareUrl;
     }
 
-    // 저장 ID가 없으면 기존 방식으로 궁합 페이지 링크 생성
+    // shareToken이 없으면 기존 방식으로 궁합 페이지 링크 생성
+    console.log("shareToken이 없어 기본 URL 생성");
     const userId = session?.user?.id || "anonymous";
     return `${baseUrl}/compatibility?userId=${userId}&shared=true`;
   };
@@ -409,15 +440,14 @@ export default function CompatibilityResultPage() {
 
   // 카카오톡 공유하기
   const shareToKakao = () => {
-    console.log("Kakao 객체:", window.Kakao);
-    console.log("Kakao 초기화 여부:", window.Kakao?.isInitialized?.());
-    console.log("Kakao.Share 객체:", window.Kakao?.Share);
-    if (!window.Kakao || !window.Kakao.Share) {
+    if (!window.Kakao || !window.Kakao.Share || !compatibilityData) {
       toast.error("카카오톡 공유 기능을 불러오는데 실패했습니다.");
       return;
     }
 
+    // 공유 URL 미리 확인
     const shareUrl = generateShareUrl();
+    console.log("카카오 공유 전 생성된 URL:", shareUrl);
 
     try {
       // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
@@ -430,12 +460,13 @@ export default function CompatibilityResultPage() {
       // 실제 도메인 사용 (개발 환경에서는 배포된 URL로 변경)
       const webUrl = "https://v0-aifortune-rose.vercel.app";
       const realShareUrl = shareUrl.replace(window.location.origin, webUrl);
+      console.log("최종 공유 URL:", realShareUrl);
 
       window.Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
-          title: "궁합 테스트 결과",
-          description: `${state.person1.name}님과 ${state.person2.name}님의 궁합 결과를 확인해보세요!`,
+          title: `${state.person1.name}님과 ${state.person2.name}님의 궁합 결과`,
+          description: compatibilityData.magicTitle,
           imageUrl: `${window.location.origin}/chemy.png`,
           link: {
             mobileWebUrl: realShareUrl,
@@ -806,7 +837,7 @@ export default function CompatibilityResultPage() {
               {/* 두 사람의 오행 정보 */}
               <div className="flex flex-col md:flex-row gap-4 relative z-10 p-4">
                 {/* 첫 번째 사람 카드 */}
-                <div className="flex-1 bg-[#e8eaff] rounded-xl p-5 border border-[#e6e6e6] relative overflow-hidden">
+                <div className="flex-1 bg-[#e8eaff] rounded-xl p-3 border border-[#e6e6e6] relative overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="text-xl">
                       {getElementEmoji(
@@ -845,7 +876,7 @@ export default function CompatibilityResultPage() {
                   </div>
 
                   <div className="bg-white rounded-lg p-4">
-                    <p className="italic text-sm text-gray-700">
+                    <p className="font-dodamdodam text-sm text-gray-700">
                       &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.user
@@ -911,7 +942,7 @@ export default function CompatibilityResultPage() {
                   </div>
 
                   <div className="bg-white rounded-lg p-4">
-                    <p className="italic text-sm text-gray-700">
+                    <p className="font-dodamdodam text-sm text-gray-700">
                       &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.partner
@@ -947,7 +978,7 @@ export default function CompatibilityResultPage() {
 
                 <div className="bg-white rounded-lg p-4 flex items-center">
                   <span className="text-lg mr-2">🐾</span>
-                  <p className="text-sm italic text-[#990dfa]">
+                  <p className="text-sm font-dodamdodam text-[#990dfa]">
                     {
                       compatibilityData?.details?.yinYangAnalysis?.compatibility
                         ?.catComment
@@ -979,7 +1010,7 @@ export default function CompatibilityResultPage() {
                 {compatibilityData?.details?.personalityCompatibility?.analysis}
               </p>
               <div className="bg-[#990dfa]/10 p-3 rounded-lg border border-[#990dfa]/20">
-                <p className="text-sm font-medium text-[#3B2E7E]">
+                <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.personalityCompatibility?.tip}
                 </p>
               </div>
@@ -997,7 +1028,7 @@ export default function CompatibilityResultPage() {
                 {compatibilityData?.details?.loveStyle?.analysis}
               </p>
               <div className="bg-[#FF4D80]/10 p-3 rounded-lg border border-[#FF4D80]/20">
-                <p className="text-sm font-medium text-[#3B2E7E]">
+                <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.loveStyle?.tip}
                 </p>
               </div>
@@ -1029,7 +1060,7 @@ export default function CompatibilityResultPage() {
                 {compatibilityData?.details?.conflictElements?.analysis}
               </p>
               <div className="bg-[#FF9F40]/10 p-3 rounded-lg border border-[#FF9F40]/20">
-                <p className="text-sm font-medium text-[#3B2E7E]">
+                <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.conflictElements?.tip}
                 </p>
               </div>
@@ -1061,7 +1092,7 @@ export default function CompatibilityResultPage() {
                 {compatibilityData?.details?.futurePerspective?.analysis}
               </p>
               <div className="bg-[#48BB78]/10 p-3 rounded-lg border border-[#48BB78]/20">
-                <p className="text-sm font-medium text-[#3B2E7E]">
+                <p className="text-sm font-dodamdodam font-medium text-[#3B2E7E]">
                   🐾 {compatibilityData?.details?.futurePerspective?.tip}
                 </p>
               </div>
@@ -1118,7 +1149,7 @@ export default function CompatibilityResultPage() {
               border-l-transparent border-r-transparent border-t-[#FFF7EA]"
                 ></div>
               </div>
-              <span className="mt-5 absolute left-12">
+              <span className="mt-5 absolute left-10">
                 <Image
                   src="/new_cat.png"
                   alt="냥냥이"

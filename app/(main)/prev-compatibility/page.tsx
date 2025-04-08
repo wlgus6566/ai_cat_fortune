@@ -18,6 +18,7 @@ type CompatibilityResult = {
   person2Name: string;
   totalScore: number;
   createdAt: string;
+  shareToken: string;
 };
 
 // 카카오 SDK 타입 정의 추가
@@ -352,7 +353,7 @@ export default function PrevCompatibilityPage() {
             {results.map((result) => (
               <Link
                 key={result.id}
-                href={`/compatibility-results/${result.id}`}
+                href={`/share/${result.shareToken}`}
                 className="block"
               >
                 <div className="bg-white p-4 rounded-xl border border-gray-200 hover:border-[#990dfa]/20 hover:shadow-sm transition-all">

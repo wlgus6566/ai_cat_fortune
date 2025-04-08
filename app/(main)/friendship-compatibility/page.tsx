@@ -620,7 +620,7 @@ export default function FriendshipCompatibilityPage() {
               ) : (
                 <form onSubmit={handleSubmit}>
                   {/* 내 정보 표시 */}
-                  <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="mb-6 py-5 px-3 bg-purple-50 rounded-xl border border-purple-200">
                     <h3 className="text-lg font-medium text-purple-900 mb-4">
                       {isSharedLink ? "상대방 정보" : "내 정보"}
                     </h3>
@@ -672,7 +672,7 @@ export default function FriendshipCompatibilityPage() {
                   </div>
 
                   {/* 두 번째 사람(상대방) 정보 */}
-                  <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="mb-6 py-5 px-3 bg-purple-50 rounded-xl border border-purple-200">
                     <h3 className="text-lg font-medium text-purple-900 mb-4">
                       {isSharedLink ? "내 정보" : "상대방 정보"}
                     </h3>

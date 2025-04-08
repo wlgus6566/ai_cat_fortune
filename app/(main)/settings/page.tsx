@@ -68,9 +68,9 @@ export default function SettingsPage() {
   };
 
   // 다크모드 변경 처리
-  const handleDarkModeToggle = () => {
-    setDarkMode(!darkMode);
-  };
+  // const handleDarkModeToggle = () => {
+  //   setDarkMode(!darkMode);
+  // };
 
   // 로그아웃 처리
   const handleLogout = async () => {
@@ -143,7 +143,7 @@ export default function SettingsPage() {
               <select
                 value={selectedLanguage}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="bg-purple-50 dark:bg-gray-700 text-purple-900 dark:text-white rounded-lg px-3 py-2 border border-purple-100 dark:border-gray-600"
+                className="bg-purple-50 dark:bg-gray-700 text-purple-900 dark:text-white rounded-lg px-4   py-2 border border-purple-100 dark:border-gray-600"
               >
                 <option value="ko">한국어</option>
                 <option value="en">English</option>
@@ -152,7 +152,7 @@ export default function SettingsPage() {
           </motion.div>
 
           {/* Dark mode settings */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -177,7 +177,7 @@ export default function SettingsPage() {
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
               </label>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Notification settings */}
           <motion.div

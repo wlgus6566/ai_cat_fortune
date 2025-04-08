@@ -3,6 +3,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth";
+import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 
 import { db } from "@/db";
 import { compatibilityResultsTable, userProfilesTable } from "@/db/schema";
@@ -112,23 +114,6 @@ export async function GET(request: Request) {
 // POST: 새 호환성 결과 저장
 export async function POST(request: Request) {
   try {
-    // Next-Auth 세션 확인
-    const authSession = await getServerSession(authOptions);
-    let sessionId = await getSessionId();
-
-    // 세션 ID가 없는 경우 임시 세션 생성
-    if (!sessionId && !authSession?.user?.id) {
-      sessionId = Math.random().toString(36).substring(2, 15);
-      console.log("임시 세션 ID 생성:", sessionId);
-    } else if (authSession?.user?.id) {
-      // Next-Auth 인증이 있으면 해당 ID 사용
-      sessionId = authSession.user.id as string;
-    }
-
-    const body = await request.json();
-    console.log("요청 바디:", JSON.stringify(body, null, 2));
-
-    // person1, person2 객체 대신 개별 필드로 전달된 경우 처리
     const {
       resultType,
       resultData,
@@ -141,43 +126,17 @@ export async function POST(request: Request) {
       person2Gender,
       person2Birthtime,
       totalScore,
-    } = body;
+    } = await request.json();
 
-    // 필수 데이터 검증
-    if (!resultType || !resultData) {
-      console.error("필수 데이터 누락: resultType 또는 resultData 없음");
-      return NextResponse.json(
-        { error: "필수 데이터가 누락되었습니다." },
-        { status: 400 }
-      );
-    }
+    // 세션 ID 가져오기
+    const sessionId = await getSessionId();
+    const authSession = await getServerSession(authOptions);
 
-    // person1, person2 정보 누락 여부 검증
-    if (
-      !person1Name ||
-      !person1Birthdate ||
-      !person1Gender ||
-      !person2Name ||
-      !person2Birthdate ||
-      !person2Gender
-    ) {
-      console.error("person1/person2 정보 누락", {
-        person1: {
-          person1Name,
-          person1Birthdate,
-          person1Gender,
-          person1Birthtime,
-        },
-        person2: {
-          person2Name,
-          person2Birthdate,
-          person2Gender,
-          person2Birthtime,
-        },
-      });
+    // 쿠키 세션 또는 Next-Auth 세션 둘 중 하나라도 없으면 인증 실패
+    if (!sessionId && !authSession?.user?.id) {
       return NextResponse.json(
-        { error: "person1 또는 person2 정보가 누락되었습니다." },
-        { status: 400 }
+        { error: "인증되지 않은 사용자입니다." },
+        { status: 401 }
       );
     }
 
@@ -207,70 +166,37 @@ export async function POST(request: Request) {
       }
     }
 
-    try {
-      // 사용자 프로필 ID 가져오기 (없으면 생성)
-      const profileId = await getUserProfileId(sessionId as string);
+    // shareToken 생성
+    const shareToken = nanoid(10); // 10자리 고유 토큰 생성
 
-      console.log("DB 삽입 시도:", {
-        userId: profileId,
+    // 결과 데이터에 shareToken 추가
+    processedResultData.shareToken = shareToken;
+
+    // 결과 저장
+    const [result] = await db
+      .insert(compatibilityResultsTable)
+      .values({
+        userId: (authSession?.user?.id || sessionId) as string,
         resultType,
         person1Name,
+        person1Birthdate,
+        person1Gender,
+        person1Birthtime,
+        person2Name,
+        person2Birthdate,
+        person2Gender,
+        person2Birthtime,
+        resultData: processedResultData,
         totalScore: finalTotalScore,
-      });
+        shareToken, // shareToken 저장
+      })
+      .returning();
 
-      const result = await db
-        .insert(compatibilityResultsTable)
-        .values({
-          userId: profileId,
-          resultType,
-          person1Name,
-          person1Birthdate,
-          person1Gender,
-          person1Birthtime: person1Birthtime || null,
-          person2Name,
-          person2Birthdate,
-          person2Gender,
-          person2Birthtime: person2Birthtime || null,
-          resultData: processedResultData,
-          totalScore: finalTotalScore,
-        })
-        .returning();
-
-      // 쿠키에 세션 ID 설정 (클라이언트에 반환)
-      const cookieStore = await cookies();
-      cookieStore.set("session_id", profileId, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 30, // 30일
-        httpOnly: true,
-        sameSite: "lax",
-      });
-
-      console.log("저장 성공:", result[0]);
-      return NextResponse.json(result[0]);
-    } catch (error) {
-      console.error("호환성 결과 저장 중 오류:", error);
-      // 오류 메시지 정리
-      const errorMessage =
-        error instanceof Error
-          ? `${error.name}: ${error.message}`
-          : String(error);
-
-      return NextResponse.json(
-        { error: "결과 저장 중 오류가 발생했습니다.", details: errorMessage },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(result);
   } catch (error) {
     console.error("결과 저장 중 오류 발생:", error);
-
-    // 상세 오류 정보 확인
-    const errorMessage =
-      error instanceof Error
-        ? `${error.name}: ${error.message}`
-        : String(error);
-
     return NextResponse.json(
-      { error: "결과 저장 중 오류가 발생했습니다.", details: errorMessage },
+      { error: "결과 저장 중 오류가 발생했습니다." },
       { status: 500 }
     );
   }

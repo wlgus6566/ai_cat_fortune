@@ -287,6 +287,7 @@ export default function FriendshipCompatibilityResultPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [resultSaved, setResultSaved] = useState(false);
   const { data: session } = useSession();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [savedResultId, setSavedResultId] = useState<number | null>(null); // 저장된 결과 ID
   // API 호출 여부를 추적하는 ref 추가
   const hasCalledApi = useRef(false);
@@ -294,13 +295,13 @@ export default function FriendshipCompatibilityResultPage() {
   const getLoadingImage = () => {
     switch (loadingStage) {
       case 1:
-        return "/friend.png";
+        return "/friend1.png";
       case 2:
         return "/friend2.png";
       case 3:
         return "/friend3.png";
       default:
-        return "/friend.png";
+        return "/friend1.png";
     }
   };
 
@@ -452,18 +453,18 @@ export default function FriendshipCompatibilityResultPage() {
     }
   }, [friendCompatibilityData, loading, error, saveFriendCompatibilityResult]);
 
-  // 공유 URL 생성 함수 추가
+  // 공유 URL 생성 함수 수정
   const generateShareUrl = () => {
     if (typeof window === "undefined") return "";
 
     const baseUrl = window.location.origin;
 
-    // 결과 저장 ID가 있으면 결과 저장 상세 페이지로 링크 생성
-    if (savedResultId) {
-      return `${baseUrl}/compatibility-results/${savedResultId}?shared=true`;
+    // shareToken이 있으면 공유 토큰으로 링크 생성
+    if (friendCompatibilityData?.shareToken) {
+      return `${baseUrl}/share/${friendCompatibilityData.shareToken}`;
     }
 
-    // 저장 ID가 없으면 기존 방식으로 친구 궁합 페이지 링크 생성
+    // shareToken이 없으면 기존 방식으로 궁합 페이지 링크 생성
     const userId = session?.user?.id || "anonymous";
     return `${baseUrl}/friendship-compatibility?userId=${userId}&shared=true`;
   };
@@ -557,7 +558,7 @@ export default function FriendshipCompatibilityResultPage() {
         // 로딩 화면
         <div className="flex flex-col items-center justify-center flex-grow p-6 text-center">
           <motion.div
-            className="w-24 h-28 mb-8 relative"
+            className="w-24 h-23 mb-8 relative"
             animate={{
               y: [0, -10, 0],
             }}
@@ -572,7 +573,7 @@ export default function FriendshipCompatibilityResultPage() {
               src={getLoadingImage()}
               alt="로딩중"
               width={180}
-              height={80}
+              height={146}
               className="w-full h-full relative z-10"
             />
           </motion.div>
@@ -634,13 +635,13 @@ export default function FriendshipCompatibilityResultPage() {
             >
               {friendCompatibilityData && (
                 <>
-                  <h1 className="text-3xl font-bold text-[#3B2E7E] mb-2">
+                  <h1 className="text-2xl font-bold text-[#3B2E7E] mb-2">
                     {
                       getScoreNickname(friendCompatibilityData.totalScore)
                         .nickname
                     }
                   </h1>
-                  <p className="text-[#990dfa] text-lg mb-4">
+                  <p className="text-[#990dfa] text-md mb-4">
                     {
                       getScoreNickname(friendCompatibilityData.totalScore)
                         .catComment
@@ -648,7 +649,7 @@ export default function FriendshipCompatibilityResultPage() {
                   </p>
                 </>
               )}
-              <div className="flex justify-center relative items-center my-4">
+              <div className="flex justify-center relative items-center my-8">
                 <CircularProgress
                   percentage={friendCompatibilityData.totalScore}
                   size={200}
@@ -800,8 +801,10 @@ export default function FriendshipCompatibilityResultPage() {
                   <div>
                     <p className="text-gray-700 mb-3">{category.analysis}</p>
                     <div className="flex items-start mt-2 text-[#990dfa]">
-                      <div className="flex-shrink-0 mr-2 mt-1">🐱</div>
-                      <p className="italic text-sm">{category.catComment}</p>
+                      <div className="flex-shrink-0 mr-2">🐱</div>
+                      <p className="font-dodamdodam text-sm">
+                        {category.catComment}
+                      </p>
                     </div>
                   </div>
                 </CategoryCard>
@@ -878,7 +881,7 @@ export default function FriendshipCompatibilityResultPage() {
                   className="object-contain"
                 />
               </div>
-              <p className="text-gray-700 text-lg italic whitespace-pre-line">
+              <p className="text-gray-700 text-lg font-dodamdodam whitespace-pre-line">
                 {friendCompatibilityData.finalCatComment}
               </p>
             </motion.div>
