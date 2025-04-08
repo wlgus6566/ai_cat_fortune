@@ -7,10 +7,11 @@ import { compatibilityResultsTable } from "@/db/schema";
 // GET: 공유 토큰으로 호환성 결과 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any
 ) {
   try {
-    const token = params.token;
+    const token = context.params.token;
 
     if (!token) {
       return NextResponse.json(

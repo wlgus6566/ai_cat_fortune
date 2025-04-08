@@ -190,6 +190,7 @@ export default function CompatibilityResultPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [resultSaved, setResultSaved] = useState(false);
   const { data: session } = useSession();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [savedResultId, setSavedResultId] = useState<number | null>(null); // 저장된 결과 ID
   // API 호출 여부를 추적하는 ref 추가
   const hasCalledApi = useRef(false);

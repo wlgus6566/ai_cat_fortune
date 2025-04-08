@@ -216,7 +216,6 @@ function SetupContent() {
 
     // 콜백 URL로 이동 (showFortune=true 파라미터 추가)
     // callbackUrl이 /fortune이면 showFortune 파라미터 추가
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const destinationUrl =
       callbackUrl === "/fortune"
         ? `${callbackUrl}?showFortune=true`

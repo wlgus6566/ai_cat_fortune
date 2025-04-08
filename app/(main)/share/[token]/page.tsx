@@ -47,7 +47,15 @@ interface KakaoShareOptions {
 interface CompatibilityResultData {
   id: number;
   resultType: "love" | "friend";
-  resultData: any;
+  resultData: {
+    shareToken?: string;
+    score?: number;
+    totalScore?: number;
+    magicTitle?: string;
+    nickname?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any; // 나머지 속성들은 any로 유지 - 필요에 의해 유지
+  };
   person1Name: string;
   person1Birthdate: string;
   person1Gender: string;
@@ -151,16 +159,19 @@ export default function SharedCompatibilityResult() {
       const webUrl = "https://v0-aifortune-rose.vercel.app";
       const realShareUrl = shareUrl.replace(window.location.origin, webUrl);
 
+      // 설명 텍스트 설정 - undefined 값 처리
+      const description =
+        resultData.resultType === "love"
+          ? resultData.resultData.magicTitle || "연인 궁합 결과"
+          : resultData.resultData.nickname || "친구 궁합 결과";
+
       window.Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
           title: `${resultData.person1Name}님과 ${resultData.person2Name}님의 ${
             resultData.resultType === "love" ? "연인" : "친구"
           } 궁합`,
-          description:
-            resultData.resultType === "love"
-              ? resultData.resultData.magicTitle
-              : resultData.resultData.nickname,
+          description,
           imageUrl: `${window.location.origin}/chemy.png`,
           link: {
             mobileWebUrl: realShareUrl,
@@ -251,7 +262,8 @@ export default function SharedCompatibilityResult() {
       >
         {resultData.resultType === "love" ? (
           <LoveCompatibilityResult
-            data={resultData.resultData}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data={resultData.resultData as any}
             person1={createPersonData(
               resultData.person1Name,
               resultData.person1Birthdate,
@@ -267,7 +279,8 @@ export default function SharedCompatibilityResult() {
           />
         ) : (
           <FriendCompatibilityResult
-            data={resultData.resultData}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data={resultData.resultData as any}
             person1={createPersonData(
               resultData.person1Name,
               resultData.person1Birthdate,

@@ -3,7 +3,6 @@ import { and, desc, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth";
-import { v4 as uuidv4 } from "uuid";
 import { nanoid } from "nanoid";
 
 import { db } from "@/db";
@@ -20,7 +19,8 @@ async function getSessionId(): Promise<string | null> {
   }
 }
 
-// 사용자 프로필 확인 또는 생성
+// 사용자 프로필 확인 또는 생성 (현재 사용하지 않음)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getUserProfileId(sessionId: string): Promise<string> {
   try {
     // 세션 ID로 사용자 프로필 조회

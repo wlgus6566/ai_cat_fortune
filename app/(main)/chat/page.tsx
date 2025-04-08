@@ -11,7 +11,8 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   //const [currentDate, setCurrentDate] = useState("");
 
-  // 날짜 포맷팅 함수
+  // 날짜 포맷팅 함수 - 나중에 필요할 경우 활성화
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const formatDate = () => {
     const now = new Date();
     const year = now.getFullYear();
