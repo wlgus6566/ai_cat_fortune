@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import Image from "next/image";
+const MotionImage = motion(Image);
 // 말풍선 메시지 상태별 배열
 const speechMessages = {
   origin: [
@@ -65,10 +66,13 @@ const preloadImages = (imageUrls: string[]): Promise<void[]> => {
   return Promise.all(
     imageUrls.map(
       (src) =>
-        new Promise<void>((resolve) => {
-          const img = new Image();
+        new Promise<void>((resolve, reject) => {
+          if (typeof window === "undefined") return resolve();
+
+          const img = new window.Image();
           img.src = src;
-          img.onload = () => resolve(); // 이제 이 resolve는 void로 인식됨
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
         })
     )
   );
@@ -182,8 +186,6 @@ const WizardCat = ({
     const randomText =
       clickMessages[Math.floor(Math.random() * clickMessages.length)];
 
-    // ✅ 이미지 상태는 변경하지 않음
-    // ✅ 말풍선만 출력
     setBubbleMessage(randomText);
     setShowSpeechBubble(true);
 
@@ -233,12 +235,13 @@ const WizardCat = ({
         }}
         onClick={handleCatClick}
       >
-        <motion.img
+        <MotionImage
           key="origin"
           src={getCatImage(catState)}
           alt="마법사 고양이"
-          priority
           className="w-full h-full object-contain"
+          priority
+          fill
         />
       </motion.div>
     </div>

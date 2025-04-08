@@ -59,7 +59,7 @@ function SignInContent() {
       </div>
 
       {/* 로그인 버튼 */}
-      <div className="mb-20 relative w-full max-w-md z-100 flex flex-col items-center gap-4 px-8">
+      <div className="mb-20 relative w-full z-100 flex flex-col items-center gap-4 px-8">
         <button
           onClick={() => handleOAuthSignIn("google")}
           disabled={isLoading}

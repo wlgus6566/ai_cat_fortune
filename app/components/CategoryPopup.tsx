@@ -25,14 +25,6 @@ const CategoryPopup: React.FC<CategoryPopupProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  // 점수를 ●○ 형식으로 변환 (현재 사용되지 않음)
-  // const renderScore = (score: number, maxScore = 5) => {
-  //   return Array(maxScore)
-  //     .fill(0)
-  //     .map((_, i) => (i < score ? "🔮" : "○"))
-  //     .join("");
-  // };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
