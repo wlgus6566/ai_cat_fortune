@@ -204,6 +204,9 @@ export default function HomePage() {
   const [starAnimationData, setStarAnimationData] = useState<object | null>(
     null
   );
+  const [sparkleAnimationData, setSparkleAnimationData] = useState<
+    object | null
+  >(null);
   const loveAnimationRef = useRef<LottieRefCurrentProps>(null);
 
   // Lottie 애니메이션 로딩
@@ -217,6 +220,10 @@ export default function HomePage() {
         const starResponse = await fetch("/lottie/star_pump.json");
         const starData = await starResponse.json();
         setStarAnimationData(starData);
+
+        const sparkleResponse = await fetch("/lottie/sparkle.json");
+        const sparkleData = await sparkleResponse.json();
+        setSparkleAnimationData(sparkleData);
       } catch (error) {
         console.error("Failed to load Lottie animations:", error);
       }
@@ -477,6 +484,13 @@ export default function HomePage() {
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
+          {starAnimationData && (
+            <Lottie
+              className="absolute top-0 -left-5"
+              animationData={sparkleAnimationData}
+              style={{ width: 150, height: 150 }}
+            />
+          )}
           <Image
             src="/new_cat_magic.png"
             alt="마법사 고양이"

@@ -43,7 +43,7 @@ function SignInContent() {
   return (
     <div className="flex h-screen w-full flex-col justify-end relative">
       {isLoading && (
-        <div className="bg-black/70 flex justify-center items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full z-101">
+        <div className="bg-black/40 z-1 flex justify-center items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full z-101">
           <div className="w-12 h-12 border-4 border-[#990dfa]/20 border-t-[#990dfa] rounded-full animate-spin"></div>
         </div>
       )}

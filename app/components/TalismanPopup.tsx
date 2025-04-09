@@ -42,6 +42,9 @@ export default function TalismanPopup({
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deletionAttempted, setDeletionAttempted] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
     // Animation sequence starts when popup is mounted
@@ -206,6 +209,42 @@ export default function TalismanPopup({
     }
   }, [isBurning, talismanId, onBurn, deletionAttempted, handleClose]);
 
+  // 이미지 로드 에러 핸들러
+  const handleImageError = () => {
+    console.error("이미지 로드 실패:", imageUrl, "재시도 횟수:", retryCount);
+
+    if (retryCount < maxRetries) {
+      // 자동 재시도 기능
+      setRetryCount(retryCount + 1);
+      setSaveMessage(
+        `이미지를 불러오는 중입니다... (${retryCount + 1}/${maxRetries})`
+      );
+
+      // 1.5초 후 이미지 다시 로드 (캐시 회피를 위한 타임스탬프 추가)
+      setTimeout(() => {
+        setImageLoadError(false); // 이미지 다시 표시
+      }, 1500);
+    } else {
+      // 최대 재시도 횟수 초과
+      setImageLoadError(true);
+      setSaveMessage("이미지를 불러올 수 없습니다. 다시 시도해주세요.");
+      console.log("최대 재시도 횟수 초과");
+    }
+  };
+
+  // 이미지 다시 시도 버튼 핸들러
+  const handleRetryClick = () => {
+    setRetryCount(0); // 재시도 횟수 초기화
+    setImageLoadError(false); // 이미지 표시
+    setSaveMessage("이미지를 다시 불러오는 중...");
+  };
+
+  // 이미지 로드 성공 핸들러
+  const handleImageLoaded = () => {
+    console.log("이미지 로드 성공:", imageUrl);
+    setSaveMessage(null);
+  };
+
   // 부적 제목 생성
   const getTalismanTitle = () => {
     if (title) return title;
@@ -316,26 +355,49 @@ export default function TalismanPopup({
                     transitionTimingFunction: "cubic-bezier(0.33, 1, 0.68, 1)",
                   }}
                 ></div>
-                <Image
-                  src={imageUrl}
-                  alt={"행운의 부적"}
-                  fill
-                  quality={90}
-                  className={`object-contain rounded-lg transition-all duration-1000 
-                    ${
-                      isFullyVisible
-                        ? "scale-100 filter-none"
-                        : "scale-105 blur-sm"
-                    }
-                    ${isBurning ? "burning-animation" : ""}
-                    ${isBurned ? "opacity-0" : ""}`}
-                  style={{
-                    transform: isFullyVisible
-                      ? "translateY(0)"
-                      : "translateY(-40%)",
-                    transition: "transform 1.5s cubic-bezier(0.33, 1, 0.68, 1)",
-                  }}
-                />
+
+                {imageLoadError ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+                    <div className="text-center p-4">
+                      <p className="text-red-500 mb-2">
+                        이미지를 불러올 수 없습니다
+                      </p>
+                      <button
+                        onClick={handleRetryClick}
+                        className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm"
+                      >
+                        다시 시도
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <Image
+                    src={`${imageUrl}${
+                      retryCount > 0 ? `?retry=${retryCount}` : ""
+                    }`}
+                    alt={"행운의 부적"}
+                    fill
+                    quality={90}
+                    className={`object-contain rounded-lg transition-all duration-1000 
+                      ${
+                        isFullyVisible
+                          ? "scale-100 filter-none"
+                          : "scale-105 blur-sm"
+                      }
+                      ${isBurning ? "burning-animation" : ""}
+                      ${isBurned ? "opacity-0" : ""}`}
+                    style={{
+                      transform: isFullyVisible
+                        ? "translateY(0)"
+                        : "translateY(-40%)",
+                      transition:
+                        "transform 1.5s cubic-bezier(0.33, 1, 0.68, 1)",
+                    }}
+                    onError={handleImageError}
+                    onLoad={handleImageLoaded}
+                    priority={true}
+                  />
+                )}
               </div>
             </div>
 

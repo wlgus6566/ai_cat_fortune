@@ -265,7 +265,13 @@ export async function POST(request: Request) {
     // 이미지 생성 상태 확인을 위한 폴링
     let finalPrediction = prediction;
     let retryCount = 0;
-    const maxRetries = 30; // 최대 30초 대기
+    const maxRetries = 60; // 최대 60초 대기로 증가
+
+    console.log(
+      "이미지 생성 상태 폴링 시작, 최대 대기 시간:",
+      maxRetries,
+      "초"
+    );
 
     while (
       finalPrediction.status !== "succeeded" &&
@@ -273,10 +279,17 @@ export async function POST(request: Request) {
       retryCount < maxRetries
     ) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      finalPrediction = await replicate.predictions.get(prediction.id);
-      console.log(
-        `폴링 ${retryCount + 1}/${maxRetries}: 상태=${finalPrediction.status}`
-      );
+      try {
+        finalPrediction = await replicate.predictions.get(prediction.id);
+        console.log(
+          `폴링 ${retryCount + 1}/${maxRetries}: 상태=${finalPrediction.status}`
+        );
+      } catch (pollError) {
+        console.error(
+          `폴링 오류 (${retryCount + 1}/${maxRetries}):`,
+          pollError
+        );
+      }
       retryCount++;
     }
 
@@ -290,8 +303,8 @@ export async function POST(request: Request) {
             code: "GENERATION_FAILED",
             message:
               retryCount >= maxRetries
-                ? "Image generation timed out."
-                : "Failed to generate image.",
+                ? "이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
+                : "이미지 생성에 실패했습니다.",
           },
         } as IErrorResponse,
         { status: 500 }

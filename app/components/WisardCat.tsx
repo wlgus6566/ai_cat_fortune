@@ -225,7 +225,7 @@ const WizardCat = ({
       <motion.div
         className="w-[200px] h-[200px] mb-20 mr-20 relative cursor-pointer"
         animate={{
-          rotate: [-2, 2, -2], // 기본 흔들림
+          rotate: [-3, 3, -3], // 기본 흔들림
         }}
         transition={{
           duration: 3,

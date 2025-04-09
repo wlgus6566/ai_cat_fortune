@@ -406,7 +406,7 @@ export default function LoveCompatibilityResult({
                     </div>
 
                     <div className="bg-white rounded-lg p-4">
-                      <p className="font-dodamdodam text-sm text-gray-700">
+                      <p className="font-dodamdodam text-md text-gray-700">
                         &ldquo;
                         {data.details.yinYangAnalysis.user?.description}
                         &rdquo;
@@ -469,7 +469,7 @@ export default function LoveCompatibilityResult({
                     </div>
 
                     <div className="bg-white rounded-lg p-4">
-                      <p className="font-dodamdodam text-sm text-gray-700">
+                      <p className="font-dodamdodam text-md text-gray-700">
                         &ldquo;
                         {data.details.yinYangAnalysis.partner?.description}
                         &rdquo;

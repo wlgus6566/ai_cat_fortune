@@ -598,7 +598,7 @@ export default function FriendshipCompatibilityPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* 첫 번째 사람 정보 */}
-            <div className="border border-purple-100 rounded-xl p-4 md:p-6 bg-purple-50/50">
+            <div>
               {!isLoaded ? (
                 <div className="flex justify-center p-10">
                   <div className="animate-spin h-8 w-8 border-4 border-purple-500 rounded-full border-t-transparent"></div>
@@ -620,7 +620,7 @@ export default function FriendshipCompatibilityPage() {
               ) : (
                 <form onSubmit={handleSubmit}>
                   {/* 내 정보 표시 */}
-                  <div className="mb-6 py-5 px-3 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="mb-6 py-5 px-4 bg-purple-50 rounded-xl border border-purple-200">
                     <h3 className="text-lg font-medium text-purple-900 mb-4">
                       {isSharedLink ? "상대방 정보" : "내 정보"}
                     </h3>
@@ -672,7 +672,7 @@ export default function FriendshipCompatibilityPage() {
                   </div>
 
                   {/* 두 번째 사람(상대방) 정보 */}
-                  <div className="mb-6 py-5 px-3 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="mb-6 py-5 px-4 bg-purple-50 rounded-xl border border-purple-200">
                     <h3 className="text-lg font-medium text-purple-900 mb-4">
                       {isSharedLink ? "내 정보" : "상대방 정보"}
                     </h3>
