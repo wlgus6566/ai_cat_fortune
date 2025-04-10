@@ -10,25 +10,25 @@ const replicate = new Replicate({
 
 const talismanTemplates = {
   default: (phrase: string) =>
-    `A vintage-style tarot card illustration featuring an anthropomorphic white cat in a mystical pose. The cat wears ornate medieval clothing and stands at the center of a symbolic magical scene. The overall emotion and symbolism of the card reflect a message of: ${phrase}. Style: Classic tarot, painterly details, fantasy European atmosphere. No written text or characters in the image. Aspect ratio 9:16.`,
+    `A vintage-style tarot card illustration featuring an anthropomorphic white cat in a mystical pose. The cat wears ornate medieval clothing and stands at the center of a symbolic magical scene. The overall emotion and symbolism of the card reflect a message of: ${phrase}. Style: Classic tarot, painterly details, fantasy European atmosphere. No written text or characters in the card. Aspect ratio 9:16.`,
 
   romance: (phrase: string) =>
-    `A romantic tarot card illustration featuring a cat in flowing robes, holding a rose under a glowing sky. Surrounded by hearts, flowers, and stars, the visual mood represents: ${phrase}. Style: Vintage tarot, dreamy and warm tones. No text or visible letters in the image. Aspect ratio 9:16.`,
+    `A romantic tarot card illustration featuring a cat in flowing robes, holding a rose under a glowing sky. Surrounded by hearts, flowers, and stars, the visual mood represents: ${phrase}. Style: Vintage tarot, dreamy and warm tones. No text or visible letters in the card. Aspect ratio 9:16.`,
 
   career: (phrase: string) =>
-    `A tarot card showing a regal cat emperor seated on a throne with scrolls and a scepter. The image radiates the feeling of: ${phrase}. Style: Classic European tarot, rich symbolic composition, ornate throne and medieval symbols. No text or writing in the image. Aspect ratio 9:16.`,
+    `A tarot card showing a regal cat emperor seated on a throne with scrolls and a scepter. The image radiates the feeling of: ${phrase}. Style: Classic European tarot, rich symbolic composition, ornate throne and medieval symbols. No text or writing in the card. Aspect ratio 9:16.`,
 
   money: (phrase: string) =>
-    `A tarot card illustration of a noble cat surrounded by coins, golden treasure, and light beams. The illustration visually conveys abundance and the mood of: ${phrase}. Style: Medieval tarot painting, luxurious and radiant. No written text or typographic elements. Aspect ratio 9:16.`,
+    `A tarot card illustration of a noble cat surrounded by coins, golden treasure, and light beams. The illustration visually conveys abundance and the mood of: ${phrase}. Style: Medieval tarot painting, luxurious and radiant. No written text or typographic elements in the card. Aspect ratio 9:16.`,
 
   psychology: (phrase: string) =>
-    `A peaceful tarot card illustration with a meditating cat by a calm river under a starry sky. Flowers, stars, and water symbolize healing and inner balance, evoking the emotion of: ${phrase}. Style: Soft tarot painting, tranquil and spiritual. No text in the image. Aspect ratio 9:16.`,
+    `A peaceful tarot card illustration with a meditating cat by a calm river under a starry sky. Flowers, stars, and water symbolize healing and inner balance, evoking the emotion of: ${phrase}. Style: Soft tarot painting, tranquil and spiritual. No text in the card. Aspect ratio 9:16.`,
 
   relationships: (phrase: string) =>
-    `A tarot card with two joyful cats gently interacting under a sunny sky, surrounded by doves and vines. The connection between the characters symbolizes: ${phrase}. Style: Vintage love tarot, harmonious and warm. No text or writing in the image. Aspect ratio 9:16.`,
+    `A tarot card with two joyful cats gently interacting under a sunny sky, surrounded by doves and vines. The connection between the characters symbolizes: ${phrase}. Style: Vintage love tarot, harmonious and warm. No text or writing in the card. Aspect ratio 9:16.`,
 
   lifestyle: (phrase: string) =>
-    `A tarot card showing a cheerful cat dancing, eating, or reading in a relaxed environment. Books, food, and plants around the cat represent the feeling of: ${phrase}. Style: Wholesome classic tarot, bright and delightful. No visible text in the image. Aspect ratio 9:16.`,
+    `A tarot card showing a cheerful cat dancing, eating, or reading in a relaxed environment. Books, food, and plants around the cat represent the feeling of: ${phrase}. Style: Wholesome classic tarot, bright and delightful. No visible text in the card. Aspect ratio 9:16.`,
 };
 
 // const encouragingPhrases: Record<string, string[]> = {

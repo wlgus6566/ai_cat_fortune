@@ -161,7 +161,7 @@ export async function getDailyFortune(
     */
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: 0.7,
       response_format: {
         type: "json_object",
@@ -407,7 +407,7 @@ export async function getFortuneResponse(
     const userInfo = profileInfo ? `${namePrefix}(${profileInfo})` : namePrefix;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: 0.7,
       messages: [
         {
@@ -481,7 +481,7 @@ export async function getDirectFortuneResponse(
     const userInfo = profileInfo ? `${namePrefix}(${profileInfo})` : namePrefix;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: 0.7,
       messages: [
         {
@@ -627,7 +627,7 @@ export async function getCompatibilityAnalysis(
 ): Promise<CompatibilityResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: 0.7,
       response_format: {
         type: "json_object",
@@ -803,7 +803,7 @@ export async function getFriendCompatibilityAnalysis(
 ): Promise<FriendCompatibilityResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: 0.7,
       response_format: {
         type: "json_object",
