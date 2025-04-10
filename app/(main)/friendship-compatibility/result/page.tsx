@@ -441,24 +441,6 @@ export default function FriendshipCompatibilityResultPage() {
       console.log("친구 궁합 결과가 저장되었습니다:", responseData);
       // 저장된 ID 상태에 저장
       setSavedResultId(responseData.id);
-      // API 응답의 resultData에서 shareToken 추출
-      const savedShareToken =
-        responseData.shareToken ||
-        (responseData.resultData && responseData.resultData.shareToken);
-
-      console.log("서버에서 받은 shareToken:", savedShareToken);
-      // compatibilityData 상태 업데이트
-      if (savedShareToken) {
-        setFriendCompatibilityData((prevData) => {
-          if (!prevData) return null;
-          return {
-            ...prevData,
-            shareToken: savedShareToken,
-          };
-        });
-      } else {
-        console.warn("서버에서 shareToken을 받지 못했습니다");
-      }
     } catch (error) {
       console.error("결과 저장 중 오류:", error);
     }
@@ -477,24 +459,23 @@ export default function FriendshipCompatibilityResultPage() {
 
     const baseUrl = window.location.origin;
 
-    // shareToken이 있는 경우 /share/[token] 형식의 URL 생성
+    // shareToken이 있으면 공유 토큰으로 링크 생성
     if (friendCompatibilityData?.shareToken) {
-      const shareUrl = `${baseUrl}/share/${friendCompatibilityData.shareToken}`;
-      console.log("생성된 공유 URL:", shareUrl);
-      return shareUrl;
+      return `${baseUrl}/share/${friendCompatibilityData.shareToken}`;
     }
+
     // shareToken이 없으면 기존 방식으로 궁합 페이지 링크 생성
-    console.log("shareToken이 없어 기본 URL 생성");
     const userId = session?.user?.id || "anonymous";
     return `${baseUrl}/friendship-compatibility?userId=${userId}&shared=true`;
   };
 
   // 카카오 공유 함수 수정
   const shareToKakao = () => {
+    console.log("Kakao 객체:", window.Kakao);
+    console.log("Kakao 초기화 여부:", window.Kakao?.isInitialized?.());
+    console.log("Kakao.Share 객체:", window.Kakao?.Share);
     if (!window.Kakao || !friendCompatibilityData) return;
 
-    // 공유 URL 미리 확인
-    const shareUrl = generateShareUrl();
     try {
       // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
       if (window.location.hostname === "localhost") {
@@ -503,9 +484,13 @@ export default function FriendshipCompatibilityResultPage() {
         );
       }
 
+      // 공유 URL 생성
+      const shareUrl = generateShareUrl();
+
       // 실제 도메인 사용 (개발 환경에서는 배포된 URL로 변경)
       const webUrl = "https://v0-aifortune-rose.vercel.app";
       const realShareUrl = shareUrl.replace(window.location.origin, webUrl);
+
       window.Kakao.Share.sendDefault({
         objectType: "feed",
         content: {
@@ -909,14 +894,8 @@ export default function FriendshipCompatibilityResultPage() {
               transition={{ duration: 0.5, delay: 1 }}
             >
               <button
-                onClick={() => router.push("/friendship-compatibility")}
-                className="px-8 py-3 bg-white text-[#990dfa] border border-[#990dfa] rounded-full font-medium shadow-sm hover:bg-[#F9F5FF] transition-all"
-              >
-                다시 궁합 보기
-              </button>
-              <button
                 onClick={() => setShowShareModal(true)}
-                className="px-6 py-3 ml-4 rounded-full bg-gradient-to-r from-[#990dfa] to-[#7609c1] text-white font-medium hover:opacity-90 transition-colors flex items-center"
+                className="px-6 py-3 rounded-full bg-gradient-to-r from-[#990dfa] to-[#7609c1] text-white font-medium hover:opacity-90 transition-colors flex items-center"
               >
                 <Share2 className="w-5 h-5 mr-2" />
                 친구와 공유하기

@@ -377,6 +377,10 @@ export default function CompatibilityResultPage() {
       if (savedShareToken) {
         setCompatibilityData((prevData) => {
           if (!prevData) return null;
+          console.log("compatibilityData 업데이트:", {
+            ...prevData,
+            shareToken: savedShareToken,
+          });
           return {
             ...prevData,
             shareToken: savedShareToken,
@@ -444,6 +448,7 @@ export default function CompatibilityResultPage() {
 
     // 공유 URL 미리 확인
     const shareUrl = generateShareUrl();
+    console.log("카카오 공유 전 생성된 URL:", shareUrl);
 
     try {
       // 로컬환경이면 카카오 공유가 제대로 작동하지 않을 수 있음을 알리기
@@ -471,7 +476,7 @@ export default function CompatibilityResultPage() {
         },
         buttons: [
           {
-            title: "우리의 사랑궁합 확인하기",
+            title: "궁합 확인하기",
             link: {
               mobileWebUrl: realShareUrl,
               webUrl: realShareUrl,
@@ -872,7 +877,7 @@ export default function CompatibilityResultPage() {
                   </div>
 
                   <div className="bg-white rounded-lg p-4">
-                    <p className="font-dodamdodam text-md text-gray-700">
+                    <p className="font-dodamdodam text-sm text-gray-700">
                       &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.user
@@ -938,7 +943,7 @@ export default function CompatibilityResultPage() {
                   </div>
 
                   <div className="bg-white rounded-lg p-4">
-                    <p className="font-dodamdodam text-md text-gray-700">
+                    <p className="font-dodamdodam text-sm text-gray-700">
                       &ldquo;
                       {
                         compatibilityData?.details?.yinYangAnalysis?.partner

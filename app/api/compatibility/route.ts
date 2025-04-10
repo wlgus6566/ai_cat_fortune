@@ -41,10 +41,13 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("호환성 API 오류:", error);
     return Response.json(
-      { error: "서버 오류가 발생했습니다." },
+      {
+        error: "서버 오류가 발생했습니다.",
+        message: error instanceof Error ? error.message : "알 수 없는 오류",
+      },
       { status: 500 }
     );
   }
